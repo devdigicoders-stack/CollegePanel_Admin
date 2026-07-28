@@ -21,22 +21,22 @@ const Academics = () => {
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex h-full font-['Inter']">
+    <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col md:flex-row h-full font-['Inter']">
       
       {/* Inner Sidebar */}
-      <div className="w-[240px] border-r border-gray-100 py-4 flex flex-col flex-shrink-0">
+      <div className="w-full md:w-[240px] border-b md:border-b-0 md:border-r border-gray-100 py-2 md:py-4 flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible flex-shrink-0 custom-scrollbar">
         {sideMenu.map((item) => (
           <button
             key={item.name}
             onClick={() => setActiveMenu(item.name)}
-            className={`w-full flex items-center justify-between px-6 py-3.5 transition-colors text-left ${
+            className={`w-auto md:w-full flex-shrink-0 flex items-center justify-between px-4 md:px-6 py-2.5 md:py-3.5 transition-colors text-left mx-2 md:mx-0 rounded-full md:rounded-none md:rounded-r-full ${
               activeMenu === item.name 
-                ? 'bg-[#0A6C54] text-white rounded-r-full font-medium' 
+                ? 'bg-[#0A6C54] text-white font-medium' 
                 : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 font-medium'
             }`}
           >
-            <span className="text-[14px]">{item.name}</span>
-            <ChevronRight size={16} className={activeMenu === item.name ? 'text-white' : 'text-gray-400'} />
+            <span className="text-[13px] md:text-[14px] whitespace-nowrap">{item.name}</span>
+            <ChevronRight size={16} className={`hidden md:block ${activeMenu === item.name ? 'text-white' : 'text-gray-400'}`} />
           </button>
         ))}
       </div>

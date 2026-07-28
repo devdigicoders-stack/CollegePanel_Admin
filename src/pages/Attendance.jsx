@@ -31,7 +31,7 @@ const Attendance = () => {
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
       
       {/* Top Filter Section */}
-      <div className="p-6 border-b border-gray-50 flex flex-col md:flex-row items-end gap-6">
+      <div className="p-4 md:p-6 border-b border-gray-50 flex flex-col md:flex-row items-stretch md:items-end gap-4 md:gap-6">
         
         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
           <div>
@@ -133,8 +133,8 @@ const Attendance = () => {
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="p-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50/30 rounded-b-2xl">
-        <div className="flex items-center gap-6 text-[14px] font-semibold text-gray-600">
+      <div className="p-4 md:p-6 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 bg-gray-50/30 rounded-b-2xl">
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 text-[13px] md:text-[14px] font-semibold text-gray-600 w-full md:w-auto">
           <div>Total Present: <span className="text-[#0A6C54] ml-1">{totalPresent}</span></div>
           <div>Absent: <span className="text-red-500 ml-1">{totalAbsent}</span></div>
           <div>Late: <span className="text-orange-500 ml-1">{totalLate}</span></div>

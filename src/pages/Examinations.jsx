@@ -39,12 +39,12 @@ const Examinations = () => {
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
       
       {/* Tabs */}
-      <div className="flex px-6 border-b border-gray-100 pt-2 flex-shrink-0">
+      <div className="flex overflow-x-auto px-4 md:px-6 border-b border-gray-100 pt-2 flex-shrink-0 custom-scrollbar">
         {tabs.map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-4 text-[14px] font-semibold transition-colors relative ${
+            className={`px-4 md:px-6 py-4 whitespace-nowrap text-[13px] md:text-[14px] font-semibold transition-colors relative ${
               activeTab === tab 
                 ? 'text-[#0A6C54]' 
                 : 'text-gray-500 hover:text-gray-700'
@@ -61,7 +61,7 @@ const Examinations = () => {
       {activeTab === 'Marks Entry' && (
         <>
           {/* Filters Top Row */}
-          <div className="p-6 border-b border-gray-50 flex flex-col md:flex-row items-end gap-6 flex-shrink-0">
+          <div className="p-4 md:p-6 border-b border-gray-50 flex flex-col md:flex-row items-stretch md:items-end gap-4 md:gap-6 flex-shrink-0">
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
               
               <div>
@@ -180,11 +180,11 @@ const Examinations = () => {
           </div>
 
           {/* Bottom Action Bar */}
-          <div className="p-6 border-t border-gray-100 flex items-center justify-end gap-4 rounded-b-2xl">
-            <button className="px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm">
+          <div className="p-4 md:p-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 rounded-b-2xl bg-gray-50/30">
+            <button className="w-full sm:w-auto px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm">
               Save Marks
             </button>
-            <button className="px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm">
+            <button className="w-full sm:w-auto px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm">
               Publish Result
             </button>
           </div>

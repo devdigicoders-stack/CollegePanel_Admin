@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
@@ -23,6 +24,7 @@ import Notifications from './pages/Notifications';
 function App() {
   return (
     <Router>
+      <Toaster position="top-right" />
       <Routes>
         {/* Login - outside Layout (no sidebar/header) */}
         <Route path="/login" element={<Login />} />
