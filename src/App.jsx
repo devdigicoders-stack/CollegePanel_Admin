@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/Layout';
+import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Admissions from './pages/Admissions';
@@ -31,30 +32,32 @@ function App() {
 
         {/* Protected Routes - inside Layout */}
         <Route path="/*" element={
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/admissions" element={<Admissions />} />
-              <Route path="/students" element={<Students />} />
-              <Route path="/academics" element={<Academics />} />
-              <Route path="/teachers" element={<Teachers />} />
-              <Route path="/hod" element={<Hods />} />
-              <Route path="/roles" element={<Roles />} />
-              <Route path="/employees" element={<Employees />} />
-              <Route path="/attendance" element={<Attendance />} />
-              <Route path="/exams" element={<Examinations />} />
-              <Route path="/fees" element={<Fees />} />
-              <Route path="/library" element={<Library />} />
-              <Route path="/hostel" element={<Hostel />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/notice" element={<Notice />} />
-              <Route path="/complaints" element={<Complaints />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/notifications" element={<Notifications />} />
-              {/* Add more routes here as needed */}
-            </Routes>
-          </Layout>
+          <PrivateRoute>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/admissions" element={<Admissions />} />
+                <Route path="/students" element={<Students />} />
+                <Route path="/academics" element={<Academics />} />
+                <Route path="/teachers" element={<Teachers />} />
+                <Route path="/hod" element={<Hods />} />
+                <Route path="/roles" element={<Roles />} />
+                <Route path="/employees" element={<Employees />} />
+                <Route path="/attendance" element={<Attendance />} />
+                <Route path="/exams" element={<Examinations />} />
+                <Route path="/fees" element={<Fees />} />
+                <Route path="/library" element={<Library />} />
+                <Route path="/hostel" element={<Hostel />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/notice" element={<Notice />} />
+                <Route path="/complaints" element={<Complaints />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/notifications" element={<Notifications />} />
+                {/* Add more routes here as needed */}
+              </Routes>
+            </Layout>
+          </PrivateRoute>
         } />
       </Routes>
     </Router>

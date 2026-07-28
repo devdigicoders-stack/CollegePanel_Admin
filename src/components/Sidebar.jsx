@@ -1,13 +1,15 @@
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { 
   LayoutDashboard, UserPlus, Users, GraduationCap, 
   UserSquare2, UsersRound, Settings, Fingerprint,
   FileText, Wallet, Library,
   Building2, PieChart,
-  ClipboardList, AlertCircle, LogOut
+  ClipboardList, AlertCircle, LogOut, X, AlertTriangle
 } from 'lucide-react';
 
-export const Sidebar = ({ isOpen = true }) => {
+export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -75,7 +77,7 @@ export const Sidebar = ({ isOpen = true }) => {
       {/* Logout Button */}
       <div className={`p-4 flex-shrink-0 border-t border-white/10 mt-auto ${!isOpen ? 'px-2' : ''}`}>
         <button 
-          onClick={() => navigate('/login')}
+          onClick={onLogoutClick}
           className={`flex items-center ${isOpen ? 'gap-3 px-4' : 'justify-center px-0'} py-3 w-full rounded-xl transition-all font-medium text-[14px] text-[#ff6b6b] hover:text-white hover:bg-red-500/20`}
           title={!isOpen ? 'Logout' : undefined}
         >
@@ -84,6 +86,7 @@ export const Sidebar = ({ isOpen = true }) => {
         </button>
       </div>
 
+      {/* Styles */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;

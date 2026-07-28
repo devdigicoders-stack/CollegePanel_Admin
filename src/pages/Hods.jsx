@@ -1,229 +1,118 @@
-import React, { useState } from 'react';
-import { Plus, Search, ChevronDown, ChevronLeft, ChevronRight, Edit, Trash2, Copy } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Edit, Trash2, X, AlertTriangle, Eye, User } from 'lucide-react';
+import axiosInstance from '../utils/axiosInstance';
+import toast from 'react-hot-toast';
 
 const Hods = () => {
-  const [isCreating, setIsCreating] = useState(false);
-  const [hods, setHods] = useState([
-    { id: 1, name: 'Dr. Sunil Tiwari', department: 'Civil Engineering', email: 'sunil.t@greenpoly.edu', mobile: '9876543210', doj: '2020-01-15', status: 'Active' },
-    { id: 2, name: 'Mr. Prakash Mehra', department: 'Mechanical Engineering', email: 'prakash.m@greenpoly.edu', mobile: '9876543211', doj: '2018-07-22', status: 'Active' },
-    { id: 3, name: 'Mr. Amit Gupta', department: 'Electrical Engineering', email: 'amit.g@greenpoly.edu', mobile: '9876543212', doj: '2019-11-05', status: 'Active' },
-    { id: 4, name: 'Ms. Neha Verma', department: 'Computer Engineering', email: 'neha.v@greenpoly.edu', mobile: '9876543213', doj: '2021-03-10', status: 'Active' },
-    { id: 5, name: 'Mr. Rajat Verma', department: 'Electronics Engg.', email: 'rajat.v@greenpoly.edu', mobile: '9876543214', doj: '2022-08-01', status: 'Active' },
-  ]);
+  const [hods, setHods] = useState([]);
+  const [filteredHods, setFilteredHods] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedHod, setSelectedHod] = useState(null);
 
-  // Form State
-  const [formData, setFormData] = useState({
-    name: '', department: 'Computer Engineering', email: '', mobile: '', doj: '', status: 'Active'
-  });
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  useEffect(() => {
+    fetchHods();
+  }, []);
 
-  const handleCreateHod = (e) => {
-    e.preventDefault();
-    const newHod = {
-      id: hods.length > 0 ? Math.max(...hods.map(h => h.id)) + 1 : 1,
-      name: formData.name,
-      department: formData.department,
-      email: formData.email,
-      mobile: formData.mobile,
-      doj: formData.doj,
-      status: formData.status
-    };
-    
-    setHods([...hods, newHod]);
-    setIsCreating(false);
-    setFormData({ name: '', department: 'Computer Engineering', email: '', mobile: '', doj: '', status: 'Active' });
-  };
+  useEffect(() => {
+    handleSearch();
+  }, [searchQuery, hods]);
 
-  const handleDelete = (id) => {
-    if(window.confirm('Are you sure you want to remove this HOD?')) {
-      setHods(hods.filter(h => h.id !== id));
+  const fetchHods = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/teachers/hods');
+      const hodsData = res.data.data || [];
+      setHods(hodsData);
+      setFilteredHods(hodsData);
+    } catch (error) {
+      console.error('Error fetching HODs:', error);
+      toast.error('Failed to fetch HODs');
+      setHods([]);
+      setFilteredHods([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (isCreating) {
-    return (
-      <div className="flex flex-col h-full font-['Inter']">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[20px] font-bold text-gray-800 font-['Outfit']">Add New HOD</h2>
-        </div>
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setFilteredHods(hods);
+      setCurrentPage(1);
+      return;
+    }
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            
-            {/* Left Column: HOD Information */}
-            <div className="lg:col-span-3 bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 p-6 sm:p-8 h-fit">
-              <h3 className="text-[15px] font-bold text-[#0A6C54] mb-6">Personal Information</h3>
-              
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                    Full Name<span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Dr. Rajesh Kumar"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                    Department<span className="text-red-500">*</span>
-                  </label>
-                  <select 
-                    name="department"
-                    value={formData.department}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] appearance-none bg-white"
-                  >
-                    <option>Computer Engineering</option>
-                    <option>Electrical Engineering</option>
-                    <option>Mechanical Engineering</option>
-                    <option>Civil Engineering</option>
-                    <option>Electronics Engg.</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                      Date of Joining<span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <input 
-                        type="date" 
-                        name="doj"
-                        value={formData.doj}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                      Status<span className="text-red-500">*</span>
-                    </label>
-                    <select 
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] appearance-none bg-white"
-                    >
-                      <option>Active</option>
-                      <option>Inactive</option>
-                      <option>On Leave</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                    Email Address<span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="email" 
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="email@college.edu"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                    Mobile Number<span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    name="mobile"
-                    value={formData.mobile}
-                    onChange={handleInputChange}
-                    placeholder="9876543210"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Login Credentials */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 p-6 sm:p-8 h-fit">
-                <h3 className="text-[15px] font-bold text-[#0A6C54] mb-6">Login Credentials <span className="font-medium text-gray-500">(Auto Generated)</span></h3>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <label className="w-20 text-[13px] font-semibold text-gray-700">Username</label>
-                    <div className="flex-1 relative">
-                      <input 
-                        type="text" 
-                        readOnly
-                        value={formData.name ? formData.name.toLowerCase().replace(/[^a-z0-9]/g, '.') : 'auto.generated'}
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2 text-[13px] text-gray-500 bg-gray-50 outline-none pr-10"
-                      />
-                      <button className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[#0A6C54] hover:bg-green-50 rounded-md transition-colors">
-                        <Copy size={14} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <label className="w-20 text-[13px] font-semibold text-gray-700">Password</label>
-                    <div className="flex-1 relative">
-                      <input 
-                        type="password" 
-                        readOnly
-                        value="**********"
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2 text-[13px] text-gray-500 bg-gray-50 outline-none pr-10"
-                      />
-                      <button className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[#0A6C54] hover:bg-green-50 rounded-md transition-colors">
-                        <Copy size={14} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="pt-2">
-                    <label className="flex items-center cursor-pointer group">
-                      <div className="relative flex items-center">
-                        <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-[#0A6C54] focus:ring-[#0A6C54] accent-[#0A6C54] cursor-pointer" />
-                      </div>
-                      <span className="ml-2 text-[13px] text-gray-600 font-medium group-hover:text-gray-800 transition-colors">Send credentials to email</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Action Bar */}
-        <div className="mt-4 flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-          <button 
-            type="button"
-            onClick={() => setIsCreating(false)}
-            className="px-5 py-2.5 text-[13px] font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            Cancel
-          </button>
-          <button type="button" className="px-5 py-2.5 text-[13px] font-semibold text-gray-700 border border-gray-300 bg-white hover:bg-gray-50 rounded-lg transition-colors shadow-sm">
-            Save as Draft
-          </button>
-          <button onClick={handleCreateHod} className="px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm">
-            Save HOD
-          </button>
-        </div>
-      </div>
+    const filtered = hods.filter(hod =>
+      hod.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      hod.department?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      hod.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      hod.mobile?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }
+    setFilteredHods(filtered);
+    setCurrentPage(1);
+  };
 
-  // --- Table View ---
+  const handleViewClick = (hod) => {
+    setSelectedHod(hod);
+    setShowViewModal(true);
+  };
+
+  const handleDeleteClick = (hod) => {
+    setSelectedHod(hod);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await axiosInstance.delete(`/teachers/${selectedHod._id}`);
+      toast.success('HOD deleted successfully');
+      setShowDeleteModal(false);
+      setSelectedHod(null);
+      fetchHods();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete HOD');
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'Active': return 'text-[#15803d] bg-[#dcfce3]';
+      case 'Inactive': return 'text-[#dc2626] bg-[#fee2e2]';
+      case 'On Leave': return 'text-[#d97706] bg-[#fef3c7]';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-IN');
+  };
+
+  // Pagination
+  const totalPages = Math.ceil(filteredHods.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentHods = filteredHods.slice(startIndex, endIndex);
+
+  const getPageNumbers = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 3) {
+      return [1, 2, 3, 4, '...', totalPages];
+    }
+    if (currentPage >= totalPages - 2) {
+      return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
       
@@ -234,73 +123,309 @@ const Hods = () => {
           <input 
             type="text" 
             placeholder="Search HOD by name or department..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] placeholder:text-gray-400 shadow-sm"
           />
         </div>
 
-        <button 
-          onClick={() => setIsCreating(true)}
-          className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
-        >
-          <Plus size={16} strokeWidth={2.5} />
-          Add HOD
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="text-sm text-gray-600">
+            <span className="font-semibold">{filteredHods.length}</span> HOD{filteredHods.length !== 1 ? 's' : ''} found
+          </div>
+        </div>
       </div>
 
       {/* Table */}
       <div className="flex-1 overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[950px]">
-          <thead>
-            <tr className="bg-[#F9FAFB] border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[5%]">#</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[18%]">HOD Name</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[18%]">Department</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%]">Email</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[12%]">Mobile</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[12%]">Date of Joining</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[10%]">Status</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[10%] text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {hods.map((row, index) => (
-              <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] text-gray-600">{index + 1}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{row.name}</td>
-                <td className="py-4 px-6 text-[13px] text-[#0A6C54] font-medium">{row.department}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600">{row.email}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600">{row.mobile}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600">{row.doj}</td>
-                <td className="py-4 px-6">
-                  <span className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide ${
-                    row.status === 'Active' ? 'text-green-700 bg-green-50' : 
-                    row.status === 'Inactive' ? 'text-red-700 bg-red-50' : 
-                    'text-orange-700 bg-orange-50'
-                  }`}>
-                    {row.status}
-                  </span>
-                </td>
-                <td className="py-4 px-6">
-                  <div className="flex items-center justify-center gap-3">
-                    <button className="w-7 h-7 rounded border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-                      <Edit size={14} strokeWidth={2} />
-                    </button>
-                    <button onClick={() => handleDelete(row.id)} className="w-7 h-7 rounded border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors bg-red-50/50">
-                      <Trash2 size={14} strokeWidth={2} />
-                    </button>
-                  </div>
-                </td>
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="w-8 h-8 border-4 border-[#0A6C54] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : currentHods.length === 0 ? (
+          <div className="flex items-center justify-center h-64">
+            <p className="text-gray-500 text-sm">
+              {searchQuery ? 'No HODs found matching your search' : 'No HODs found'}
+            </p>
+          </div>
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[950px]">
+            <thead>
+              <tr className="bg-[#F9FAFB] border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">#</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">HOD Name</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Department</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Email</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Mobile</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Date of Joining</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Action</th>
               </tr>
+            </thead>
+            <tbody>
+              {currentHods.map((hod, index) => (
+                <tr key={hod._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{startIndex + index + 1}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-medium whitespace-nowrap">{hod.name}</td>
+                  <td className="py-4 px-6 text-[13px] text-[#0A6C54] font-medium whitespace-nowrap">{hod.department}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{hod.email}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{hod.mobile}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{formatDate(hod.dateOfJoining)}</td>
+                  <td className="py-4 px-6 whitespace-nowrap">
+                    <span className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide inline-block ${getStatusColor(hod.status)}`}>
+                      {hod.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+                      <button 
+                        onClick={() => handleViewClick(hod)}
+                        className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm flex-shrink-0"
+                        title="View HOD"
+                      >
+                        <Eye size={14} strokeWidth={2} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteClick(hod)}
+                        className="w-8 h-8 rounded border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm bg-red-50/50 flex-shrink-0"
+                        title="Delete HOD"
+                      >
+                        <Trash2 size={14} strokeWidth={2} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Pagination */}
+      {!loading && filteredHods.length > itemsPerPage && (
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+          <p className="text-[13px] text-gray-600 font-medium">
+            Showing {startIndex + 1} to {Math.min(endIndex, filteredHods.length)} of {filteredHods.length} entries
+          </p>
+          
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1.5 text-[13px] font-medium rounded border transition-colors ${
+                currentPage === 1 
+                  ? 'border-gray-200 text-gray-400 cursor-not-allowed' 
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Previous
+            </button>
+
+            {getPageNumbers().map((page, index) => (
+              page === '...' ? (
+                <span key={`ellipsis-${index}`} className="px-2 text-gray-500">...</span>
+              ) : (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`min-w-[32px] px-3 py-1.5 text-[13px] font-medium rounded border transition-colors ${
+                    currentPage === page
+                      ? 'bg-[#0A6C54] text-white border-[#0A6C54]'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              )
             ))}
-            {hods.length === 0 && (
-              <tr>
-                <td colSpan="8" className="py-8 text-center text-gray-500 text-[14px]">
-                  No HODs found. Click "Add HOD" to create one.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1.5 text-[13px] font-medium rounded border transition-colors ${
+                currentPage === totalPages 
+                  ? 'border-gray-200 text-gray-400 cursor-not-allowed' 
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {showViewModal && selectedHod && (
+        <ViewHodModal 
+          hod={selectedHod} 
+          onClose={() => {
+            setShowViewModal(false);
+            setSelectedHod(null);
+          }} 
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedHod && (
+        <DeleteConfirmationModal
+          title="Delete HOD"
+          message={`Are you sure you want to delete ${selectedHod.name}? This will remove them from the HOD role but they will still exist as a teacher.`}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setSelectedHod(null);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+// View Modal Component
+const ViewHodModal = ({ hod, onClose }) => {
+  const baseURL = 'http://localhost:5000';
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-IN', { 
+      day: '2-digit', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'Active': return 'text-[#15803d] bg-[#dcfce3]';
+      case 'Inactive': return 'text-[#dc2626] bg-[#fee2e2]';
+      case 'On Leave': return 'text-[#d97706] bg-[#fef3c7]';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        {/* Header with Gradient */}
+        <div className="bg-gradient-to-r from-[#0A6C54] to-[#0d8566] p-6 relative">
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+          >
+            <X size={24} />
+          </button>
+          <h3 className="text-xl font-bold text-white">HOD Details</h3>
+          <p className="text-white/80 text-sm mt-1">Complete information about the HOD</p>
+        </div>
+
+        {/* Profile Section */}
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#0A6C54] to-[#0d8566] flex items-center justify-center flex-shrink-0">
+              {hod.profileImage ? (
+                <img 
+                  src={`${baseURL}${hod.profileImage}`} 
+                  alt={hod.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div className={hod.profileImage ? 'hidden' : 'flex'} style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                <User size={40} className="text-white" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h4 className="text-lg font-bold text-gray-800">{hod.name}</h4>
+              <p className="text-sm text-[#0A6C54] font-medium">{hod.designation} - {hod.department}</p>
+              <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-bold tracking-wide mt-2 ${getStatusColor(hod.status)}`}>
+                {hod.status}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Details Grid */}
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Personal Information */}
+          <div>
+            <h5 className="text-sm font-bold text-gray-700 mb-4 pb-2 border-b border-gray-200">Personal Information</h5>
+            <div className="space-y-3">
+              <InfoRow label="Email" value={hod.email || 'N/A'} />
+              <InfoRow label="Mobile" value={hod.mobile || 'N/A'} />
+              {hod.dateOfBirth && <InfoRow label="Date of Birth" value={formatDate(hod.dateOfBirth)} />}
+              {hod.gender && <InfoRow label="Gender" value={hod.gender} />}
+              {hod.qualification && <InfoRow label="Qualification" value={hod.qualification} />}
+              {hod.experience && <InfoRow label="Experience" value={`${hod.experience} years`} />}
+            </div>
+          </div>
+
+          {/* Employment Information */}
+          <div>
+            <h5 className="text-sm font-bold text-gray-700 mb-4 pb-2 border-b border-gray-200">Employment Information</h5>
+            <div className="space-y-3">
+              <InfoRow label="Department" value={hod.department || 'N/A'} />
+              <InfoRow label="Designation" value={hod.designation || 'N/A'} />
+              <InfoRow label="Date of Joining" value={formatDate(hod.dateOfJoining)} />
+              {hod.payScale && <InfoRow label="Pay Scale" value={hod.payScale} />}
+              <InfoRow label="Status" value={hod.status || 'N/A'} />
+              {hod.createdAt && <InfoRow label="Created Date" value={formatDate(hod.createdAt)} />}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100 rounded-b-2xl">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Info Row Component
+const InfoRow = ({ label, value }) => (
+  <div className="flex items-start">
+    <span className="text-xs font-semibold text-gray-500 w-32 flex-shrink-0">{label}</span>
+    <span className="text-sm text-gray-800 font-medium flex-1">{value}</span>
+  </div>
+);
+
+// Delete Confirmation Modal Component
+const DeleteConfirmationModal = ({ title, message, onConfirm, onCancel }) => {
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-red-50">
+          <AlertTriangle size={24} className="text-red-600" />
+          <h3 className="text-lg font-bold text-gray-800">{title}</h3>
+        </div>
+
+        <div className="px-6 py-6">
+          <p className="text-gray-600 text-sm">{message}</p>
+        </div>
+
+        <div className="flex gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
+          <button
+            onClick={onConfirm}
+            className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm"
+          >
+            Delete
+          </button>
+          <button
+            onClick={onCancel}
+            className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );

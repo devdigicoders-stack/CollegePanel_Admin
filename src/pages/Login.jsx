@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -10,6 +10,15 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // If already logged in, redirect to dashboard
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -21,7 +30,10 @@ const Login = () => {
       localStorage.setItem('admin_info', JSON.stringify(res.data));
       
       toast.success('Login successful!');
-      navigate('/dashboard');
+      
+      // Redirect to the page they tried to access, or dashboard
+      const from = location.state?.from || '/dashboard';
+      navigate(from, { replace: true });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid credentials or server error');
     } finally {
