@@ -3,7 +3,7 @@ import {
   Plus, Search, Edit, Trash2, X, Shield, Check, ChevronLeft, ArrowLeft,
   LayoutDashboard, GraduationCap, Users, UserCheck, ClipboardList,
   BookOpen, DollarSign, Calendar, FileText, BookMarked, Home, 
-  BarChart3, Settings
+  BarChart3, Settings, Coffee, FlaskConical, Hammer, Briefcase, Phone, ShieldAlert, Award
 } from 'lucide-react';
 
 const Roles = () => {
@@ -23,51 +23,21 @@ const Roles = () => {
 
   // Static roles data (will be replaced with API later)
   const [roles, setRoles] = useState([
-    {
-      id: 1,
-      name: 'Admin',
-      description: 'Full system access with all permissions',
-      department: 'Administration',
-      status: 'Active',
-      permissionsCount: 48,
-      usersCount: 3
-    },
-    {
-      id: 2,
-      name: 'HOD',
-      description: 'Head of Department with departmental access',
-      department: 'Academic',
-      status: 'Active',
-      permissionsCount: 32,
-      usersCount: 8
-    },
-    {
-      id: 3,
-      name: 'Teacher',
-      description: 'Teaching staff with limited access',
-      department: 'Academic',
-      status: 'Active',
-      permissionsCount: 18,
-      usersCount: 45
-    },
-    {
-      id: 4,
-      name: 'Accountant',
-      description: 'Finance and fee management access',
-      department: 'Finance',
-      status: 'Active',
-      permissionsCount: 12,
-      usersCount: 2
-    },
-    {
-      id: 5,
-      name: 'Librarian',
-      description: 'Library management access only',
-      department: 'Library',
-      status: 'Active',
-      permissionsCount: 8,
-      usersCount: 2
-    }
+    { id: 1, name: 'Admin', description: 'Full system access with all permissions', department: 'Administration', status: 'Active', permissionsCount: 88, usersCount: 3 },
+    { id: 2, name: 'Principal', description: 'Institutional oversight, review student approvals and financial stats', department: 'Administration', status: 'Active', permissionsCount: 72, usersCount: 1 },
+    { id: 3, name: 'HOD', description: 'Head of Department with departmental and section controls', department: 'Academic', status: 'Active', permissionsCount: 54, usersCount: 6 },
+    { id: 4, name: 'Teacher', description: 'Teaching staff with course and student attendance permissions', department: 'Academic', status: 'Active', permissionsCount: 24, usersCount: 42 },
+    { id: 5, name: 'Accountant', description: 'Finance ledger, installments, receipts, and vendor records', department: 'Finance', status: 'Active', permissionsCount: 22, usersCount: 2 },
+    { id: 6, name: 'Librarian', description: 'Library cataloging, book assets, members, and fine cards', department: 'Library', status: 'Active', permissionsCount: 12, usersCount: 2 },
+    { id: 7, name: 'Hostel Warden', description: 'Room allocations, hostel attendance, visitor logs, and complaints', department: 'Hostel', status: 'Active', permissionsCount: 16, usersCount: 2 },
+    { id: 8, name: 'Mess Manager', description: 'Mess attendance, daily meal menus, inventory logs, and complaints', department: 'Mess', status: 'Active', permissionsCount: 14, usersCount: 1 },
+    { id: 9, name: 'Lab Assistant', description: 'Lab inventory assets, practical schedules, equipment checks', department: 'Academic', status: 'Active', permissionsCount: 12, usersCount: 4 },
+    { id: 10, name: 'Workshop Instructor', description: 'Practical attendance sheets, job exercises, tool issue, and safety checklists', department: 'Academic', status: 'Active', permissionsCount: 14, usersCount: 3 },
+    { id: 11, name: 'Placement Officer', description: 'Student placement profiles, drives, job openings, and selections ledger', department: 'Placement', status: 'Active', permissionsCount: 18, usersCount: 1 },
+    { id: 12, name: 'Scholarship Coordinator', description: 'Verify schemes, check documents, eligibility verification, and renewals', department: 'Finance', status: 'Active', permissionsCount: 15, usersCount: 1 },
+    { id: 13, name: 'Receptionist', description: 'Visitor logs, enquiries dispatch, call sheets, help desk ticketing, and gate passes', department: 'Administration', status: 'Active', permissionsCount: 16, usersCount: 2 },
+    { id: 14, name: 'Security/Gate Operator', description: 'Student entry logs, visitor slips, gate pass scanners, and incident reporting', department: 'Security', status: 'Active', permissionsCount: 12, usersCount: 5 },
+    { id: 15, name: 'Student', description: 'Read-only profile, assignments submit, fee payments, study materials downloads', department: 'Student', status: 'Active', permissionsCount: 17, usersCount: 1250 }
   ]);
 
   // Permission categories with granular permissions
@@ -137,6 +107,54 @@ const Roles = () => {
       icon: Home,
       color: 'lime',
       permissions: ['View Hostels', 'Manage Rooms', 'Manage Allocations', 'View Hostel Reports']
+    },
+    {
+      name: 'Mess Management',
+      icon: Coffee,
+      color: 'amber',
+      permissions: ['View Mess Attendance', 'Manage Mess Menu', 'Manage Mess Stock', 'View Mess Reports']
+    },
+    {
+      name: 'Lab Assistant',
+      icon: FlaskConical,
+      color: 'teal',
+      permissions: ['View Lab Equipments', 'Manage Lab Equipments', 'Log Practical Attendance', 'Manage Lab Consumables']
+    },
+    {
+      name: 'Workshop',
+      icon: Hammer,
+      color: 'orange',
+      permissions: ['View Workshop Schedule', 'Mark Practical Attendance', 'Manage Workshop Tools', 'Log Maintenance Request']
+    },
+    {
+      name: 'Placement',
+      icon: Briefcase,
+      color: 'blue',
+      permissions: ['View Placement Dashboard', 'Verify Student Profiles', 'Manage Recruiters Directory', 'Manage Placement Drives', 'Manage Job Offers']
+    },
+    {
+      name: 'Scholarship',
+      icon: Award,
+      color: 'indigo',
+      permissions: ['View Scholarship Schemes', 'Verify Student Applications', 'Verify Documents', 'Disburse Scholarships', 'Approve Renewal Applications']
+    },
+    {
+      name: 'Receptionist',
+      icon: Phone,
+      color: 'rose',
+      permissions: ['View Visitor Logs', 'Register Visitor Entry', 'Manage Appointment Booking', 'Generate Gate Pass', 'Log Courier Parcels']
+    },
+    {
+      name: 'Security & Gate',
+      icon: ShieldAlert,
+      color: 'red',
+      permissions: ['View Security Dashboard', 'Log Student Entry/Exit', 'Scan Gate Pass', 'Log Vehicle Registry', 'Log Security Incident']
+    },
+    {
+      name: 'Student Portal',
+      icon: GraduationCap,
+      color: 'emerald',
+      permissions: ['View Portal Dashboard', 'Submit Course Assignments', 'View Semester Results', 'Pay Fees Online', 'Apply For Outings']
     },
     {
       name: 'Reports',

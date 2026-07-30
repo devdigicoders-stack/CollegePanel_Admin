@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, UserPlus, Users, GraduationCap, 
   UserSquare2, UsersRound, Settings, Fingerprint,
@@ -8,7 +7,8 @@ import {
   Building2, PieChart,
   ClipboardList, AlertCircle, LogOut, ChevronDown, ChevronRight,
   DollarSign, Receipt, CreditCard, TrendingDown, TrendingUp,
-  BookOpen, Award, RotateCcw, ShoppingCart, Landmark, BookMarked
+  BookOpen, Award, RotateCcw, ShoppingCart, Landmark, BookMarked,CheckSquare ,Bed,ShieldAlert,
+  Coffee, FlaskConical, Wrench, Briefcase, Hammer,Calendar, Phone
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
@@ -34,15 +34,16 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
       name: 'Admissions',
       icon: UserPlus,
       items: [
-        { name: 'Enquiries', icon: FileText, path: '/admissions/enquiries' },
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/admissions/dashboard' },
+        { name: 'Enquiries', icon: UserPlus, path: '/admissions/enquiries' },
         { name: 'Follow-ups', icon: ClipboardList, path: '/admissions/followups' },
-        { name: 'Applications', icon: BookOpen, path: '/admissions/applications' },
-        { name: 'New Admission', icon: UserPlus, path: '/admissions/new' },
-        { name: 'Document Verification', icon: FileText, path: '/admissions/documents' },
-        { name: 'Student Registration', icon: Users, path: '/admissions/registration' },
-        { name: 'Seat Management', icon: BookMarked, path: '/admissions/seats' },
-        { name: 'Admission Approval', icon: Award, path: '/admissions/approval' },
-        { name: 'Admission Cancellation', icon: RotateCcw, path: '/admissions/cancellation' },
+        { name: 'Applications', icon: FileText, path: '/admissions/applications' },
+        { name: 'New Admission', icon: UserSquare2, path: '/admissions/new' },
+        { name: 'Document Verification', icon: Fingerprint, path: '/admissions/documents' },
+        { name: 'Student Registration', icon: UsersRound, path: '/admissions/registration' },
+        { name: 'Seat Management', icon: Settings, path: '/admissions/seats' },
+        { name: 'Admission Approval', icon: GraduationCap, path: '/admissions/approval' },
+        { name: 'Admission Cancellation', icon: AlertCircle, path: '/admissions/cancellation' },
         { name: 'Admission Reports', icon: PieChart, path: '/admissions/reports' },
       ]
     },
@@ -50,17 +51,18 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
       name: 'Financial',
       icon: Wallet,
       items: [
-        { name: 'Fee Structure', icon: DollarSign, path: '/financial/fee-structure' },
-        { name: 'Student Fees', icon: Users, path: '/financial/student-fees' },
+        { name: 'Fee Structure', icon: Wallet, path: '/financial/fee-structure' },
+        { name: 'Student Fees', icon: DollarSign, path: '/financial/student-fees' },
         { name: 'Fee Collection', icon: Receipt, path: '/financial/fee-collection' },
         { name: 'Pending Dues', icon: AlertCircle, path: '/financial/pending-dues' },
-        { name: 'Installments', icon: ClipboardList, path: '/financial/installments' },
+        { name: 'Installments', icon: CreditCard, path: '/financial/installments' },
         { name: 'Discounts', icon: TrendingDown, path: '/financial/discounts' },
         { name: 'Scholarships', icon: Award, path: '/financial/scholarships' },
         { name: 'Refunds', icon: RotateCcw, path: '/financial/refunds' },
-        { name: 'Expenses', icon: CreditCard, path: '/financial/expenses' },
-        { name: 'Income', icon: TrendingUp, path: '/financial/income' },
+        { name: 'Expenses', icon: TrendingUp, path: '/financial/expenses' },
+        { name: 'Income', icon: TrendingDown, path: '/financial/income' },
         { name: 'Vendor Payments', icon: ShoppingCart, path: '/financial/vendor-payments' },
+        { name: 'Payroll', icon: Landmark, path: '/financial/payroll' },
         { name: 'Receipts', icon: Receipt, path: '/financial/receipts' },
         { name: 'Cash & Bank', icon: Landmark, path: '/financial/cash-bank' },
         { name: 'Account Ledger', icon: BookOpen, path: '/financial/ledger' },
@@ -97,10 +99,174 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
       ]
     },
     {
+      name: 'Library',
+      icon: Library,
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/library/dashboard' },
+        { name: 'Books Catalog', icon: BookOpen, path: '/library/books' },
+        { name: 'Members Card', icon: Users, path: '/library/members' },
+        { name: 'Issue & Return', icon: ClipboardList, path: '/library/issue-return' },
+        { name: 'Reservations', icon: BookMarked, path: '/library/reservations' },
+        { name: 'Penalties & Fines', icon: DollarSign, path: '/library/fines' },
+        { name: 'Lost/Damaged Books', icon: AlertCircle, path: '/library/lost-damaged' },
+        { name: 'Stock Verification', icon: CheckSquare, path: '/library/stock' },
+        { name: 'Library Reports', icon: PieChart, path: '/library/reports' },
+      ]
+    },
+    {
+      name: 'Hostel Warden',
+      icon: Building2,
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/hostel-warden/dashboard' },
+        { name: 'Rooms & Beds', icon: Bed, path: '/hostel-warden/rooms' },
+        { name: 'Student Allotment', icon: UserPlus, path: '/hostel-warden/allotment' },
+        { name: 'Check-In/Out', icon: RotateCcw, path: '/hostel-warden/check-in-out' },
+        { name: 'Hostel Attendance', icon: CheckSquare, path: '/hostel-warden/attendance' },
+        { name: 'Leave & Outing', icon: ClipboardList, path: '/hostel-warden/leave-outing' },
+        { name: 'Visitors Gate', icon: Users, path: '/hostel-warden/visitors' },
+        { name: 'Room Complaints', icon: AlertCircle, path: '/hostel-warden/complaints' },
+        { name: 'Discipline Incidents', icon: ShieldAlert, path: '/hostel-warden/incidents' },
+        { name: 'Assets & Inventory', icon: ShoppingCart, path: '/hostel-warden/inventory' },
+        { name: 'Hostel Notices', icon: ClipboardList, path: '/hostel-warden/notices' },
+        { name: 'Hostel Reports', icon: PieChart, path: '/hostel-warden/reports' },
+      ]
+    },
+    {
+      name: 'Mess Manager',
+      icon: Coffee,
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/mess/dashboard' },
+        { name: 'Meal Menu', icon: BookOpen, path: '/mess/menu' },
+        { name: 'Meal Attendance', icon: CheckSquare, path: '/mess/attendance' },
+        { name: 'Mess Students', icon: Users, path: '/mess/students' },
+        { name: 'Stock & Inventory', icon: ShoppingCart, path: '/mess/stock' },
+        { name: 'Daily Consumption', icon: ClipboardList, path: '/mess/consumption' },
+        { name: 'Purchase Requests', icon: ShoppingCart, path: '/mess/purchases' },
+        { name: 'Food Complaints', icon: AlertCircle, path: '/mess/complaints' },
+        { name: 'Mess Reports', icon: PieChart, path: '/mess/reports' },
+      ]
+    },
+    {
+      name: 'Lab Assistant',
+      icon: FlaskConical,
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/lab/dashboard' },
+        { name: 'Labs Management', icon: Building2, path: '/lab/units' },
+        { name: 'Equipment Assets', icon: BookOpen, path: '/lab/equipment' },
+        { name: 'Practical Schedule', icon: ClipboardList, path: '/lab/schedule' },
+        { name: 'Practical Attendance', icon: CheckSquare, path: '/lab/attendance' },
+        { name: 'Issue & Return', icon: RotateCcw, path: '/lab/issue-return' },
+        { name: 'Consumable Stock', icon: ShoppingCart, path: '/lab/consumables' },
+        { name: 'Maintenance & Repair', icon: Wrench, path: '/lab/maintenance' },
+        { name: 'Damage & Lost', icon: AlertCircle, path: '/lab/damage-lost' },
+        { name: 'Safety Checklist', icon: CheckSquare, path: '/lab/safety' },
+        { name: 'Lab Reports', icon: PieChart, path: '/lab/reports' },
+      ]
+    },
+    {
+      name: 'Workshop',
+      icon: Hammer,
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/workshop/dashboard' },
+        { name: 'Schedule', icon: ClipboardList, path: '/workshop/schedule' },
+        { name: 'Student Batches', icon: Users, path: '/workshop/batches' },
+        { name: 'Attendance', icon: CheckSquare, path: '/workshop/attendance' },
+        { name: 'Jobs & Exercises', icon: BookOpen, path: '/workshop/jobs' },
+        { name: 'Machines & Tools', icon: Settings, path: '/workshop/machines' },
+        { name: 'Tool Issue/Return', icon: RotateCcw, path: '/workshop/tool-issue-return' },
+        { name: 'Consumable Stock', icon: ShoppingCart, path: '/workshop/stock' },
+        { name: 'Maintenance', icon: Wrench, path: '/workshop/maintenance' },
+        { name: 'Safety Checklist', icon: CheckSquare, path: '/workshop/safety' },
+        { name: 'Workshop Reports', icon: PieChart, path: '/workshop/reports' },
+      ]
+    },
+    {
+      name: 'Placement',
+      icon: Briefcase,
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/placement/dashboard' },
+        { name: 'Student Profiles', icon: Users, path: '/placement/profiles' },
+        { name: 'Companies Directory', icon: Building2, path: '/placement/companies' },
+        { name: 'Job Opportunities', icon: Briefcase, path: '/placement/jobs' },
+        { name: 'Placement Drives', icon: ClipboardList, path: '/placement/drives' },
+        { name: 'Shortlisting', icon: CheckSquare, path: '/placement/shortlist' },
+        { name: 'Applications', icon: FileText, path: '/placement/applications' },
+        { name: 'Interviews', icon: Calendar, path: '/placement/interviews' },
+        { name: 'Selections & Offers', icon: Award, path: '/placement/offers' },
+        { name: 'Internships', icon: Award, path: '/placement/internships' },
+        { name: 'Placement Reports', icon: PieChart, path: '/placement/reports' },
+      ]
+    },
+    {
+      name: 'Scholarship',
+      icon: Award,
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/scholarship/dashboard' },
+        { name: 'Schemes', icon: BookOpen, path: '/scholarship/schemes' },
+        { name: 'Applications', icon: FileText, path: '/scholarship/applications' },
+        { name: 'Doc Verification', icon: CheckSquare, path: '/scholarship/verification' },
+        { name: 'Eligibility', icon: CheckSquare, path: '/scholarship/eligibility' },
+        { name: 'Approvals', icon: CheckSquare, path: '/scholarship/approval' },
+        { name: 'Disbursement', icon: DollarSign, path: '/scholarship/disbursement' },
+        { name: 'Renewal', icon: RotateCcw, path: '/scholarship/renewal' },
+        { name: 'Scholarship Reports', icon: PieChart, path: '/scholarship/reports' },
+      ]
+    },
+    {
+      name: 'Receptionist',
+      icon: Phone,
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/receptionist/dashboard' },
+        { name: 'Visitors', icon: Users, path: '/receptionist/visitors' },
+        { name: 'Enquiries', icon: FileText, path: '/receptionist/enquiries' },
+        { name: 'Calls Ledger', icon: Phone, path: '/receptionist/calls' },
+        { name: 'Appointments', icon: Calendar, path: '/receptionist/appointments' },
+        { name: 'Help Desk', icon: ClipboardList, path: '/receptionist/helpdesk' },
+        { name: 'Gate Passes', icon: CheckSquare, path: '/receptionist/gatepass' },
+        { name: 'Courier & Parcels', icon: FileText, path: '/receptionist/courier' },
+        { name: 'Receptionist Reports', icon: PieChart, path: '/receptionist/reports' },
+      ]
+    },
+    {
+      name: 'Security',
+      icon: ShieldAlert,
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/security/dashboard' },
+        { name: 'Student Movement', icon: CheckSquare, path: '/security/movement' },
+        { name: 'Visitors', icon: Users, path: '/security/visitors' },
+        { name: 'Gatepass Check', icon: CheckSquare, path: '/security/gatepass' },
+        { name: 'Vehicle Logs', icon: CheckSquare, path: '/security/vehicles' },
+        { name: 'Hostel Outings', icon: Bed, path: '/security/hostel-movement' },
+        { name: 'Incident Reports', icon: AlertCircle, path: '/security/incidents' },
+        { name: 'Security Reports', icon: PieChart, path: '/security/reports' },
+      ]
+    },
+    {
+      name: 'Student Portal',
+      icon: GraduationCap,
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/student/dashboard' },
+        { name: 'My Profile', icon: Users, path: '/student/profile' },
+        { name: 'Attendance', icon: CheckSquare, path: '/student/attendance' },
+        { name: 'Timetable', icon: Calendar, path: '/student/timetable' },
+        { name: 'Registered Subjects', icon: BookOpen, path: '/student/subjects' },
+        { name: 'Assignments', icon: FileText, path: '/student/assignments' },
+        { name: 'Study Materials', icon: BookOpen, path: '/student/materials' },
+        { name: 'Exam Schedules', icon: Calendar, path: '/student/exams' },
+        { name: 'Semester Results', icon: Award, path: '/student/results' },
+        { name: 'Fees & Receipts', icon: DollarSign, path: '/student/fees' },
+        { name: 'Scholarships', icon: Award, path: '/student/scholarships' },
+        { name: 'Library Card', icon: BookOpen, path: '/student/library' },
+        { name: 'Hostel Room', icon: Bed, path: '/student/hostel' },
+        { name: 'Placements', icon: Briefcase, path: '/student/placement' },
+        { name: 'IT & Infra Complaints', icon: AlertCircle, path: '/student/complaints' },
+        { name: 'Leave Requests', icon: Calendar, path: '/student/leave-requests' },
+        { name: 'Downloads', icon: FileText, path: '/student/downloads' },
+      ]
+    },
+    {
       name: 'Other',
       items: [
-        { name: 'Library', icon: Library, path: '/library' },
-        { name: 'Hostel', icon: Building2, path: '/hostel' },
         { name: 'Reports', icon: PieChart, path: '/reports' },
       ]
     },

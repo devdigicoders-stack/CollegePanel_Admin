@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-  Search, ChevronDown, Eye, ChevronLeft, ChevronRight, MoreHorizontal, Plus, X 
+  Search, ChevronDown, Eye, ChevronLeft, ChevronRight, Plus, X 
 } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';

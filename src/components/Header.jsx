@@ -1,8 +1,19 @@
-import { Menu, Heart, Bell, User, Plus } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Menu, Bell, Plus, Maximize } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const Header = ({ onMenuClick }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   const getHeaderContent = () => {
     switch (location.pathname) {
@@ -51,14 +62,14 @@ export const Header = ({ onMenuClick }) => {
   const { title, subtitle, isBreadcrumb, actionButton } = getHeaderContent();
 
   return (
-    <header className="h-[88px] bg-[#F8F9FA] flex items-center justify-between px-2 flex-shrink-0 pt-4 pb-2">
+    <header className="h-[72px] bg-white border-b border-gray-100 flex items-center justify-between px-6 flex-shrink-0 shadow-sm z-30">
       <div className="flex items-center gap-2 md:gap-4 min-w-0 pr-2">
-        <button onClick={onMenuClick} className="p-2 hover:bg-gray-200 rounded-lg text-gray-500 flex-shrink-0">
+        <button onClick={onMenuClick} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 flex-shrink-0 transition-colors">
           <Menu size={20} />
         </button>
         <div className="min-w-0">
-          <h1 className="text-[16px] md:text-[22px] font-bold text-[#111827] font-['Outfit'] truncate">{title}</h1>
-          <p className={`text-[11px] md:text-[13px] font-['Inter'] mt-0.5 truncate ${isBreadcrumb ? 'text-[#0A6C54] font-medium' : 'text-gray-500'}`}>
+          <h1 className="text-[16px] md:text-[20px] font-bold text-[#111827] font-['Outfit'] truncate">{title}</h1>
+          <p className={`text-[11px] md:text-[12px] font-['Inter'] mt-0.5 truncate ${isBreadcrumb ? 'text-[#0A6C54] font-semibold' : 'text-gray-500'}`}>
             {subtitle}
           </p>
         </div>
@@ -71,30 +82,35 @@ export const Header = ({ onMenuClick }) => {
             <span className="hidden sm:inline">{actionButton}</span>
           </button>
         )}
-        <button className="relative text-gray-500 hover:text-gray-700 transition-colors hidden sm:block">
-          <Heart size={20} strokeWidth={1.5} />
-        </button>
         <button 
-          onClick={() => window.location.href = '/notifications'}
-          className="relative text-gray-500 hover:text-gray-700 transition-colors"
+          onClick={toggleFullScreen}
+          className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-50"
+          title="Toggle Fullscreen"
+        >
+          <Maximize size={20} strokeWidth={1.8} />
+        </button>
+
+        <button 
+          onClick={() => navigate('/notifications')}
+          className="relative text-gray-400 hover:text-gray-600 transition-colors"
         >
           <Bell size={20} strokeWidth={1.5} />
-          <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-[#F8F9FA]"></span>
+          <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
         </button>
         
         <div 
-          onClick={() => window.location.href = '/profile'}
-          className="flex items-center gap-3 pl-2 md:pl-4 border-l border-gray-200 cursor-pointer"
+          onClick={() => navigate('/profile')}
+          className="flex items-center gap-3 pl-4 border-l border-gray-100 cursor-pointer group"
         >
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#0A6C54] text-white flex items-center justify-center overflow-hidden flex-shrink-0">
-            <User size={18} />
+          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#0A6C54] text-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm transition-transform group-hover:scale-105">
+            <span className="font-bold text-[13px] font-['Outfit']">A</span>
           </div>
           <div className="hidden md:block">
-            <div className="text-[14px] font-semibold text-gray-800 flex items-center gap-1">
+            <div className="text-[13px] font-bold text-gray-800 flex items-center gap-1 font-['Inter']">
               Admin
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-gray-600 transition-colors"><path d="m6 9 6 6 6-6"/></svg>
             </div>
-            <div className="text-[12px] text-gray-500">Principal</div>
+            <div className="text-[11px] text-gray-500 font-medium font-['Inter']">Principal</div>
           </div>
         </div>
       </div>
