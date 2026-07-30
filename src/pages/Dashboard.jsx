@@ -1,7 +1,9 @@
 import React from 'react';
 import { 
   Users, SquareUser, User, Building2, 
-  Clock, Receipt, Coins, ShieldAlert
+  Clock, Receipt, Coins, ShieldAlert, FileText,
+  BookOpen, BookMarked, CalendarDays, ClipboardCheck,
+  UserCheck, AlertCircle
 } from 'lucide-react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -96,7 +98,7 @@ const Dashboard = () => {
             <SquareUser size={24} />
           </div>
           <div className="flex-1">
-            <p className="text-[12px] text-gray-500 font-medium">Total Teachers</p>
+            <p className="text-[12px] text-gray-500 font-medium">Total Faculty</p>
             <div className="flex items-baseline gap-2">
               <h3 className="text-[20px] font-bold text-gray-800">156</h3>
               <span className="text-[12px] text-green-500 font-medium">+1.3%</span>
@@ -106,27 +108,26 @@ const Dashboard = () => {
 
         {/* Card 3 */}
         <div className="bg-white p-5 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-4 border border-gray-100">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
-            <User size={24} />
+          <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500">
+            <BookOpen size={24} />
           </div>
           <div className="flex-1">
-            <p className="text-[12px] text-gray-500 font-medium">Total Employees</p>
+            <p className="text-[12px] text-gray-500 font-medium">Total Classes</p>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-[20px] font-bold text-gray-800">89</h3>
-              <span className="text-[12px] text-green-500 font-medium">+2.1%</span>
+              <h3 className="text-[20px] font-bold text-gray-800">42</h3>
             </div>
           </div>
         </div>
 
         {/* Card 4 */}
         <div className="bg-white p-5 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-4 border border-gray-100">
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500">
-            <Building2 size={24} />
+          <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
+            <BookMarked size={24} />
           </div>
           <div className="flex-1">
-            <p className="text-[12px] text-gray-500 font-medium">Total Departments</p>
+            <p className="text-[12px] text-gray-500 font-medium">Total Subjects</p>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-[20px] font-bold text-gray-800">8</h3>
+              <h3 className="text-[20px] font-bold text-gray-800">125</h3>
             </div>
           </div>
         </div>
@@ -140,34 +141,23 @@ const Dashboard = () => {
             <Clock size={24} />
           </div>
           <div className="flex-1">
-            <p className="text-[12px] text-gray-500 font-medium">Today's Attendance</p>
+            <p className="text-[12px] text-gray-500 font-medium">Student Attendance</p>
             <h3 className="text-[20px] font-bold text-gray-800">86.5%</h3>
           </div>
         </div>
 
         {/* Card 2 */}
         <div className="bg-white p-5 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-4 border border-gray-100">
-          <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
-            <Receipt size={24} />
+          <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <UserCheck size={24} />
           </div>
           <div className="flex-1">
-            <p className="text-[12px] text-gray-500 font-medium">Pending Fees</p>
-            <h3 className="text-[20px] font-bold text-gray-800">₹18,45,200</h3>
+            <p className="text-[12px] text-gray-500 font-medium">Faculty Attendance</p>
+            <h3 className="text-[20px] font-bold text-gray-800">94.2%</h3>
           </div>
         </div>
 
         {/* Card 3 */}
-        <div className="bg-white p-5 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-4 border border-gray-100">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-[#0A6C54]">
-            <Coins size={24} />
-          </div>
-          <div className="flex-1">
-            <p className="text-[12px] text-gray-500 font-medium">Today Collection</p>
-            <h3 className="text-[20px] font-bold text-gray-800">₹2,45,600</h3>
-          </div>
-        </div>
-
-        {/* Card 4 */}
         <div className="bg-white p-5 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-4 border border-gray-100">
           <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
             <ShieldAlert size={24} />
@@ -175,6 +165,17 @@ const Dashboard = () => {
           <div className="flex-1">
             <p className="text-[12px] text-gray-500 font-medium">Upcoming Exams</p>
             <h3 className="text-[20px] font-bold text-red-500">6</h3>
+          </div>
+        </div>
+
+        {/* Card 4 */}
+        <div className="bg-white p-5 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex items-center gap-4 border border-gray-100">
+          <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
+            <AlertCircle size={24} />
+          </div>
+          <div className="flex-1">
+            <p className="text-[12px] text-gray-500 font-medium">Pending Complaints</p>
+            <h3 className="text-[20px] font-bold text-orange-600">5</h3>
           </div>
         </div>
       </div>

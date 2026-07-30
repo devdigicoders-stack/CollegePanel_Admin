@@ -21,6 +21,13 @@ import Notice from './pages/Notice';
 import Complaints from './pages/Complaints';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
+import LeaveRequests from './pages/LeaveRequests';
+import LessonPlans from './pages/LessonPlans';
+import InternalMarks from './pages/InternalMarks';
+import FacultyAttendance from './pages/FacultyAttendance';
+import Timetable from './pages/Timetable';
+import Assignments from './pages/Assignments';
+import Meetings from './pages/Meetings';
 
 function App() {
   return (
@@ -54,6 +61,13 @@ function App() {
                 <Route path="/complaints" element={<Complaints />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/leave-requests" element={<LeaveRequests />} />
+                <Route path="/lesson-plans" element={<LessonPlans />} />
+                <Route path="/internal-marks" element={<InternalMarks />} />
+                <Route path="/faculty-attendance" element={<FacultyAttendance />} />
+                <Route path="/timetable" element={<Timetable />} />
+                <Route path="/assignments" element={<Assignments />} />
+                <Route path="/meetings" element={<Meetings />} />
                 {/* Add more routes here as needed */}
               </Routes>
             </Layout>
