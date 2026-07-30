@@ -1,14 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Eye, MessageSquare, ChevronDown, Calendar, X } from 'lucide-react';
-
-const followUpsData = [
-  { id: 1, no: 'FUP/2024/001', enquiryNo: 'ENQ/2024/001', studentName: 'Aarav Singh', mobile: '9876543210', course: 'Diploma in CE', followUpDate: '2024-02-15', callStatus: 'Interested', counsellor: 'Mr. Sharma', nextFollowUp: '2024-02-20', interestLevel: 'Very High', notes: 'Student is very keen, will visit tomorrow.' },
-  { id: 2, no: 'FUP/2024/002', enquiryNo: 'ENQ/2024/002', studentName: 'Neha Verma', mobile: '9876543211', course: 'Diploma in IT', followUpDate: '2024-02-14', callStatus: 'Call Later', counsellor: 'Ms. Patel', nextFollowUp: '2024-02-18', interestLevel: 'High', notes: 'Will call back after discussing with parents.' },
-  { id: 3, no: 'FUP/2024/003', enquiryNo: 'ENQ/2024/003', studentName: 'Vikram Patel', mobile: '9876543212', course: 'Diploma in ME', followUpDate: '2024-02-13', callStatus: 'Visit Scheduled', counsellor: 'Mr. Kumar', nextFollowUp: '2024-02-17', interestLevel: 'High', notes: 'Scheduled campus visit for 17th Feb.' },
-  { id: 4, no: 'FUP/2024/004', enquiryNo: 'ENQ/2024/004', studentName: 'Muskan Jain', mobile: '9876543213', course: 'Diploma in EE', followUpDate: '2024-02-12', callStatus: 'Application Started', counsellor: 'Ms. Singh', nextFollowUp: '2024-02-22', interestLevel: 'Very High', notes: 'Started filling application form.' },
-  { id: 5, no: 'FUP/2024/005', enquiryNo: 'ENQ/2024/005', studentName: 'Rohit Sharma', mobile: '9876543214', course: 'Diploma in CE', followUpDate: '2024-02-11', callStatus: 'Not Interested', counsellor: 'Mr. Sharma', nextFollowUp: null, interestLevel: 'Low', notes: 'Decided to join another college.' },
-  { id: 6, no: 'FUP/2024/006', enquiryNo: 'ENQ/2024/006', studentName: 'Priya Singh', mobile: '9876543215', course: 'Diploma in IT', followUpDate: '2024-02-10', callStatus: 'No Response', counsellor: 'Ms. Patel', nextFollowUp: '2024-02-16', interestLevel: 'Medium', notes: 'Phone not reachable, will try again.' },
-];
+import axios from 'axios';
 
 const callStatusColors = {
   'Interested': 'bg-green-100 text-green-700',
@@ -28,15 +20,60 @@ const interestColors = {
 };
 
 const FollowUps = () => {
+  const [followUps, setFollowUps] = useState([]);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showModal, setShowModal] = useState(false);
 
-  const filtered = followUpsData.filter(f => {
-    const matchSearch = f.studentName.toLowerCase().includes(search.toLowerCase()) || f.mobile.includes(search);
-    const matchStatus = filterStatus === 'All' || f.callStatus === filterStatus;
-    return matchSearch && matchStatus;
+  const [formData, setFormData] = useState({
+    enquiryNo: '', followUpDate: new Date().toISOString().split('T')[0],
+    nextFollowUpDate: '', callStatus: 'Call Later', interestLevel: 'Medium', counsellorNotes: ''
   });
+
+  const fetchFollowUps = async () => {
+    try {
+      const token = localStorage.getItem('admin_token');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/followups`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { status: filterStatus }
+      });
+      setFollowUps(res.data);
+    } catch (error) {
+      console.error('Error fetching follow-ups', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFollowUps();
+  }, [filterStatus]);
+
+  const filtered = followUps.filter(f => {
+    const studentName = f.enquiryId?.studentName || '';
+    const mobile = f.enquiryId?.mobileNumber || '';
+    return studentName.toLowerCase().includes(search.toLowerCase()) || mobile.includes(search);
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const token = localStorage.getItem('admin_token');
+      await axios.post(`${import.meta.env.VITE_API_URL}/followups`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setShowModal(false);
+      setFormData({
+        enquiryNo: '', followUpDate: new Date().toISOString().split('T')[0],
+        nextFollowUpDate: '', callStatus: 'Call Later', interestLevel: 'Medium', counsellorNotes: ''
+      });
+      fetchFollowUps();
+    } catch (error) {
+      console.error('Error creating follow-up', error);
+      alert(error.response?.data?.message || 'Error creating follow-up');
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -59,8 +96,8 @@ const FollowUps = () => {
         <div className="relative">
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
             className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
-            <option>All</option>
-            {Object.keys(callStatusColors).map(s => <option key={s}>{s}</option>)}
+            <option value="All">All Status</option>
+            {Object.keys(callStatusColors).map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
         </div>
@@ -70,51 +107,49 @@ const FollowUps = () => {
         <table className="w-full text-left border-collapse min-w-[1200px]">
           <thead>
             <tr className="bg-gray-50 border-y border-gray-100">
-              {['Follow-up No.','Student Name','Course','Follow-up Date','Call Status','Interest Level','Counsellor','Next Follow-up','Actions'].map(h => (
+              {['Follow-up No.','Student Name','Course','Follow-up Date','Call Status','Interest Level','Counsellor Notes','Next Follow-up','Actions'].map(h => (
                 <th key={h} className="py-3 px-4 text-[12px] font-bold text-gray-700">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {filtered.map(f => (
-              <tr key={f.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-3 px-4 text-[13px] font-semibold text-[#0A6C54]">{f.no}</td>
+            {filtered.length > 0 ? filtered.map(f => (
+              <tr key={f._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                <td className="py-3 px-4 text-[13px] font-semibold text-[#0A6C54]">{f.followUpNo}</td>
                 <td className="py-3 px-4">
-                  <p className="text-[13px] font-medium text-gray-800">{f.studentName}</p>
-                  <p className="text-[11px] text-gray-500">{f.mobile}</p>
+                  <p className="text-[13px] font-medium text-gray-800">{f.enquiryId?.studentName || 'N/A'}</p>
+                  <p className="text-[11px] text-gray-500">{f.enquiryId?.mobileNumber || 'N/A'}</p>
                 </td>
-                <td className="py-3 px-4 text-[13px] text-gray-600">{f.course}</td>
-                <td className="py-3 px-4 text-[13px] text-gray-600">{f.followUpDate}</td>
+                <td className="py-3 px-4 text-[13px] text-gray-600">{f.enquiryId?.courseInterested || 'N/A'}</td>
+                <td className="py-3 px-4 text-[13px] text-gray-600">{new Date(f.followUpDate).toLocaleDateString()}</td>
                 <td className="py-3 px-4">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${callStatusColors[f.callStatus]}`}>{f.callStatus}</span>
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${callStatusColors[f.callStatus] || 'bg-gray-100 text-gray-700'}`}>{f.callStatus}</span>
                 </td>
                 <td className="py-3 px-4">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${interestColors[f.interestLevel]}`}>{f.interestLevel}</span>
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${interestColors[f.studentInterestLevel] || 'bg-gray-100 text-gray-700'}`}>{f.studentInterestLevel}</span>
                 </td>
-                <td className="py-3 px-4 text-[13px] text-gray-600">{f.counsellor}</td>
+                <td className="py-3 px-4 text-[13px] text-gray-600 max-w-xs truncate" title={f.counsellorNotes}>{f.counsellorNotes}</td>
                 <td className="py-3 px-4 text-[13px] text-gray-600">
-                  {f.nextFollowUp ? <span className="flex items-center gap-1"><Calendar size={13} className="text-gray-400" />{f.nextFollowUp}</span> : <span className="text-gray-400">-</span>}
+                  {f.nextFollowUpDate ? <span className="flex items-center gap-1"><Calendar size={13} className="text-gray-400" />{new Date(f.nextFollowUpDate).toLocaleDateString()}</span> : <span className="text-gray-400">-</span>}
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex gap-1">
                     <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Eye size={15} className="text-gray-500" /></button>
                     <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Edit2 size={15} className="text-gray-500" /></button>
-                    <button className="p-1.5 hover:bg-gray-100 rounded-lg"><MessageSquare size={15} className="text-gray-500" /></button>
                   </div>
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan="9" className="py-8 text-center text-gray-500 text-[13px]">No follow-ups found.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-        <p className="text-[12px] text-gray-500">Showing {filtered.length} of 156 follow-ups</p>
-        <div className="flex gap-2">
-          {['Prev','1','2','Next'].map(p => (
-            <button key={p} className={`px-3 py-1.5 rounded-lg text-[12px] font-medium ${p === '1' ? 'bg-[#0A6C54] text-white' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{p}</button>
-          ))}
-        </div>
+        <p className="text-[12px] text-gray-500">Showing {filtered.length} follow-ups</p>
       </div>
 
       {showModal && (
@@ -125,40 +160,38 @@ const FollowUps = () => {
               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { label: 'Enquiry No.', placeholder: 'e.g. ENQ/2024/001' },
-                { label: 'Follow-up Date', type: 'date' },
-                { label: 'Next Follow-up Date', type: 'date' },
-              ].map(f => (
-                <div key={f.label}>
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">{f.label}</label>
-                  <input type={f.type || 'text'} placeholder={f.placeholder}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
-                </div>
-              ))}
-              {[
-                { label: 'Call Status', options: Object.keys(callStatusColors) },
-                { label: 'Interest Level', options: Object.keys(interestColors) },
-                { label: 'Counsellor', options: ['Mr. Sharma', 'Ms. Patel', 'Mr. Kumar', 'Ms. Singh'] },
-              ].map(f => (
-                <div key={f.label}>
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">{f.label}</label>
-                  <div className="relative">
-                    <select className="appearance-none w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]">
-                      {f.options.map(o => <option key={o}>{o}</option>)}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
-                  </div>
-                </div>
-              ))}
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Enquiry No.</label>
+                <input type="text" name="enquiryNo" value={formData.enquiryNo} onChange={handleChange} placeholder="e.g. ENQ/2024/001" className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px]" />
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Follow-up Date</label>
+                <input type="date" name="followUpDate" value={formData.followUpDate} onChange={handleChange} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px]" />
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Next Follow-up Date</label>
+                <input type="date" name="nextFollowUpDate" value={formData.nextFollowUpDate} onChange={handleChange} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px]" />
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Call Status</label>
+                <select name="callStatus" value={formData.callStatus} onChange={handleChange} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px]">
+                  {Object.keys(callStatusColors).map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Interest Level</label>
+                <select name="interestLevel" value={formData.interestLevel} onChange={handleChange} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px]">
+                  {Object.keys(interestColors).map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
               <div className="md:col-span-2">
                 <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Counsellor Notes</label>
-                <textarea rows={3} placeholder="Add notes..." className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+                <textarea name="counsellorNotes" value={formData.counsellorNotes} onChange={handleChange} rows={3} placeholder="Add notes..." className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px]" />
               </div>
             </div>
             <div className="p-6 border-t border-gray-100 flex justify-end gap-3">
               <button onClick={() => setShowModal(false)} className="px-5 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold">Save</button>
+              <button onClick={handleSubmit} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold">Save</button>
             </div>
           </div>
         </div>

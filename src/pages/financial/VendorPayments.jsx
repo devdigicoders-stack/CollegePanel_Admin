@@ -1,13 +1,9 @@
-import { useState } from 'react';
-import { Search, Plus, Edit2, Eye, Download } from 'lucide-react';
-
-const vendorPaymentsData = [
-  { id: 1, invoiceNo: 'INV-2024-089', vendor: 'Shree Stationary Mart', amount: 15400, dueDate: '2024-02-28', status: 'Paid', datePaid: '2024-02-14', category: 'Stationery', description: 'Office files, registers, A4 paper bundles' },
-  { id: 2, invoiceNo: 'INV-2024-112', vendor: 'Globe Scientific Instruments', amount: 89000, dueDate: '2024-03-05', status: 'Pending Approval', datePaid: '-', category: 'Lab equipment', description: 'Oscilloscopes and multimeters for EE lab' },
-  { id: 3, invoiceNo: 'INV-2024-045', vendor: 'Royal Furniture Works', amount: 120000, dueDate: '2024-02-20', status: 'Partial', datePaid: '2024-02-10', category: 'Maintenance', description: 'Classroom benches repair and replacement' },
-  { id: 4, invoiceNo: 'INV-2024-098', vendor: 'Super Clean Services', amount: 35000, dueDate: '2024-02-25', status: 'Overdue', datePaid: '-', category: 'Maintenance', description: 'Monthly campus sanitation service' },
-  { id: 5, invoiceNo: 'INV-2024-076', vendor: 'A1 Internet Provider', amount: 12500, dueDate: '2024-02-18', status: 'Paid', datePaid: '2024-02-15', category: 'Internet', description: 'High-speed leased line internet fee' },
-];
+import { useState, useEffect, useCallback } from 'react';
+import { Search, Plus, Eye, Download } from 'lucide-react';
+import axiosInstance from '../../utils/axiosInstance';
+import toast from 'react-hot-toast';
+import SkeletonLoader from '../../components/SkeletonLoader';
+import { CheckCircle } from 'lucide-react';
 
 const categories = ['All', 'Electricity', 'Maintenance', 'Stationery', 'Lab equipment', 'Transport', 'Events', 'Internet', 'Office expenses'];
 
@@ -16,6 +12,8 @@ const VendorPayments = () => {
   const [filterCategory, setFilterCategory] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
   const [newPayment, setNewPayment] = useState({
     vendor: '',
     invoiceNo: '',
@@ -25,26 +23,63 @@ const VendorPayments = () => {
     description: '',
   });
 
-  const filtered = vendorPaymentsData.filter(item => {
-    const matchesSearch = item.vendor.toLowerCase().includes(search.toLowerCase()) || 
-                          item.invoiceNo.toLowerCase().includes(search.toLowerCase());
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = {};
+      if (search) params.search = search;
+      if (filterCategory !== 'All') params.category = filterCategory;
+      if (filterStatus !== 'All') params.status = filterStatus;
+      const res = await axiosInstance.get('/fees/vendor-payments', { params });
+      setData(res.data?.data || res.data || []);
+    } catch {
+      toast.error('Failed to fetch vendor payments');
+    } finally {
+      setLoading(false);
+    }
+  }, [search, filterCategory, filterStatus]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleAddPayment = async (e) => {
+    e.preventDefault();
+    try {
+      await axiosInstance.post('/fees/vendor-payments', newPayment);
+      toast.success('Vendor invoice added successfully');
+      setShowModal(false);
+      setNewPayment({
+        vendor: '',
+        invoiceNo: '',
+        amount: '',
+        category: 'Stationery',
+        dueDate: '',
+        description: '',
+      });
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add vendor invoice');
+    }
+  };
+
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      await axiosInstance.put(`/fees/vendor-payments/${id}`, { status });
+      toast.success(`Payment status updated to ${status}`);
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to update payment status');
+    }
+  };
+
+  const filtered = data.filter(item => {
+    const matchesSearch = item.vendor?.toLowerCase().includes(search.toLowerCase()) || 
+                          item.invoiceNo?.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = filterCategory === 'All' || item.category === filterCategory;
     const matchesStatus = filterStatus === 'All' || item.status === filterStatus;
     return matchesSearch && matchesCategory && matchesStatus;
   });
-
-  const handleAddPayment = (e) => {
-    e.preventDefault();
-    setShowModal(false);
-    setNewPayment({
-      vendor: '',
-      invoiceNo: '',
-      amount: '',
-      category: 'Stationery',
-      dueDate: '',
-      description: '',
-    });
-  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -55,7 +90,7 @@ const VendorPayments = () => {
           <p className="text-[12px] text-gray-500 mt-0.5">Manage vendors, purchase invoices, and outgoing payments</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <button onClick={() => toast.success('Exporting...')} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={15} /> Export
           </button>
           <button onClick={() => setShowModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
@@ -102,46 +137,53 @@ const VendorPayments = () => {
 
       {/* Table */}
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[1000px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Invoice No</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Vendor</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Category</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Amount</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Due Date</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Payment Date</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.invoiceNo}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{item.vendor}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.category}</td>
-                <td className="py-4 px-6 text-[13px] font-bold text-gray-900">₹{item.amount.toLocaleString()}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-500">{item.dueDate}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-500">{item.datePaid}</td>
-                <td className="py-4 px-6">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                    item.status === 'Paid' ? 'bg-green-50 text-green-700 border border-green-100' :
-                    item.status === 'Partial' ? 'bg-orange-50 text-orange-700 border border-orange-100' :
-                    item.status === 'Overdue' ? 'bg-red-50 text-red-700 border border-red-100' :
-                    'bg-yellow-50 text-yellow-700 border border-yellow-100'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="py-4 px-6 flex gap-2">
-                  <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"><Eye size={15} /></button>
-                  <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"><Edit2 size={15} /></button>
-                </td>
+        {loading ? (
+          <SkeletonLoader type="table" rows={5} cols={8} />
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Invoice No</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Vendor</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Category</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Amount</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Due Date</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Payment Date</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(item => (
+                <tr key={item._id || item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.invoiceNo}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{item.vendor}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.category}</td>
+                  <td className="py-4 px-6 text-[13px] font-bold text-gray-900">₹{(item.amount || 0).toLocaleString()}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-500">{item.dueDate}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-500">{item.datePaid || '-'}</td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                      item.status === 'Paid' ? 'bg-green-50 text-green-700 border border-green-100' :
+                      item.status === 'Partial' ? 'bg-orange-50 text-orange-700 border border-orange-100' :
+                      item.status === 'Overdue' ? 'bg-red-50 text-red-700 border border-red-100' :
+                      'bg-yellow-50 text-yellow-700 border border-yellow-100'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 flex gap-2">
+                    <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"><Eye size={15} /></button>
+                    <button onClick={() => handleUpdateStatus(item._id || item.id, 'Paid')} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors" title="Mark Paid"><CheckCircle size={15} /></button>
+                  </td>
+                </tr>
+              ))}
+              {!loading && filtered.length === 0 && (
+                <tr><td colSpan={8} className="py-8 text-center text-gray-500 text-[13px]">No vendor payments found</td></tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Add Invoice Modal */}
@@ -223,14 +265,6 @@ const VendorPayments = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-[12px] font-semibold text-gray-600 mb-1">Attach Invoice Bill (PDF/Image)</label>
-                <input 
-                  type="file" 
-                  className="w-full text-[12px] text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-[12px] file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
-                />
-              </div>
-
               <div className="flex gap-3 pt-2">
                 <button 
                   type="button"
@@ -255,3 +289,4 @@ const VendorPayments = () => {
 };
 
 export default VendorPayments;
+

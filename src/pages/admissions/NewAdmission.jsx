@@ -1,16 +1,35 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Check, Upload } from 'lucide-react';
+import axios from 'axios';
 
 const steps = ['Personal Details','Parent/Guardian','Address','Academic Details','Course Selection','Document Upload','Scholarship','Fee Plan','Review','Submit'];
 
 const NewAdmission = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+  const [submittedAppNo, setSubmittedAppNo] = useState('');
+  const [formData, setFormData] = useState({
+    // Personal
+    studentName: '', dob: '', gender: 'Male', mobile: '', email: '', aadhaar: '', category: 'General',
+    // Parent
+    fatherName: '', fatherMobile: '',
+    // Academic
+    qualification: '10th Pass', passingYear: '', percentage: '',
+    // Course
+    course: 'Diploma in CE', admissionType: 'Regular', academicSession: '2024-25'
+  });
 
-  const SelectField = ({ label, options }) => (
+  const handleFieldChange = (name, value) => setFormData(prev => ({ ...prev, [name]: value }));
+
+  const SelectField = ({ label, options, name }) => (
     <div>
       <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">{label}</label>
       <div className="relative">
-        <select className="appearance-none w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]">
+        <select
+          name={name}
+          value={name ? formData[name] : undefined}
+          onChange={name ? e => handleFieldChange(name, e.target.value) : undefined}
+          className="appearance-none w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]">
           <option value="">Select {label}</option>
           {options.map(o => <option key={o}>{o}</option>)}
         </select>
@@ -19,25 +38,31 @@ const NewAdmission = () => {
     </div>
   );
 
-  const InputField = ({ label, type = 'text', placeholder }) => (
+  const InputField = ({ label, type = 'text', placeholder, name }) => (
     <div>
       <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">{label}</label>
-      <input type={type} placeholder={placeholder || `Enter ${label.toLowerCase()}`}
+      <input
+        type={type}
+        name={name}
+        value={name ? formData[name] : undefined}
+        onChange={name ? e => handleFieldChange(name, e.target.value) : undefined}
+        placeholder={placeholder || `Enter ${label.toLowerCase()}`}
         className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
     </div>
   );
 
   const renderStep = () => {
+    if (submitted) return null;
     switch (currentStep) {
       case 0: return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InputField label="Student Full Name" />
-          <InputField label="Date of Birth" type="date" />
-          <SelectField label="Gender" options={['Male','Female','Other']} />
-          <InputField label="Mobile Number" />
-          <InputField label="Email Address" />
-          <InputField label="Aadhaar Number" />
-          <SelectField label="Category" options={['General','OBC','SC','ST','EWS']} />
+          <InputField label="Student Full Name" name="studentName" />
+          <InputField label="Date of Birth" type="date" name="dob" />
+          <SelectField label="Gender" options={['Male','Female','Other']} name="gender" />
+          <InputField label="Mobile Number" name="mobile" />
+          <InputField label="Email Address" name="email" />
+          <InputField label="Aadhaar Number" name="aadhaar" />
+          <SelectField label="Category" options={['General','OBC','SC','ST','EWS']} name="category" />
           <SelectField label="Religion" options={['Hindu','Muslim','Christian','Sikh','Other']} />
           <InputField label="Nationality" placeholder="Indian" />
           <SelectField label="Blood Group" options={['A+','A-','B+','B-','O+','O-','AB+','AB-']} />
@@ -85,11 +110,11 @@ const NewAdmission = () => {
       );
       case 4: return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SelectField label="Course" options={['Diploma in CE','Diploma in IT','Diploma in ME','Diploma in EE']} />
+          <SelectField label="Course" options={['Diploma in CE','Diploma in IT','Diploma in ME','Diploma in EE']} name="course" />
           <SelectField label="Department" options={['Civil Engineering','Information Technology','Mechanical Engineering','Electrical Engineering']} />
           <SelectField label="Semester" options={['1st Semester','2nd Semester','3rd Semester (Lateral Entry)']} />
-          <SelectField label="Admission Type" options={['Regular','Lateral Entry','Management Quota','NRI Quota']} />
-          <SelectField label="Academic Session" options={['2024-25','2025-26']} />
+          <SelectField label="Admission Type" options={['Regular','Lateral Entry','Management Quota','NRI Quota']} name="admissionType" />
+          <SelectField label="Academic Session" options={['2024-25','2025-26']} name="academicSession" />
           <SelectField label="Hostel Required" options={['Yes','No']} />
           <SelectField label="Transport Required" options={['Yes','No']} />
           <InputField label="Preferred Hostel Type" placeholder="e.g. Single Room" />
@@ -190,8 +215,12 @@ const NewAdmission = () => {
             <Check size={40} className="text-green-600" />
           </div>
           <h3 className="text-[20px] font-bold text-gray-800 mb-2">Admission Submitted Successfully!</h3>
-          <p className="text-[14px] text-gray-600 mb-6">Application No: <span className="font-bold text-[#0A6C54]">APP/2024/089</span></p>
+          <p className="text-[14px] text-gray-600 mb-6">Application No: <span className="font-bold text-[#0A6C54]">{submittedAppNo || 'Generating...'}</span></p>
           <p className="text-[13px] text-gray-500">The admission will be reviewed and you will be notified once approved.</p>
+          <button onClick={() => { setCurrentStep(0); setSubmitted(false); setSubmittedAppNo(''); }}
+            className="mt-6 bg-[#0A6C54] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#085a46]">
+            New Admission
+          </button>
         </div>
       );
       default: return null;
@@ -234,7 +263,7 @@ const NewAdmission = () => {
       </div>
 
       {/* Navigation */}
-      {currentStep < 9 && (
+      {currentStep < 9 && !submitted && (
         <div className="p-6 border-t border-gray-100 flex justify-between">
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
@@ -244,7 +273,36 @@ const NewAdmission = () => {
             Previous
           </button>
           <button
-            onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
+            onClick={async () => {
+              if (currentStep === 8) {
+                // Final submit
+                try {
+                  const token = localStorage.getItem('admin_token');
+                  const appNo = `APP/${new Date().getFullYear()}/${Date.now().toString().slice(-4)}`;
+                  await axios.post(`${import.meta.env.VITE_API_URL}/admissions`, {
+                    appNo,
+                    name: formData.studentName,
+                    mobile: formData.mobile,
+                    email: formData.email,
+                    parentName: formData.fatherName,
+                    course: formData.course,
+                    category: formData.category,
+                    academicSession: formData.academicSession,
+                    admissionType: formData.admissionType,
+                    stage: 'Application',
+                    status: 'Pending Verification'
+                  }, { headers: { Authorization: `Bearer ${token}` } });
+                  setSubmittedAppNo(appNo);
+                  setSubmitted(true);
+                  setCurrentStep(9);
+                } catch (error) {
+                  console.error('Error submitting admission', error);
+                  alert(error.response?.data?.message || 'Error submitting admission');
+                }
+              } else {
+                setCurrentStep(Math.min(steps.length - 1, currentStep + 1));
+              }
+            }}
             className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold"
           >
             {currentStep === 8 ? 'Submit Admission' : 'Next'}

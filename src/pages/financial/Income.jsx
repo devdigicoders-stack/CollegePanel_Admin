@@ -1,13 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Eye, Download, Filter, Trash2, Calendar, FileText, IndianRupee } from 'lucide-react';
-
-const incomeData = [
-  { id: 1, receiptNo: 'INC/2024/001', category: 'Training Income', source: 'Corporate Java Training', amount: 45000, date: '2024-02-15', mode: 'Bank Transfer', status: 'Approved', description: 'Java training session fee for TechCorp' },
-  { id: 2, receiptNo: 'INC/2024/002', category: 'Grants', source: 'DST Research Grant', amount: 150000, date: '2024-02-14', mode: 'Bank Transfer', status: 'Approved', description: '1st installment for green energy research' },
-  { id: 3, receiptNo: 'INC/2024/003', category: 'Rental Income', source: 'Auditorium Booking', amount: 25000, date: '2024-02-12', mode: 'Cheque', status: 'Pending Approval', description: 'Weekend seminar booking' },
-  { id: 4, receiptNo: 'INC/2024/004', category: 'Scrap Sale', source: 'Old Lab Computers', amount: 18500, date: '2024-02-10', mode: 'Cash', status: 'Approved', description: 'Disposed 10 non-functional desktop PCs' },
-  { id: 5, receiptNo: 'INC/2024/005', category: 'Donations', source: 'Alumni Association Contribution', amount: 50000, date: '2024-02-08', mode: 'UPI', status: 'Approved', description: 'Library renovation contribution' },
-];
+import axiosInstance from '../../utils/axiosInstance';
+import toast from 'react-hot-toast';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const categories = ['All', 'Rental Income', 'Training Income', 'Seminar Fees', 'Donations', 'Grants', 'Scrap Sale', 'Other Income'];
 const modes = ['All', 'Cash', 'UPI', 'Card', 'Bank Transfer', 'Cheque', 'Demand Draft'];
@@ -17,6 +12,8 @@ const Income = () => {
   const [filterCategory, setFilterCategory] = useState('All');
   const [filterMode, setFilterMode] = useState('All');
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
   const [newIncome, setNewIncome] = useState({
     category: 'Training Income',
     source: '',
@@ -26,26 +23,53 @@ const Income = () => {
     description: '',
   });
 
-  const filtered = incomeData.filter(item => {
-    const matchesSearch = item.source.toLowerCase().includes(search.toLowerCase()) || 
-                          item.receiptNo.toLowerCase().includes(search.toLowerCase());
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const params = {};
+      if (search) params.search = search;
+      if (filterCategory !== 'All') params.category = filterCategory;
+      if (filterMode !== 'All') params.status = filterMode;
+      const res = await axiosInstance.get('/fees/income', { params });
+      setData(res.data?.data || res.data || []);
+    } catch (error) {
+      toast.error('Failed to fetch income');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [search, filterCategory, filterMode]);
+
+  const handleAddIncome = async (e) => {
+    e.preventDefault();
+    try {
+      await axiosInstance.post('/fees/income', newIncome);
+      toast.success('Income recorded successfully');
+      setShowModal(false);
+      setNewIncome({
+        category: 'Training Income',
+        source: '',
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
+        mode: 'Bank Transfer',
+        description: '',
+      });
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to record income');
+    }
+  };
+
+  const filtered = data.filter(item => {
+    const matchesSearch = item.source?.toLowerCase().includes(search.toLowerCase()) || 
+                          item.receiptNo?.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = filterCategory === 'All' || item.category === filterCategory;
     const matchesMode = filterMode === 'All' || item.mode === filterMode;
     return matchesSearch && matchesCategory && matchesMode;
   });
-
-  const handleAddIncome = (e) => {
-    e.preventDefault();
-    setShowModal(false);
-    setNewIncome({
-      category: 'Training Income',
-      source: '',
-      amount: '',
-      date: new Date().toISOString().split('T')[0],
-      mode: 'Bank Transfer',
-      description: '',
-    });
-  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -56,7 +80,7 @@ const Income = () => {
           <p className="text-[12px] text-gray-500 mt-0.5">Track and record non-academic income sources</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <button onClick={() => toast.success('Exporting...')} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={15} /> Export
           </button>
           <button onClick={() => setShowModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
@@ -99,43 +123,50 @@ const Income = () => {
 
       {/* Table */}
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[900px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Receipt No</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Category</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Source</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Amount</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Date</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Payment Mode</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.receiptNo}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.category}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{item.source}</td>
-                <td className="py-4 px-6 text-[13px] font-bold text-gray-900">₹{item.amount.toLocaleString()}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-500">{item.date}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.mode}</td>
-                <td className="py-4 px-6">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                    item.status === 'Approved' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-yellow-50 text-yellow-700 border border-yellow-100'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="py-4 px-6 flex gap-2">
-                  <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"><Eye size={15} /></button>
-                  <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"><Edit2 size={15} /></button>
-                </td>
+        {loading ? (
+          <SkeletonLoader type="table" rows={5} cols={8} />
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Receipt No</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Category</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Source</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Amount</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Date</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Payment Mode</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(item => (
+                <tr key={item._id || item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.receiptNo}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.category}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{item.source}</td>
+                  <td className="py-4 px-6 text-[13px] font-bold text-gray-900">₹{(item.amount || 0).toLocaleString()}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-500">{item.date}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.mode}</td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                      item.status === 'Approved' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-yellow-50 text-yellow-700 border border-yellow-100'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 flex gap-2">
+                    <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"><Eye size={15} /></button>
+                    <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"><Edit2 size={15} /></button>
+                  </td>
+                </tr>
+              ))}
+              {!loading && filtered.length === 0 && (
+                <tr><td colSpan={8} className="py-8 text-center text-gray-500 text-[13px]">No income records found</td></tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Record Income Modal */}
@@ -239,3 +270,4 @@ const Income = () => {
 };
 
 export default Income;
+

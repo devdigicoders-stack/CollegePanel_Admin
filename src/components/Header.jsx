@@ -102,16 +102,27 @@ export const Header = ({ onMenuClick }) => {
           onClick={() => navigate('/profile')}
           className="flex items-center gap-3 pl-4 border-l border-gray-100 cursor-pointer group"
         >
-          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#0A6C54] text-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm transition-transform group-hover:scale-105">
-            <span className="font-bold text-[13px] font-['Outfit']">A</span>
-          </div>
-          <div className="hidden md:block">
-            <div className="text-[13px] font-bold text-gray-800 flex items-center gap-1 font-['Inter']">
-              Admin
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-gray-600 transition-colors"><path d="m6 9 6 6 6-6"/></svg>
-            </div>
-            <div className="text-[11px] text-gray-500 font-medium font-['Inter']">Principal</div>
-          </div>
+          {(() => {
+            const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+            const userName = adminInfo.name || 'Admin User';
+            const userRole = adminInfo.role || 'college_admin';
+            const displayRole = userRole === 'college_admin' ? 'Super Admin' : userRole;
+            const initial = userName.charAt(0).toUpperCase();
+            return (
+              <>
+                <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#0A6C54] text-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm transition-transform group-hover:scale-105">
+                  <span className="font-bold text-[13px] font-['Outfit']">{initial}</span>
+                </div>
+                <div className="hidden md:block">
+                  <div className="text-[13px] font-bold text-gray-800 flex items-center gap-1 font-['Inter']">
+                    {userName}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-gray-600 transition-colors"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
+                  <div className="text-[11px] text-gray-500 font-medium font-['Inter']">{displayRole}</div>
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
     </header>

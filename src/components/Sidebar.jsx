@@ -131,7 +131,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         { name: 'Hostel Reports', icon: PieChart, path: '/hostel-warden/reports' },
       ]
     },
-    {
+    /* {
       name: 'Mess Manager',
       icon: Coffee,
       items: [
@@ -226,7 +226,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         { name: 'Courier & Parcels', icon: FileText, path: '/receptionist/courier' },
         { name: 'Receptionist Reports', icon: PieChart, path: '/receptionist/reports' },
       ]
-    },
+    }, */
     {
       name: 'Security',
       icon: ShieldAlert,
@@ -272,6 +272,40 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
     },
   ];
 
+  const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+  const userRole = adminInfo.role || 'college_admin';
+
+  const filteredMenuGroups = menuGroups.filter(group => {
+    if (group.name === 'Main' || group.name === 'Other') {
+      if (userRole === 'Student') {
+        return group.name === 'Main';
+      }
+      return true;
+    }
+    if (userRole === 'college_admin' || userRole === 'Principal') {
+      return true;
+    }
+    
+    const roleMapping = {
+      'HOD': ['Academic'],
+      'Teacher': ['Academic'],
+      'Accountant': ['Financial'],
+      'Librarian': ['Library'],
+      'Hostel Warden': ['Hostel Warden'],
+      'Mess Manager': ['Mess'],
+      'Lab Assistant': ['Lab'],
+      'Workshop Instructor': ['Workshop'],
+      'Placement Officer': ['Placement'],
+      'Scholarship Coordinator': ['Scholarship'],
+      'Receptionist': ['Receptionist'],
+      'Security/Gate Operator': ['Security'],
+      'Student': ['Student Portal']
+    };
+    
+    const allowedGroups = roleMapping[userRole] || [];
+    return allowedGroups.includes(group.name);
+  });
+
   return (
     <div className={`${isOpen ? 'w-[260px]' : 'w-[80px]'} bg-[#022A36] text-white flex flex-col h-full overflow-hidden flex-shrink-0 transition-all duration-300`}>
       <div className={`h-22 flex items-center ${isOpen ? 'justify-start px-5' : 'justify-center px-0'} flex-shrink-0 pt-6 pb-4 gap-3`}>
@@ -291,7 +325,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
       </div>
       
       <nav className="flex-1 overflow-y-auto py-2 px-3 space-y-1 custom-scrollbar overflow-x-hidden">
-        {menuGroups.map((group) => {
+        {filteredMenuGroups.map((group) => {
           if (group.name === 'Main') {
             return group.items.map((item) => {
               const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');

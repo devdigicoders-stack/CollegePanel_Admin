@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, ChevronDown, Edit, Trash2, X, AlertTriangle, Eye, User, Lock } from 'lucide-react';
+import { Plus, Search, ChevronDown, Edit, Trash2, X, AlertTriangle, Eye, User, Lock, Upload } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
@@ -247,9 +248,7 @@ const Employees = () => {
       {/* Table */}
       <div className="flex-1 overflow-x-auto">
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="w-8 h-8 border-4 border-[#0A6C54] border-t-transparent rounded-full animate-spin"></div>
-          </div>
+          <SkeletonLoader type="table" rows={5} cols={8} />
         ) : employees.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <p className="text-gray-500 text-sm">No employees found</p>
@@ -404,22 +403,6 @@ const Employees = () => {
 const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSubmit, onClose }) => {
   const isNewEmployee = !formData._id;
 
-  // Copy to clipboard utility function
-  const copyToClipboard = (text, fieldName) => {
-    if (!text) {
-      toast.error('No text to copy');
-      return;
-    }
-    
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        toast.success(`Copied ${fieldName} to clipboard!`);
-      })
-      .catch(() => {
-        toast.error('Failed to copy');
-      });
-  };
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -569,6 +552,33 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
               </select>
             </div>
 
+            {/* Profile Photo */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Profile Photo
+              </label>
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors text-[13px] font-medium text-gray-600">
+                  <Upload size={16} />
+                  Upload Photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setFormData(prev => ({ ...prev, profilePhoto: file }));
+                      }
+                    }}
+                  />
+                </label>
+                {formData.profilePhoto && (
+                  <span className="text-[12px] text-gray-500">{formData.profilePhoto.name}</span>
+                )}
+              </div>
+            </div>
+
             {/* Address */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -592,112 +602,35 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
                 <h4 className="text-[14px] font-bold text-gray-900">Login Credentials</h4>
               </div>
 
-              {isNewEmployee ? (
-                /* Message for new employees */
-                <div className="p-4 bg-blue-50 border border-blue-300 rounded-lg flex gap-3">
-                  <svg 
-                    className="w-5 h-5 text-blue-700 mt-0.5 flex-shrink-0" 
-                    fill="currentColor" 
-                    viewBox="0 0 20 20"
-                  >
-                    <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
-                  </svg>
-                  <p className="text-[13px] text-blue-800 font-medium">
-                    Credentials will be auto-generated on save. Username will be generated from employee name (firstname.lastname) and a unique secure password will be created automatically.
-                  </p>
-                </div>
-              ) : (
-                /* Display credentials for existing employees */
-                <div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    {/* Username Field */}
-                    <fieldset className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                      <div className="flex-1">
-                        <label htmlFor={`username-edit-${formData._id}`} className="block text-[11px] font-semibold text-gray-700 mb-1">
-                          Username
-                        </label>
-                        <p 
-                          id={`username-edit-${formData._id}`}
-                          className="text-[13px] font-mono text-gray-900 break-all"
-                        >
-                          {formData.username || 'N/A'}
-                        </p>
-                      </div>
-                      {formData.username && (
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(formData.username, 'username')}
-                          className="ml-2 p-2 hover:bg-purple-50 rounded-lg transition-colors flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                          title="Copy username"
-                          aria-label="Copy username to clipboard"
-                        >
-                          <svg 
-                            className="w-4 h-4 text-purple-600" 
-                            fill="currentColor" 
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"></path>
-                            <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 011 1v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6zM9 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path>
-                          </svg>
-                        </button>
-                      )}
-                      {!formData.username && (
-                        <div className="ml-2 w-10 h-10"></div>
-                      )}
-                    </fieldset>
-                    
-                    {/* Password Field */}
-                    <fieldset className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                      <div className="flex-1">
-                        <label htmlFor={`password-edit-${formData._id}`} className="block text-[11px] font-semibold text-gray-700 mb-1">
-                          Password
-                        </label>
-                        <p 
-                          id={`password-edit-${formData._id}`}
-                          className="text-[13px] font-mono text-gray-900 break-all"
-                        >
-                          {formData.password || 'N/A'}
-                        </p>
-                      </div>
-                      {formData.password && (
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(formData.password, 'password')}
-                          className="ml-2 p-2 hover:bg-purple-50 rounded-lg transition-colors flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                          title="Copy password"
-                          aria-label="Copy password to clipboard"
-                        >
-                          <svg 
-                            className="w-4 h-4 text-purple-600" 
-                            fill="currentColor" 
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"></path>
-                            <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 011 1v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6zM9 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path>
-                          </svg>
-                        </button>
-                      )}
-                      {!formData.password && (
-                        <div className="ml-2 w-10 h-10"></div>
-                      )}
-                    </fieldset>
-                  </div>
-
-                  {/* Info message */}
-                  <div className="p-3 bg-blue-50 border border-blue-300 rounded-lg flex gap-2">
-                    <svg 
-                      className="w-4 h-4 text-blue-700 mt-0.5 flex-shrink-0" 
-                      fill="currentColor" 
-                      viewBox="0 0 20 20"
-                    >
-                      <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-[12px] text-blue-800">
-                      Credentials are read-only. To regenerate credentials, contact system administrator.
-                    </p>
-                  </div>
-                </div>
-              )}
+{isNewEmployee ? (
+                 /* Message for new employees */
+                 <div className="p-4 bg-blue-50 border border-blue-300 rounded-lg flex gap-3">
+                   <svg 
+                     className="w-5 h-5 text-blue-700 mt-0.5 flex-shrink-0" 
+                     fill="currentColor" 
+                     viewBox="0 0 20 20"
+                   >
+                     <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
+                   </svg>
+                   <p className="text-[13px] text-blue-800 font-medium">
+                     Credentials will be auto-generated on save. Username will be generated from employee name (firstname.lastname) and a unique secure password will be created automatically.
+                   </p>
+                 </div>
+               ) : (
+                 /* Info message for existing employees */
+                 <div className="p-3 bg-yellow-50 border border-yellow-300 rounded-lg flex gap-2">
+                   <svg 
+                     className="w-4 h-4 text-yellow-700 mt-0.5 flex-shrink-0" 
+                     fill="currentColor" 
+                     viewBox="0 0 20 20"
+                   >
+                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                   </svg>
+                   <p className="text-[12px] text-yellow-800">
+                     Login credentials are managed separately. Contact system administrator to reset credentials.
+                   </p>
+                 </div>
+               )}
             </div>
           </div>
 
@@ -740,22 +673,6 @@ const ViewEmployeeModal = ({ employee, onClose }) => {
       case 'On Leave': return 'text-[#d97706] bg-[#fef3c7]';
       default: return 'text-gray-600 bg-gray-100';
     }
-  };
-
-  // Copy to clipboard utility function
-  const copyToClipboard = (text) => {
-    if (!text) {
-      toast.error('No text to copy');
-      return;
-    }
-    
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        toast.success('Copied to clipboard!');
-      })
-      .catch(() => {
-        toast.error('Failed to copy');
-      });
   };
 
   return (
@@ -810,118 +727,6 @@ const ViewEmployeeModal = ({ employee, onClose }) => {
               {employee.gender && <InfoRow label="Gender" value={employee.gender} />}
               {employee.dateOfJoining && <InfoRow label="Date of Joining" value={formatDate(employee.dateOfJoining)} />}
               <InfoRow label="Created Date" value={formatDate(employee.createdAt)} />
-            </div>
-          </div>
-        </div>
-
-        {/* Login Credentials Section */}
-        <div className="p-6 border-t border-gray-100">
-          {/* Updated gradient with better WCAG AA contrast (dark purple-600 to indigo-600) */}
-          <div className="bg-gradient-to-r from-purple-100 to-indigo-100 border-2 border-purple-300 rounded-xl p-6">
-            {/* Heading with proper semantic structure */}
-            <div className="flex items-center gap-2 mb-4">
-              <svg 
-                className="w-5 h-5 text-purple-700" 
-                fill="currentColor" 
-                viewBox="0 0 20 20"
-                aria-hidden="true"
-              >
-                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-              </svg>
-              <h4 className="text-[14px] font-bold text-gray-900">Login Credentials</h4>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Username Field */}
-              <fieldset className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                <div className="flex-1">
-                  <label htmlFor="username-display" className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Username
-                  </label>
-                  <p 
-                    id="username-display"
-                    className="text-[13px] font-mono text-gray-900 break-all"
-                  >
-                    {employee.username || 'N/A'}
-                  </p>
-                </div>
-                {employee.username && (
-                  <button
-                    onClick={() => copyToClipboard(employee.username)}
-                    className="ml-2 p-2 hover:bg-purple-50 rounded-lg transition-colors flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                    title="Copy username"
-                    aria-label="Copy username to clipboard"
-                    type="button"
-                    tabIndex={0}
-                  >
-                    <svg 
-                      className="w-4 h-4 text-purple-600" 
-                      fill="currentColor" 
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"></path>
-                      <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 011 1v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6zM9 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path>
-                    </svg>
-                  </button>
-                )}
-                {!employee.username && (
-                  <div className="ml-2 w-10 h-10"></div>
-                )}
-              </fieldset>
-              
-              {/* Password Field */}
-              <fieldset className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                <div className="flex-1">
-                  <label htmlFor="password-display" className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Password
-                  </label>
-                  <p 
-                    id="password-display"
-                    className="text-[13px] font-mono text-gray-900 break-all"
-                  >
-                    {employee.password || 'N/A'}
-                  </p>
-                </div>
-                {employee.password && (
-                  <button
-                    onClick={() => copyToClipboard(employee.password)}
-                    className="ml-2 p-2 hover:bg-purple-50 rounded-lg transition-colors flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                    title="Copy password"
-                    aria-label="Copy password to clipboard"
-                    type="button"
-                    tabIndex={0}
-                  >
-                    <svg 
-                      className="w-4 h-4 text-purple-600" 
-                      fill="currentColor" 
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"></path>
-                      <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 011 1v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6zM9 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path>
-                    </svg>
-                  </button>
-                )}
-                {!employee.password && (
-                  <div className="ml-2 w-10 h-10"></div>
-                )}
-              </fieldset>
-            </div>
-
-            {/* Info message with improved contrast */}
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-300 rounded-lg flex gap-2">
-              <svg 
-                className="w-4 h-4 text-blue-700 mt-0.5 flex-shrink-0" 
-                fill="currentColor" 
-                viewBox="0 0 20 20"
-                aria-hidden="true"
-              >
-                <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
-              </svg>
-              <p className="text-[12px] text-blue-800">
-                Username is generated from employee name (firstname.lastname). A unique secure password will be auto-generated.
-              </p>
             </div>
           </div>
         </div>

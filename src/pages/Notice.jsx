@@ -1,179 +1,614 @@
-import React, { useState } from 'react';
-import { Plus, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { 
+  Plus, Search, ChevronDown, Eye, Edit2, Trash2, X as XIcon,
+  ChevronLeft, ChevronRight, Calendar, BookOpen, Users, Save, X, Paperclip, Send
+} from 'lucide-react';
+import axiosInstance from '../utils/axiosInstance';
+import toast from 'react-hot-toast';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const Notice = () => {
-  const [isCreating, setIsCreating] = useState(false);
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 1 });
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedNotice, setSelectedNotice] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    noticeId: '',
+    title: '',
+    targetAudience: 'All Students',
+    postedBy: '',
+    postedByRole: 'Admin',
+    department: '',
+    dateOfPublishing: '',
+    details: '',
+    status: 'Draft',
+    attachments: []
+  });
+  const [formLoading, setFormLoading] = useState(false);
+  const [filterAudience, setFilterAudience] = useState('All Audiences');
+  const [filterStatus, setFilterStatus] = useState('All Status');
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchTimeout = useRef(null);
 
-  const notices = [
-    { id: 1, title: 'Internal Practical Exam Schedule', target: 'All Students', postedBy: 'Admin', postedOn: '20-05-2024', status: 'Published', statusColor: 'text-yellow-700 bg-yellow-50 border border-yellow-100' },
-    { id: 2, title: 'Parent Teacher Meeting', target: 'All Parents', postedBy: 'Principal', postedOn: '19-05-2024', status: 'Published', statusColor: 'text-green-700 bg-green-50 border border-green-100' },
-    { id: 3, title: 'Workshop on AI & ML', target: 'CE Students', postedBy: 'HOD CSE', postedOn: '18-05-2024', status: 'Published', statusColor: 'text-yellow-700 bg-yellow-50 border border-yellow-100' },
-    { id: 4, title: 'College Annual Function', target: 'All Students', postedBy: 'Admin', postedOn: '15-05-2024', status: 'Draft', statusColor: 'text-red-600 bg-red-50 border border-red-100' },
-  ];
+  useEffect(() => {
+    fetchNotices();
+  }, [pagination.page, filterAudience, filterStatus]);
+
+  useEffect(() => {
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => {
+      setPagination(prev => ({ ...prev, page: 1 }));
+      fetchNotices();
+    }, 400);
+  }, [searchQuery]);
+
+  const fetchNotices = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        status: filterStatus === 'All Status' ? '' : filterStatus,
+        targetAudience: filterAudience === 'All Audiences' ? '' : filterAudience,
+        search: searchQuery
+      };
+      const res = await axiosInstance.get('/notices', { params });
+      setNotices(res.data.data || []);
+      setPagination(prev => ({
+        ...prev,
+        total: res.data.total || 0,
+        pages: res.data.pages || 1
+      }));
+    } catch (error) {
+      toast.error('Failed to load notices');
+      console.error('Failed to fetch notices', error);
+      setNotices([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      noticeId: '',
+      title: '',
+      targetAudience: 'All Students',
+      postedBy: '',
+      postedByRole: 'Admin',
+      department: '',
+      dateOfPublishing: '',
+      details: '',
+      status: 'Draft'
+    });
+    setIsEditing(false);
+    setSelectedNotice(null);
+  };
+
+  const handleCreate = () => {
+    resetForm();
+    setShowCreateModal(true);
+  };
+
+  const handleEdit = (notice) => {
+    setFormData({
+      noticeId: notice.noticeId || '',
+      title: notice.title || '',
+      targetAudience: notice.targetAudience || 'All Students',
+      postedBy: notice.postedBy || '',
+      postedByRole: notice.postedByRole || 'Admin',
+      department: notice.department || '',
+      dateOfPublishing: notice.dateOfPublishing ? notice.dateOfPublishing.split('T')[0] : '',
+      details: notice.details || '',
+      status: notice.status || 'Draft'
+    });
+    setIsEditing(true);
+    setSelectedNotice(notice);
+    setShowEditModal(true);
+  };
+
+  const handleView = (notice) => {
+    setSelectedNotice(notice);
+    setShowViewModal(true);
+  };
+
+  const handleDelete = async (notice) => {
+    if (!window.confirm(`Delete notice "${notice.title}"?`)) return;
+    try {
+      await axiosInstance.delete(`/notices/${notice._id}`);
+      toast.success('Notice deleted successfully');
+      fetchNotices();
+    } catch (error) {
+      toast.error('Failed to delete notice');
+    }
+  };
+
+  const handleSave = async () => {
+    if (!formData.title || !formData.details || !formData.dateOfPublishing) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+    setFormLoading(true);
+    try {
+      const payload = {
+        ...formData,
+        dateOfPublishing: new Date(formData.dateOfPublishing).toISOString()
+      };
+      if (isEditing) {
+        await axiosInstance.put(`/notices/${selectedNotice._id}`, payload);
+        toast.success('Notice updated successfully');
+        setShowEditModal(false);
+      } else {
+        await axiosInstance.post('/notices', payload);
+        toast.success('Notice created successfully');
+        setShowCreateModal(false);
+      }
+      resetForm();
+      fetchNotices();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to save notice');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
+  const totalPages = pagination.pages;
+  const startIndex = (pagination.page - 1) * pagination.limit;
+
+  const getPageNumbers = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (pagination.page <= 3) {
+      return [1, 2, 3, 4, '...', totalPages];
+    }
+    if (pagination.page >= totalPages - 2) {
+      return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', pagination.page - 1, pagination.page, pagination.page + 1, '...', totalPages];
+  };
 
   return (
-    <div className="flex flex-col h-full font-['Inter']">
-      
-      {/* Title Area & Top Action */}
-      <div className="flex justify-between items-start mb-6">
+    <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
+
+      {/* Header */}
+      <div className="flex justify-between items-center px-6 pt-4 pb-2">
         <div>
-          <h2 className="text-[20px] font-bold text-[#022A36] font-['Outfit']">
-            {isCreating ? 'Create New Notice' : 'Notice Board'}
-          </h2>
-          <p className="text-[13px] text-gray-500 mt-1">
-            {isCreating ? 'Notice Board > Create Notice' : 'Notice Board > All Notices'}
-          </p>
+          <h2 className="text-lg font-bold text-gray-800">Notice Board</h2>
+          <p className="text-[13px] text-gray-500 mt-1">Manage and track notices</p>
         </div>
-        
-        {!isCreating && (
-          <button 
-            onClick={() => setIsCreating(true)}
-            className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm"
-          >
-            <Plus size={18} strokeWidth={2.5} />
-            Create Notice
-          </button>
-        )}
+        <button
+          onClick={handleCreate}
+          className="flex items-center gap-2 bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#085a46] transition-colors"
+        >
+          <Plus size={16} />
+          Create Notice
+        </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col flex-1 overflow-hidden">
-        
-        {!isCreating ? (
-          <>
-            {/* Table Content */}
-            <div className="flex-1 overflow-x-auto p-6">
-              <table className="w-full text-left border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="bg-[#F9FAFB] border-y border-gray-100">
-                    <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[35%] rounded-tl-xl">Title</th>
-                    <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Target Audience</th>
-                    <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[20%]">Posted By</th>
-                    <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Posted On</th>
-                    <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%] rounded-tr-xl">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {notices.map((notice) => (
-                    <tr key={notice.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                      <td className="py-5 px-6 text-[13px] font-medium text-[#022A36]">{notice.title}</td>
-                      <td className="py-5 px-6 text-[13px] font-medium text-gray-600">{notice.target}</td>
-                      <td className="py-5 px-6 text-[13px] font-medium text-gray-600">{notice.postedBy}</td>
-                      <td className="py-5 px-6 text-[13px] font-medium text-gray-600">{notice.postedOn}</td>
-                      <td className="py-5 px-6">
-                        <span className={`px-3 py-1 rounded-md text-[11px] font-bold tracking-wide ${notice.statusColor}`}>
-                          {notice.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      {/* Filters */}
+      <div className="p-5 flex flex-wrap gap-3 bg-white border-b border-gray-100">
+        <div className="relative">
+          <select
+            value={filterAudience}
+            onChange={(e) => { setFilterAudience(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
+            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer"
+          >
+            <option value="All Audiences">All Audiences</option>
+            <option value="All Students">All Students</option>
+            <option value="All Staff">All Staff</option>
+            <option value="All Parents">All Parents</option>
+            <option value="Specific Department">Specific Department</option>
+            <option value="Specific Course">Specific Course</option>
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+        </div>
+
+        <div className="relative">
+          <select
+            value={filterStatus}
+            onChange={(e) => { setFilterStatus(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
+            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer"
+          >
+            <option value="All Status">All Status</option>
+            <option value="Published">Published</option>
+            <option value="Draft">Draft</option>
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder="Search by title or posted by"
+            className="w-[260px] bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="flex-1 overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[800px]">
+          <thead>
+            <tr className="bg-[#F9FAFB] border-y border-gray-100">
+              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[35%] rounded-tl-xl">Title</th>
+              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Target Audience</th>
+              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[20%]">Posted By</th>
+              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Posted On</th>
+              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%] rounded-tr-xl">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan="5" className="py-8"><SkeletonLoader type="table" rows={3} cols={5} /></td></tr>
+            ) : notices.length > 0 ? notices.map((notice) => (
+              <tr key={notice._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                <td className="py-4 px-6 text-[13px] font-medium text-[#022A36]">{notice.title}</td>
+                <td className="py-4 px-6 text-[13px] font-medium text-gray-600">{notice.targetAudience}</td>
+                <td className="py-4 px-6 text-[13px] font-medium text-gray-600">{notice.postedBy}</td>
+                <td className="py-4 px-6 text-[13px] font-medium text-gray-600">{formatDate(notice.dateOfPublishing)}</td>
+                <td className="py-4 px-6">
+                  <span className={`px-3 py-1.5 rounded-full text-[12px] font-bold ${
+                    notice.status === 'Published'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {notice.status}
+                  </span>
+                </td>
+              </tr>
+            )) : (
+              <tr>
+                <td colSpan="5" className="py-8 text-center text-gray-500">
+                  {loading ? <SkeletonLoader type="table" rows={3} cols={5} /> : 'No notices found'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex flex-col sm:flex-row justify-between items-center p-6 border-t border-gray-100 gap-4">
+        <div className="text-[13px] text-gray-500 font-medium">
+          Showing {notices.length} of {pagination.total} entries | Page {pagination.page} of {pagination.pages}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+            disabled={pagination.page === 1}
+            className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0A6C54] text-white text-[13px] font-medium">
+            {pagination.page}
+          </button>
+          <button
+            onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.pages, prev.page + 1) }))}
+            disabled={pagination.page === pagination.pages}
+            className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* CREATE MODAL */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-gray-800">Create New Notice</h3>
+              <button onClick={() => { setShowCreateModal(false); resetForm(); }} className="text-gray-400 hover:text-gray-600">
+                <XIcon size={20} />
+              </button>
             </div>
 
-            {/* Pagination */}
-            <div className="flex flex-col sm:flex-row justify-between items-center p-6 border-t border-gray-100 bg-gray-50/30">
-              <div className="text-[13px] text-gray-500 font-medium">
-                Showing 1 to 4 of 8 entries
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[13px] font-semibold text-gray-700 mb-2">Notice Title *</label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Enter notice title"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                />
               </div>
-              <div className="flex items-center gap-1 mt-4 sm:mt-0">
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors">
-                  <ChevronLeft size={16} />
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0A6C54] text-white font-semibold text-[13px] transition-colors">
-                  1
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent text-gray-600 hover:bg-gray-50 font-medium text-[13px] transition-colors">
-                  2
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent text-gray-600 hover:bg-gray-50 font-medium text-[13px] transition-colors">
-                  3
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors">
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-            
-            <h3 className="text-[16px] font-bold text-[#022A36] mb-6">Notice Information</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="flex flex-col gap-6">
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">
-                    Notice Title <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    placeholder="Enter notice title" 
-                    className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm"
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Target Audience *</label>
+                  <select
+                    value={formData.targetAudience}
+                    onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  >
+                    <option value="All Students">All Students</option>
+                    <option value="All Staff">All Staff</option>
+                    <option value="All Parents">All Parents</option>
+                    <option value="Specific Department">Specific Department</option>
+                    <option value="Specific Course">Specific Course</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Posted By *</label>
+                  <input
+                    type="text"
+                    value={formData.postedBy}
+                    onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
+                    placeholder="e.g., Admin, Principal"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">
-                    Target Audience <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <select className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm">
-                      <option>All Students</option>
-                      <option>All Staff</option>
-                      <option>All Parents</option>
-                      <option>Specific Department</option>
-                      <option>Specific Course</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                  </div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Posted By Role</label>
+                  <select
+                    value={formData.postedByRole}
+                    onChange={(e) => setFormData({ ...formData, postedByRole: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  >
+                    <option value="Admin">Admin</option>
+                    <option value="Principal">Principal</option>
+                    <option value="HOD">HOD</option>
+                    <option value="Teacher">Teacher</option>
+                    <option value="Staff">Staff</option>
+                  </select>
                 </div>
-
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">
-                    Date of Publishing
-                  </label>
-                  <input 
-                    type="date" 
-                    className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm"
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Date of Publishing *</label>
+                  <input
+                    type="date"
+                    value={formData.dateOfPublishing}
+                    onChange={(e) => setFormData({ ...formData, dateOfPublishing: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-6">
-                <div className="h-full flex flex-col">
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">
-                    Notice Details / Message <span className="text-red-500">*</span>
+              <div>
+                <label className="block text-[13px] font-semibold text-gray-700 mb-2">Notice Details *</label>
+                <textarea
+                  value={formData.details}
+                  onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+                  placeholder="Enter notice details and message..."
+                  rows={4}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] resize-none"
+                />
+              </div>
+
+              {/* Attachments */}
+              <div>
+                <label className="block text-[13px] font-semibold text-gray-700 mb-2">Attachments</label>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors text-[13px] font-medium text-gray-600">
+                    <Paperclip size={16} />
+                    Upload Files
+                    <input
+                      type="file"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files);
+                        setFormData(prev => ({
+                          ...prev,
+                          attachments: [...prev.attachments, ...files]
+                        }));
+                      }}
+                    />
                   </label>
-                  <textarea 
-                    placeholder="Write your notice message here..." 
-                    className="w-full flex-1 bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm min-h-[150px] resize-none"
-                  ></textarea>
+                  {formData.attachments.length > 0 && (
+                    <span className="text-[12px] text-gray-500">{formData.attachments.length} file(s) selected</span>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="mt-10 pt-6 border-t border-gray-100 flex items-center justify-end gap-4">
-              <button 
-                onClick={() => setIsCreating(false)}
-                className="px-6 py-2.5 text-[13px] font-semibold text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleSave}
+                disabled={formLoading}
+                className="flex-1 bg-[#0A6C54] text-white py-2.5 rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <Send size={14} />
+                {formLoading ? 'Saving...' : 'Publish Notice'}
+              </button>
+              <button
+                onClick={() => { setShowCreateModal(false); resetForm(); }}
+                className="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
               >
                 Cancel
               </button>
-              <button className="px-6 py-2.5 text-[13px] font-semibold text-[#0A6C54] bg-[#0A6C54]/10 hover:bg-[#0A6C54]/20 rounded-lg transition-colors">
-                Save as Draft
-              </button>
-              <button className="px-8 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm">
-                Publish Notice
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT MODAL */}
+      {showEditModal && selectedNotice && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-gray-800">Edit Notice</h3>
+              <button onClick={() => { setShowEditModal(false); resetForm(); }} className="text-gray-400 hover:text-gray-600">
+                <XIcon size={20} />
               </button>
             </div>
 
-          </div>
-        )}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[13px] font-semibold text-gray-700 mb-2">Notice Title *</label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                />
+              </div>
 
-      </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Target Audience *</label>
+                  <select
+                    value={formData.targetAudience}
+                    onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  >
+                    <option value="All Students">All Students</option>
+                    <option value="All Staff">All Staff</option>
+                    <option value="All Parents">All Parents</option>
+                    <option value="Specific Department">Specific Department</option>
+                    <option value="Specific Course">Specific Course</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Posted By *</label>
+                  <input
+                    type="text"
+                    value={formData.postedBy}
+                    onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Date of Publishing *</label>
+                  <input
+                    type="date"
+                    value={formData.dateOfPublishing}
+                    onChange={(e) => setFormData({ ...formData, dateOfPublishing: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  >
+                    <option value="Draft">Draft</option>
+                    <option value="Published">Published</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-semibold text-gray-700 mb-2">Notice Details *</label>
+                <textarea
+                  value={formData.details}
+                  onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+                  rows={4}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleSave}
+                disabled={formLoading}
+                className="flex-1 bg-[#0A6C54] text-white py-2.5 rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm disabled:opacity-50"
+              >
+                {formLoading ? 'Updating...' : 'Update Notice'}
+              </button>
+              <button
+                onClick={() => { setShowEditModal(false); resetForm(); }}
+                className="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW MODAL */}
+      {showViewModal && selectedNotice && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-gray-800">Notice Details</h3>
+              <button onClick={() => setShowViewModal(false)} className="text-gray-400 hover:text-gray-600">
+                <XIcon size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <DetailRow label="Title" value={selectedNotice.title} />
+                <DetailRow label="Status" value={<span className={`px-3 py-1.5 rounded-full text-xs font-bold ${selectedNotice.status === 'Published' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{selectedNotice.status}</span>} />
+              </div>
+
+              <div className="border-t border-gray-100 pt-4">
+                <h4 className="text-sm font-bold text-gray-700 mb-3">Notice Information</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <DetailRow label="Target Audience" value={selectedNotice.targetAudience} />
+                  <DetailRow label="Posted By" value={selectedNotice.postedBy} />
+                  <DetailRow label="Role" value={selectedNotice.postedByRole} />
+                  <DetailRow label="Department" value={selectedNotice.department || 'N/A'} />
+                  <DetailRow label="Posted On" value={formatDate(selectedNotice.dateOfPublishing)} />
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 pt-4">
+                <h4 className="text-sm font-bold text-gray-700 mb-2">Details</h4>
+                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">{selectedNotice.details}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              {selectedNotice.status === 'Draft' && (
+                <button
+                  onClick={() => {
+                    setShowViewModal(false);
+                    handleEdit(selectedNotice);
+                  }}
+                  className="flex-1 bg-[#0A6C54] text-white py-2 rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm"
+                >
+                  Edit Notice
+                </button>
+              )}
+              <button
+                onClick={() => setShowViewModal(false)}
+                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+const DetailRow = ({ label, value }) => (
+  <div className="flex flex-col">
+    <span className="text-xs font-semibold text-gray-500 mb-1">{label}</span>
+    <span className="text-sm text-gray-800 font-medium">{value}</span>
+  </div>
+);
 
 export default Notice;

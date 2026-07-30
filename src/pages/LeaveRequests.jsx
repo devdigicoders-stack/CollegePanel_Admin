@@ -1,122 +1,128 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Search, ChevronDown, Eye, Check, X as XIcon, 
-  ChevronLeft, ChevronRight, Calendar, User, FileText, AlertTriangle
+  ChevronLeft, ChevronRight, Calendar, User, FileText, AlertTriangle, Trash2
 } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const LeaveRequests = () => {
   const [activeTab, setActiveTab] = useState('Pending');
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 1 });
-  
-  // Filters
+  const [tabCounts, setTabCounts] = useState({ Pending: 0, Approved: 0, Rejected: 0, All: 0 });
+
   const [filters, setFilters] = useState({
     type: 'All Types',
     department: 'All Departments',
     search: ''
   });
 
-  // Modals
   const [showViewModal, setShowViewModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const [employees, setEmployees] = useState([]);
+  const [departments, setDepartments] = useState([]);
+
+  const searchTimeout = useRef(null);
 
   const tabs = [
-    { name: 'Pending', count: 12 },
-    { name: 'Approved', count: 45 },
-    { name: 'Rejected', count: 8 },
-    { name: 'All', count: 65 }
+    { name: 'Pending' },
+    { name: 'Approved' },
+    { name: 'Rejected' },
+    { name: 'All' }
   ];
 
-  // Static data for now
-  const staticLeaveRequests = [
-    {
-      _id: '1',
-      requestId: 'LR2024001',
-      applicantName: 'Dr. Rajesh Kumar',
-      employeeId: 'EMP20240001',
-      applicantType: 'Faculty',
-      department: 'Computer Science',
-      leaveType: 'Casual Leave',
-      fromDate: '2024-02-15',
-      toDate: '2024-02-17',
-      days: 3,
-      reason: 'Personal work',
-      status: 'Pending',
-      appliedDate: '2024-02-10',
-      attachments: []
-    },
-    {
-      _id: '2',
-      requestId: 'LR2024002',
-      applicantName: 'Prof. Meena Sharma',
-      employeeId: 'EMP20240015',
-      applicantType: 'Faculty',
-      department: 'Electronics',
-      leaveType: 'Medical Leave',
-      fromDate: '2024-02-12',
-      toDate: '2024-02-14',
-      days: 3,
-      reason: 'Health checkup',
-      status: 'Pending',
-      appliedDate: '2024-02-08',
-      attachments: ['medical_certificate.pdf']
-    },
-    {
-      _id: '3',
-      requestId: 'LR2024003',
-      applicantName: 'Mr. Suresh Patel',
-      employeeId: 'EMP20240032',
-      applicantType: 'Staff',
-      department: 'Administration',
-      leaveType: 'Earned Leave',
-      fromDate: '2024-02-20',
-      toDate: '2024-02-25',
-      days: 6,
-      reason: 'Family function',
-      status: 'Approved',
-      appliedDate: '2024-02-05',
-      approvedBy: 'Principal',
-      approvedDate: '2024-02-06',
-      attachments: []
-    }
-  ];
+  useEffect(() => {
+    fetchDepartments();
+    fetchEmployees();
+    fetchTabCounts();
+  }, []);
 
   useEffect(() => {
     fetchLeaveRequests();
   }, [activeTab, pagination.page, filters]);
 
-  const fetchLeaveRequests = async () => {
+  const fetchDepartments = async () => {
     try {
-      setLoading(true);
-      // TODO: Replace with actual API call
-      // const res = await axiosInstance.get('/leave-requests', { params: { status: activeTab, ...filters } });
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Filter static data based on tab
-      let filtered = staticLeaveRequests;
-      if (activeTab !== 'All') {
-        filtered = staticLeaveRequests.filter(req => req.status === activeTab);
-      }
-      
-      setLeaveRequests(filtered);
-      setPagination(prev => ({ ...prev, total: filtered.length, pages: Math.ceil(filtered.length / prev.limit) }));
+      const res = await axiosInstance.get('/academics/departments');
+      setDepartments(res.data.data || []);
     } catch (error) {
-      toast.error('Failed to fetch leave requests');
+      console.error('Failed to fetch departments', error);
+    }
+  };
+
+  const fetchEmployees = async () => {
+    try {
+      const res = await axiosInstance.get('/leave-requests/employees');
+      setEmployees(res.data || []);
+    } catch (error) {
+      console.error('Failed to fetch employees', error);
+    }
+  };
+
+  const fetchTabCounts = async () => {
+    try {
+      const res = await axiosInstance.get('/leave-requests/stats');
+      const data = res.data.data;
+      setTabCounts({
+        Pending: data.pending || 0,
+        Approved: data.approved || 0,
+        Rejected: data.rejected || 0,
+        All: data.total || 0
+      });
+    } catch (error) {
+      console.error('Failed to fetch stats', error);
+    }
+  };
+
+  const fetchLeaveRequests = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        status: activeTab === 'All' ? '' : activeTab,
+        department: filters.department,
+        leaveType: filters.type,
+        search: filters.search
+      };
+      const res = await axiosInstance.get('/leave-requests', { params });
+      setLeaveRequests(res.data.data || []);
+      setPagination(prev => ({
+        ...prev,
+        total: res.data.total || 0,
+        pages: res.data.pages || 1
+      }));
+    } catch (error) {
+      toast.error('Failed to load leave requests');
+      console.error('Failed to fetch leave requests', error);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSearch = (value) => {
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => {
+      setFilters(prev => ({ ...prev, search: value }));
+      setPagination(prev => ({ ...prev, page: 1 }));
+    }, 400);
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'Pending': return 'bg-amber-100 text-amber-800';
       case 'Approved': return 'bg-green-100 text-green-800';
       case 'Rejected': return 'bg-red-100 text-red-800';
@@ -125,13 +131,18 @@ const LeaveRequests = () => {
   };
 
   const getLeaveTypeColor = (type) => {
-    switch(type) {
+    switch (type) {
       case 'Casual Leave': return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'Medical Leave': return 'bg-rose-50 text-rose-700 border-rose-200';
       case 'Earned Leave': return 'bg-purple-50 text-purple-700 border-purple-200';
       case 'Emergency Leave': return 'bg-orange-50 text-orange-700 border-orange-200';
       default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
   const handleView = (request) => {
@@ -151,14 +162,17 @@ const LeaveRequests = () => {
   };
 
   const handleApproveConfirm = async () => {
+    setActionLoading(true);
     try {
-      // TODO: API call to approve
-      // await axiosInstance.put(`/leave-requests/${selectedRequest._id}/approve`);
+      await axiosInstance.put(`/leave-requests/${selectedRequest._id}/approve`, { approvedBy: 'Admin' });
       toast.success('Leave request approved successfully');
       setShowApproveModal(false);
       fetchLeaveRequests();
+      fetchTabCounts();
     } catch (error) {
-      toast.error('Failed to approve leave request');
+      toast.error(error.response?.data?.message || 'Failed to approve leave request');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -167,24 +181,39 @@ const LeaveRequests = () => {
       toast.error('Please provide a reason for rejection');
       return;
     }
+    setActionLoading(true);
     try {
-      // TODO: API call to reject
-      // await axiosInstance.put(`/leave-requests/${selectedRequest._id}/reject`, { reason: rejectReason });
+      await axiosInstance.put(`/leave-requests/${selectedRequest._id}/reject`, {
+        reason: rejectReason,
+        rejectedBy: 'Admin'
+      });
       toast.success('Leave request rejected');
       setShowRejectModal(false);
+      setRejectReason('');
       fetchLeaveRequests();
+      fetchTabCounts();
     } catch (error) {
-      toast.error('Failed to reject leave request');
+      toast.error(error.response?.data?.message || 'Failed to reject leave request');
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const handleDeleteRequest = async (request) => {
+    if (!window.confirm(`Delete leave request ${request.requestId} for ${request.applicantName}?`)) return;
+    try {
+      await axiosInstance.delete(`/leave-requests/${request._id}`);
+      toast.success('Leave request deleted successfully');
+      fetchLeaveRequests();
+      fetchTabCounts();
+    } catch (error) {
+      toast.error('Failed to delete leave request');
+    }
   };
 
   return (
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
-      
+
       {/* Header */}
       <div className="flex justify-between items-center px-6 pt-4 pb-2">
         <h2 className="text-lg font-bold text-gray-800">Leave Requests</h2>
@@ -200,8 +229,8 @@ const LeaveRequests = () => {
               setPagination(prev => ({ ...prev, page: 1 }));
             }}
             className={`whitespace-nowrap px-4 py-4 text-[14px] font-semibold transition-all relative flex items-center gap-2 ${
-              activeTab === tab.name 
-                ? 'text-[#0A6C54]' 
+              activeTab === tab.name
+                ? 'text-[#0A6C54]'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -209,7 +238,7 @@ const LeaveRequests = () => {
             <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
               activeTab === tab.name ? 'bg-[#0A6C54] text-white' : 'bg-gray-100 text-gray-600'
             }`}>
-              {tab.count}
+              {tabCounts[tab.name] || 0}
             </span>
             {activeTab === tab.name && (
               <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-full"></div>
@@ -222,9 +251,9 @@ const LeaveRequests = () => {
       <div className="p-5 flex flex-col sm:flex-row gap-4 justify-between items-center bg-white">
         <div className="flex gap-3 w-full sm:w-auto flex-wrap">
           <div className="relative">
-            <select 
+            <select
               value={filters.type}
-              onChange={(e) => setFilters({...filters, type: e.target.value})}
+              onChange={(e) => handleFilterChange('type', e.target.value)}
               className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
             >
               <option value="All Types">All Types</option>
@@ -237,16 +266,15 @@ const LeaveRequests = () => {
           </div>
 
           <div className="relative">
-            <select 
+            <select
               value={filters.department}
-              onChange={(e) => setFilters({...filters, department: e.target.value})}
+              onChange={(e) => handleFilterChange('department', e.target.value)}
               className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
             >
               <option value="All Departments">All Departments</option>
-              <option value="Computer Science">Computer Science</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Mechanical">Mechanical</option>
-              <option value="Administration">Administration</option>
+              {departments.map((dept) => (
+                <option key={dept._id} value={dept.name}>{dept.name}</option>
+              ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
           </div>
@@ -254,19 +282,17 @@ const LeaveRequests = () => {
 
         <div className="relative w-full sm:w-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-          <input 
-            type="text" 
-            value={filters.search}
-            onChange={(e) => setFilters({...filters, search: e.target.value})}
-            placeholder="Search by name or ID" 
+          <input
+            type="text"
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder="Search by name or ID"
             className="w-full sm:w-[260px] bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] placeholder:text-gray-400"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="flex-1 overflow-x-auto relative">
-        {loading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10"><div className="w-8 h-8 border-4 border-[#0A6C54] border-t-transparent rounded-full animate-spin"></div></div>}
+      <div className="flex-1 overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[1200px]">
           <thead>
             <tr className="bg-[#F9FAFB] border-y border-gray-100">
@@ -282,7 +308,9 @@ const LeaveRequests = () => {
             </tr>
           </thead>
           <tbody>
-            {leaveRequests.length > 0 ? leaveRequests.map((row) => (
+            {loading ? (
+              <tr><td colSpan="9" className="py-8"><SkeletonLoader type="table" rows={3} cols={9} /></td></tr>
+            ) : leaveRequests.length > 0 ? leaveRequests.map((row) => (
               <tr key={row._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                 <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{row.requestId}</td>
                 <td className="py-4 px-6">
@@ -307,7 +335,7 @@ const LeaveRequests = () => {
                 </td>
                 <td className="py-4 px-6">
                   <div className="flex items-center justify-center gap-1.5">
-                    <button 
+                    <button
                       onClick={() => handleView(row)}
                       className="w-8 h-8 rounded-full border border-green-100 flex items-center justify-center text-[#0A6C54] hover:bg-green-50 transition-colors"
                       title="View Details"
@@ -316,19 +344,26 @@ const LeaveRequests = () => {
                     </button>
                     {row.status === 'Pending' && (
                       <>
-                        <button 
+                        <button
                           onClick={() => handleApproveClick(row)}
                           className="w-8 h-8 rounded-full border border-green-100 flex items-center justify-center text-green-600 hover:bg-green-50 transition-colors"
                           title="Approve"
                         >
                           <Check size={14} strokeWidth={2} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleRejectClick(row)}
                           className="w-8 h-8 rounded-full border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
                           title="Reject"
                         >
                           <XIcon size={14} strokeWidth={2} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteRequest(row)}
+                          className="w-8 h-8 rounded-full border border-red-100 flex items-center justify-center text-red-400 hover:bg-red-50 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} strokeWidth={2} />
                         </button>
                       </>
                     )}
@@ -337,8 +372,8 @@ const LeaveRequests = () => {
               </tr>
             )) : (
               <tr>
-                <td colSpan="9" className="py-8 text-center text-[13px] text-gray-500">
-                  {loading ? 'Loading leave requests...' : 'No leave requests found.'}
+                <td colSpan="9" className="py-8 text-center text-gray-500">
+                  {loading ? <SkeletonLoader type="table" rows={3} cols={9} /> : 'No leave requests found.'}
                 </td>
               </tr>
             )}
@@ -352,7 +387,7 @@ const LeaveRequests = () => {
           Showing {leaveRequests.length} of {pagination.total} entries | Page {pagination.page} of {pagination.pages}
         </div>
         <div className="flex items-center gap-1.5">
-          <button 
+          <button
             onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
             disabled={pagination.page === 1}
             className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -362,7 +397,7 @@ const LeaveRequests = () => {
           <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0A6C54] text-white text-[13px] font-medium">
             {pagination.page}
           </button>
-          <button 
+          <button
             onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.pages, prev.page + 1) }))}
             disabled={pagination.page === pagination.pages}
             className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -382,13 +417,13 @@ const LeaveRequests = () => {
                 <XIcon size={20} />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <DetailRow label="Request ID" value={selectedRequest.requestId} />
                 <DetailRow label="Status" value={<span className={`px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(selectedRequest.status)}`}>{selectedRequest.status}</span>} />
               </div>
-              
+
               <div className="border-t border-gray-100 pt-4">
                 <h4 className="text-sm font-bold text-gray-700 mb-3">Applicant Information</h4>
                 <div className="grid grid-cols-2 gap-4">
@@ -435,6 +470,7 @@ const LeaveRequests = () => {
                     {selectedRequest.approvedDate && <DetailRow label="Approved Date" value={formatDate(selectedRequest.approvedDate)} />}
                     {selectedRequest.rejectedBy && <DetailRow label="Rejected By" value={selectedRequest.rejectedBy} />}
                     {selectedRequest.rejectedDate && <DetailRow label="Rejected Date" value={formatDate(selectedRequest.rejectedDate)} />}
+                    {selectedRequest.rejectionReason && <DetailRow label="Rejection Reason" value={selectedRequest.rejectionReason} />}
                   </div>
                 </div>
               )}
@@ -443,7 +479,7 @@ const LeaveRequests = () => {
             <div className="mt-6 flex gap-3">
               {selectedRequest.status === 'Pending' && (
                 <>
-                  <button 
+                  <button
                     onClick={() => {
                       setShowViewModal(false);
                       handleApproveClick(selectedRequest);
@@ -452,7 +488,7 @@ const LeaveRequests = () => {
                   >
                     Approve
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setShowViewModal(false);
                       handleRejectClick(selectedRequest);
@@ -463,7 +499,7 @@ const LeaveRequests = () => {
                   </button>
                 </>
               )}
-              <button 
+              <button
                 onClick={() => setShowViewModal(false)}
                 className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
               >
@@ -484,19 +520,20 @@ const LeaveRequests = () => {
               </div>
               <h3 className="text-lg font-bold text-gray-800">Approve Leave Request</h3>
             </div>
-            
+
             <p className="text-gray-600 mb-6">
               Are you sure you want to approve <strong>{selectedRequest.applicantName}</strong>'s leave request for <strong>{selectedRequest.days} days</strong>?
             </p>
 
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={handleApproveConfirm}
-                className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors font-medium text-sm"
+                disabled={actionLoading}
+                className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors font-medium text-sm disabled:opacity-50"
               >
-                Approve
+                {actionLoading ? 'Approving...' : 'Approve'}
               </button>
-              <button 
+              <button
                 onClick={() => setShowApproveModal(false)}
                 className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
               >
@@ -517,7 +554,7 @@ const LeaveRequests = () => {
               </div>
               <h3 className="text-lg font-bold text-gray-800">Reject Leave Request</h3>
             </div>
-            
+
             <p className="text-gray-600 mb-4">
               Please provide a reason for rejecting <strong>{selectedRequest.applicantName}</strong>'s leave request:
             </p>
@@ -531,13 +568,14 @@ const LeaveRequests = () => {
             />
 
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={handleRejectConfirm}
-                className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm"
+                disabled={actionLoading || !rejectReason.trim()}
+                className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm disabled:opacity-50"
               >
-                Reject
+                {actionLoading ? 'Rejecting...' : 'Reject'}
               </button>
-              <button 
+              <button
                 onClick={() => setShowRejectModal(false)}
                 className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
               >
@@ -551,7 +589,6 @@ const LeaveRequests = () => {
   );
 };
 
-// Helper Component
 const DetailRow = ({ label, value }) => (
   <div className="flex flex-col">
     <span className="text-xs font-semibold text-gray-500 mb-1">{label}</span>

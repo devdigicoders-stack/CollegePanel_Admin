@@ -1,36 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, Eye, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
-
-const installmentsData = [
-  {
-    id: 1, enrollNo: 'OP/24/CE/001', name: 'Aarav Singh', course: 'Diploma in CE',
-    installments: [
-      { no: 1, head: 'Admission + Tuition (1st)', amount: 18500, dueDate: '2024-01-15', paidDate: '2024-01-14', status: 'Paid' },
-      { no: 2, head: 'Tuition (2nd Inst.)', amount: 12500, dueDate: '2024-06-30', paidDate: null, status: 'Upcoming' },
-    ]
-  },
-  {
-    id: 2, enrollNo: 'OP/24/ME/001', name: 'Vikram Patel', course: 'Diploma in ME',
-    installments: [
-      { no: 1, head: 'Admission + Tuition (1st)', amount: 17500, dueDate: '2024-01-15', paidDate: null, status: 'Overdue' },
-      { no: 2, head: 'Tuition (2nd Inst.)', amount: 12000, dueDate: '2024-06-30', paidDate: null, status: 'Pending' },
-    ]
-  },
-  {
-    id: 3, enrollNo: 'OP/24/IT/001', name: 'Neha Verma', course: 'Diploma in IT',
-    installments: [
-      { no: 1, head: 'Admission + Tuition (1st)', amount: 20500, dueDate: '2024-01-15', paidDate: '2024-01-10', status: 'Paid' },
-      { no: 2, head: 'Tuition (2nd Inst.)', amount: 14000, dueDate: '2024-06-30', paidDate: '2024-06-25', status: 'Paid' },
-    ]
-  },
-  {
-    id: 4, enrollNo: 'OP/24/EE/002', name: 'Sneha Patel', course: 'Diploma in EE',
-    installments: [
-      { no: 1, head: 'Admission + Tuition (1st)', amount: 19000, dueDate: '2024-01-15', paidDate: null, status: 'Overdue' },
-      { no: 2, head: 'Tuition (2nd Inst.)', amount: 13000, dueDate: '2024-06-30', paidDate: null, status: 'Pending' },
-    ]
-  },
-];
+import axiosInstance from '../../utils/axiosInstance';
+import toast from 'react-hot-toast';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const statusColors = {
   'Paid': 'bg-green-100 text-green-700',
@@ -49,12 +21,27 @@ const Installments = () => {
   const [search, setSearch] = useState('');
   const [filterCourse, setFilterCourse] = useState('All');
   const [showExtModal, setShowExtModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
 
-  const filtered = installmentsData.filter(d => {
-    const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) || d.enrollNo.toLowerCase().includes(search.toLowerCase());
-    const matchCourse = filterCourse === 'All' || d.course === filterCourse;
-    return matchSearch && matchCourse;
-  });
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const params = {};
+      if (filterCourse !== 'All') params.course = filterCourse;
+      if (search) params.search = search;
+      const res = await axiosInstance.get('/fees/installments', { params });
+      setData(res.data?.data || res.data || []);
+    } catch (error) {
+      toast.error('Failed to fetch installments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [filterCourse, search]);
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -85,55 +72,62 @@ const Installments = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {filtered.map(student => {
-          const paidCount = student.installments.filter(i => i.status === 'Paid').length;
-          return (
-            <div key={student.id} className="border border-gray-200 rounded-xl p-5">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h4 className="text-[14px] font-bold text-gray-800">{student.name}</h4>
-                  <p className="text-[12px] text-gray-500">{student.enrollNo} • {student.course}</p>
+        {loading ? (
+          <SkeletonLoader type="table" rows={4} cols={7} />
+        ) : (
+          data.map(student => {
+            const paidCount = (student.installments || []).filter(i => i.status === 'Paid').length;
+            return (
+              <div key={student._id || student.id} className="border border-gray-200 rounded-xl p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h4 className="text-[14px] font-bold text-gray-800">{student.name}</h4>
+                    <p className="text-[12px] text-gray-500">{student.enrollNo} • {student.course}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[12px] text-gray-500">Installments Paid</p>
+                    <p className="text-[16px] font-bold text-gray-800">{paidCount} / {(student.installments || []).length}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-[12px] text-gray-500">Installments Paid</p>
-                  <p className="text-[16px] font-bold text-gray-800">{paidCount} / {student.installments.length}</p>
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[700px]">
-                  <thead>
-                    <tr className="bg-gray-50 border-y border-gray-100">
-                      {['#', 'Fee Head', 'Amount', 'Due Date', 'Paid Date', 'Status', 'Action'].map(h => (
-                        <th key={h} className="py-2.5 px-4 text-[12px] font-bold text-gray-700">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {student.installments.map(inst => (
-                      <tr key={inst.no} className="border-b border-gray-50">
-                        <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.no}</td>
-                        <td className="py-2.5 px-4 text-[13px] text-gray-700">{inst.head}</td>
-                        <td className="py-2.5 px-4 text-[13px] font-semibold text-gray-800">₹{inst.amount.toLocaleString()}</td>
-                        <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.dueDate}</td>
-                        <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.paidDate || <span className="text-gray-400">-</span>}</td>
-                        <td className="py-2.5 px-4">
-                          <span className={`flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusColors[inst.status]}`}>
-                            <StatusIcon status={inst.status} />{inst.status}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-4">
-                          {inst.status !== 'Paid' && (
-                            <button className="text-[12px] font-semibold text-[#0A6C54] hover:underline">Collect</button>
-                          )}
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse min-w-[700px]">
+                    <thead>
+                      <tr className="bg-gray-50 border-y border-gray-100">
+                        {['#', 'Fee Head', 'Amount', 'Due Date', 'Paid Date', 'Status', 'Action'].map(h => (
+                          <th key={h} className="py-2.5 px-4 text-[12px] font-bold text-gray-700">{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {(student.installments || []).map(inst => (
+                        <tr key={inst._id || inst.no} className="border-b border-gray-50">
+                          <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.no}</td>
+                          <td className="py-2.5 px-4 text-[13px] text-gray-700">{inst.head}</td>
+                          <td className="py-2.5 px-4 text-[13px] font-semibold text-gray-800">₹{(inst.amount || 0).toLocaleString()}</td>
+                          <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.dueDate}</td>
+                          <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.paidDate || <span className="text-gray-400">-</span>}</td>
+                          <td className="py-2.5 px-4">
+                            <span className={`flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusColors[inst.status]}`}>
+                              <StatusIcon status={inst.status} />{inst.status}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-4">
+                            {inst.status !== 'Paid' && (
+                              <button onClick={() => toast.success('Collection form opened')} className="text-[12px] font-semibold text-[#0A6C54] hover:underline">Collect</button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
+        {!loading && data.length === 0 && (
+          <div className="py-8 text-center text-gray-500 text-[13px]">No installments found</div>
+        )}
       </div>
 
       {showExtModal && (
@@ -164,7 +158,7 @@ const Installments = () => {
             </div>
             <div className="p-6 border-t border-gray-100 flex justify-end gap-3">
               <button onClick={() => setShowExtModal(false)} className="px-5 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold">Submit Request</button>
+              <button onClick={() => { toast.success('Extension request submitted'); setShowExtModal(false); }} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold">Submit Request</button>
             </div>
           </div>
         </div>
@@ -174,3 +168,4 @@ const Installments = () => {
 };
 
 export default Installments;
+

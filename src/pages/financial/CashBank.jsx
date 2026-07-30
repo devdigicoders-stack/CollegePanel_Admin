@@ -1,40 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Eye, Download, Wallet, Landmark, ArrowLeftRight, CheckCircle, Clock } from 'lucide-react';
-
-const accountsData = [
-  { id: 1, name: 'Main Office Cash Counter', number: 'CASH-001', type: 'Cash Book', balance: 210000, bankName: 'Physical Cash', status: 'Active' },
-  { id: 2, name: 'SBI Current Account', number: 'SBI-9821827361', type: 'Bank Account', balance: 1567000, bankName: 'State Bank of India', status: 'Active' },
-  { id: 3, name: 'HDFC Fee Collection A/C', number: 'HDFC-8827361521', type: 'Bank Account', balance: 850000, bankName: 'HDFC Bank Ltd', status: 'Active' },
-  { id: 4, name: 'Petty Cash - Admin Office', number: 'CASH-002', type: 'Cash Book', balance: 12500, bankName: 'Physical Cash', status: 'Active' },
-];
-
-const transactionsData = [
-  { id: 1, date: '2024-02-15', desc: 'Cash deposited to SBI', from: 'Main Office Cash Counter', to: 'SBI Current Account', amount: 50000, type: 'Contra Transfer', status: 'Completed' },
-  { id: 2, date: '2024-02-14', desc: 'SBI Current Account Withdrawal', from: 'SBI Current Account', to: 'Main Office Cash Counter', amount: 20000, type: 'Contra Transfer', status: 'Completed' },
-  { id: 3, date: '2024-02-12', desc: 'Petty cash top up', from: 'Main Office Cash Counter', to: 'Petty Cash - Admin Office', amount: 5000, type: 'Contra Transfer', status: 'Completed' },
-];
+import axiosInstance from '../../utils/axiosInstance';
+import toast from 'react-hot-toast';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const CashBank = () => {
   const [activeTab, setActiveTab] = useState('Accounts');
   const [showTransferModal, setShowTransferModal] = useState(false);
+  const [accounts, setAccounts] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [loadingAccounts, setLoadingAccounts] = useState(true);
+  const [loadingTransactions, setLoadingTransactions] = useState(true);
   const [newTransfer, setNewTransfer] = useState({
-    from: 'Main Office Cash Counter',
-    to: 'SBI Current Account',
-    amount: '',
-    date: new Date().toISOString().split('T')[0],
-    desc: '',
+    from: '', to: '', amount: '', date: new Date().toISOString().split('T')[0], desc: ''
   });
 
-  const handleAddTransfer = (e) => {
+  const fetchAccounts = async () => {
+    setLoadingAccounts(true);
+    try {
+      const res = await axiosInstance.get('/fees/cash-bank');
+      setAccounts(res.data?.data || res.data || []);
+    } catch (error) {
+      toast.error('Failed to fetch accounts');
+    } finally {
+      setLoadingAccounts(false);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    setLoadingTransactions(true);
+    try {
+      const res = await axiosInstance.get('/fees/transactions');
+      setTransactions(res.data?.data || res.data || []);
+    } catch (error) {
+      toast.error('Failed to fetch transactions');
+    } finally {
+      setLoadingTransactions(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAccounts();
+    fetchTransactions();
+  }, []);
+
+  const handleAddTransfer = async (e) => {
     e.preventDefault();
-    setShowTransferModal(false);
-    setNewTransfer({
-      from: 'Main Office Cash Counter',
-      to: 'SBI Current Account',
-      amount: '',
-      date: new Date().toISOString().split('T')[0],
-      desc: '',
-    });
+    try {
+      await axiosInstance.post('/fees/transactions', newTransfer);
+      toast.success('Transfer completed successfully');
+      setShowTransferModal(false);
+      setNewTransfer({ from: '', to: '', amount: '', date: new Date().toISOString().split('T')[0], desc: '' });
+      fetchTransactions();
+      fetchAccounts();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to complete transfer');
+    }
   };
 
   return (
@@ -67,64 +88,78 @@ const CashBank = () => {
 
       {activeTab === 'Accounts' ? (
         <div className="overflow-x-auto flex-1 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            {accountsData.map(acc => (
-              <div key={acc.id} className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
-                      acc.type === 'Cash Book' ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
-                    }`}>
-                      {acc.type}
-                    </span>
-                    <h4 className="font-bold text-gray-800 text-[14px] mt-2">{acc.name}</h4>
-                    <p className="text-[11px] text-gray-500">{acc.bankName}</p>
-                    <p className="text-[12px] text-gray-600 font-semibold mt-1">{acc.number}</p>
+          {loadingAccounts ? (
+            <SkeletonLoader type="cards" rows={4} />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              {accounts.map(acc => (
+                <div key={acc._id || acc.id} className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
+                        acc.type === 'Cash Book' ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
+                      }`}>
+                        {acc.type}
+                      </span>
+                      <h4 className="font-bold text-gray-800 text-[14px] mt-2">{acc.name}</h4>
+                      <p className="text-[11px] text-gray-500">{acc.bankName}</p>
+                      <p className="text-[12px] text-gray-600 font-semibold mt-1">{acc.number}</p>
+                    </div>
+                    <div className={`p-2.5 rounded-lg ${acc.type === 'Cash Book' ? 'bg-orange-50 text-orange-500' : 'bg-blue-50 text-blue-500'}`}>
+                      {acc.type === 'Cash Book' ? <Wallet size={18} /> : <Landmark size={18} />}
+                    </div>
                   </div>
-                  <div className={`p-2.5 rounded-lg ${acc.type === 'Cash Book' ? 'bg-orange-50 text-orange-500' : 'bg-blue-50 text-blue-500'}`}>
-                    {acc.type === 'Cash Book' ? <Wallet size={18} /> : <Landmark size={18} />}
+                  <div className="border-t border-gray-100 pt-3 mt-4 flex justify-between items-baseline">
+                    <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Balance</span>
+                    <span className="text-[18px] font-bold text-gray-900">₹{(acc.balance || 0).toLocaleString()}</span>
                   </div>
                 </div>
-                <div className="border-t border-gray-100 pt-3 mt-4 flex justify-between items-baseline">
-                  <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Balance</span>
-                  <span className="text-[18px] font-bold text-gray-900">₹{acc.balance.toLocaleString()}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+              {!loadingAccounts && accounts.length === 0 && (
+                <div className="col-span-full py-8 text-center text-gray-500 text-[13px]">No accounts found</div>
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <div className="overflow-x-auto flex-1">
-          <table className="w-full text-left border-collapse min-w-[900px]">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Date</th>
-                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Description</th>
-                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Transfer From</th>
-                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Transfer To</th>
-                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Amount</th>
-                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Type</th>
-                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactionsData.map(item => (
-                <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] text-gray-500">{item.date}</td>
-                  <td className="py-4 px-6 text-[13px] font-medium text-gray-800">{item.desc}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.from}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.to}</td>
-                  <td className="py-4 px-6 text-[13px] font-bold text-gray-900">₹{item.amount.toLocaleString()}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-500">{item.type}</td>
-                  <td className="py-4 px-6">
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-100">
-                      {item.status}
-                    </span>
-                  </td>
+          {loadingTransactions ? (
+            <SkeletonLoader type="table" rows={5} cols={7} />
+          ) : (
+            <table className="w-full text-left border-collapse min-w-[900px]">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Date</th>
+                  <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Description</th>
+                  <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Transfer From</th>
+                  <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Transfer To</th>
+                  <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Amount</th>
+                  <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Type</th>
+                  <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {transactions.map(item => (
+                  <tr key={item._id || item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <td className="py-4 px-6 text-[13px] text-gray-500">{item.date}</td>
+                    <td className="py-4 px-6 text-[13px] font-medium text-gray-800">{item.desc}</td>
+                    <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.from}</td>
+                    <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.to}</td>
+                    <td className="py-4 px-6 text-[13px] font-bold text-gray-900">₹{(item.amount || 0).toLocaleString()}</td>
+                    <td className="py-4 px-6 text-[13px] text-gray-500">{item.type}</td>
+                    <td className="py-4 px-4">
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-100">
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {!loadingTransactions && transactions.length === 0 && (
+                  <tr><td colSpan={7} className="py-8 text-center text-gray-500 text-[13px]">No transactions found</td></tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
@@ -144,7 +179,8 @@ const CashBank = () => {
                   onChange={(e) => setNewTransfer({...newTransfer, from: e.target.value})}
                   className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
                 >
-                  {accountsData.map(acc => <option key={acc.id} value={acc.name}>{acc.name} (Bal: ₹{acc.balance.toLocaleString()})</option>)}
+                  <option value="">Select account</option>
+                  {accounts.map(acc => <option key={acc._id || acc.id} value={acc.name}>{acc.name} (Bal: ₹{(acc.balance || 0).toLocaleString()})</option>)}
                 </select>
               </div>
 
@@ -155,7 +191,8 @@ const CashBank = () => {
                   onChange={(e) => setNewTransfer({...newTransfer, to: e.target.value})}
                   className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
                 >
-                  {accountsData.map(acc => <option key={acc.id} value={acc.name}>{acc.name}</option>)}
+                  <option value="">Select account</option>
+                  {accounts.map(acc => <option key={acc._id || acc.id} value={acc.name}>{acc.name}</option>)}
                 </select>
               </div>
 
@@ -217,3 +254,4 @@ const CashBank = () => {
 };
 
 export default CashBank;
+

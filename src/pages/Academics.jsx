@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Edit, Trash2, ChevronRight, Plus, X, AlertTriangle } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const Academics = () => {
   const [activeMenu, setActiveMenu] = useState('Departments');
@@ -393,9 +394,7 @@ const Academics = () => {
         {/* Table */}
         <div className="flex-1 overflow-x-auto px-6 pb-6">
           {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="w-8 h-8 border-4 border-[#0A6C54] border-t-transparent rounded-full animate-spin"></div>
-            </div>
+            <SkeletonLoader type="detail" rows={5} cols={4} />
           ) : !Array.isArray(data) || data.length === 0 ? (
             <div className="flex items-center justify-center h-64">
               <p className="text-gray-500 text-sm">No {activeMenu.toLowerCase()} found</p>

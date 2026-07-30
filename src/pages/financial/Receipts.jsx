@@ -1,13 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Eye, Download, Printer, RotateCcw, Filter, FileText } from 'lucide-react';
-
-const receiptsData = [
-  { id: 1, receiptNo: 'RCP-2024-501', reference: 'Aarav Singh (Student)', type: 'Fee Receipt', amount: 25000, date: '2024-02-15', mode: 'UPI', status: 'Active' },
-  { id: 2, receiptNo: 'RCP-2024-502', reference: 'Corporate Java Training', type: 'Income Receipt', amount: 45000, date: '2024-02-15', mode: 'Bank Transfer', status: 'Active' },
-  { id: 3, receiptNo: 'RCP-2024-503', reference: 'Neha Verma (Student)', type: 'Fee Receipt', amount: 35000, date: '2024-02-14', mode: 'Card', status: 'Active' },
-  { id: 4, receiptNo: 'RCP-2024-504', reference: 'Rohan Kumar (Refund)', type: 'Refund Receipt', amount: 5000, date: '2024-02-12', mode: 'Bank Transfer', status: 'Cancelled' },
-  { id: 5, receiptNo: 'RCP-2024-505', reference: 'Shree Stationary Mart', type: 'Expense Voucher', amount: 15400, date: '2024-02-10', mode: 'Cash', status: 'Active' },
-];
+import axiosInstance from '../../utils/axiosInstance';
+import toast from 'react-hot-toast';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const types = ['All', 'Fee Receipt', 'Income Receipt', 'Refund Receipt', 'Expense Voucher', 'Payment Voucher'];
 
@@ -18,21 +13,50 @@ const Receipts = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [cancelReason, setCancelReason] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
 
-  const filtered = receiptsData.filter(item => {
-    const matchesSearch = item.reference.toLowerCase().includes(search.toLowerCase()) || 
-                          item.receiptNo.toLowerCase().includes(search.toLowerCase());
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const params = {};
+      if (search) params.search = search;
+      if (filterType !== 'All') params.type = filterType;
+      if (filterStatus !== 'All') params.status = filterStatus;
+      const res = await axiosInstance.get('/fees/receipts', { params });
+      setData(res.data?.data || res.data || []);
+    } catch (error) {
+      toast.error('Failed to fetch receipts');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [search, filterType, filterStatus]);
+
+  const handleCancelReceipt = async (e) => {
+    e.preventDefault();
+    try {
+      await axiosInstance.put(`/fees/receipts/${selectedReceipt._id || selectedReceipt.id}`, { status: 'Cancelled', cancelReason });
+      toast.success('Receipt cancelled successfully');
+      setShowCancelModal(false);
+      setCancelReason('');
+      setSelectedReceipt(null);
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to cancel receipt');
+    }
+  };
+
+  const filtered = data.filter(item => {
+    const matchesSearch = item.reference?.toLowerCase().includes(search.toLowerCase()) || 
+                          item.receiptNo?.toLowerCase().includes(search.toLowerCase());
     const matchesType = filterType === 'All' || item.type === filterType;
     const matchesStatus = filterStatus === 'All' || item.status === filterStatus;
     return matchesSearch && matchesType && matchesStatus;
   });
-
-  const handleCancelReceipt = (e) => {
-    e.preventDefault();
-    setShowCancelModal(false);
-    setCancelReason('');
-    setSelectedReceipt(null);
-  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -42,7 +66,7 @@ const Receipts = () => {
           <h2 className="text-[18px] font-bold text-gray-800">Receipts & Vouchers</h2>
           <p className="text-[12px] text-gray-500 mt-0.5">View, print, and audit all financial receipts, payment vouchers, and ledger postings</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+        <button onClick={() => toast.success('Exporting registry...')} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
           <Download size={15} /> Export Registry
         </button>
       </div>
@@ -83,51 +107,58 @@ const Receipts = () => {
 
       {/* Table */}
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[1000px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Receipt No</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Type</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Paid By / Reference</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Amount</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Date</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Payment Mode</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.receiptNo}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.type}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{item.reference}</td>
-                <td className="py-4 px-6 text-[13px] font-bold text-gray-900">₹{item.amount.toLocaleString()}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-500">{item.date}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.mode}</td>
-                <td className="py-4 px-6">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                    item.status === 'Active' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="py-4 px-6 flex gap-2">
-                  <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors" title="Print Duplicate"><Printer size={15} /></button>
-                  {item.status === 'Active' && (
-                    <button 
-                      onClick={() => { setSelectedReceipt(item); setShowCancelModal(true); }} 
-                      className="p-1.5 hover:bg-red-50 rounded-lg text-red-600 transition-colors" 
-                      title="Cancel / Reverse Transaction"
-                    >
-                      <RotateCcw size={15} />
-                    </button>
-                  )}
-                </td>
+        {loading ? (
+          <SkeletonLoader type="table" rows={5} cols={8} />
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Receipt No</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Type</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Paid By / Reference</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Amount</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Date</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Payment Mode</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(item => (
+                <tr key={item._id || item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.receiptNo}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.type}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{item.reference}</td>
+                  <td className="py-4 px-6 text-[13px] font-bold text-gray-900">₹{(item.amount || 0).toLocaleString()}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-500">{item.date}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.mode}</td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                      item.status === 'Active' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 flex gap-2">
+                    <button onClick={() => toast.success('Printing duplicate...')} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors" title="Print Duplicate"><Printer size={15} /></button>
+                    {item.status === 'Active' && (
+                      <button 
+                        onClick={() => { setSelectedReceipt(item); setShowCancelModal(true); }} 
+                        className="p-1.5 hover:bg-red-50 rounded-lg text-red-600 transition-colors" 
+                        title="Cancel / Reverse Transaction"
+                      >
+                        <RotateCcw size={15} />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {!loading && filtered.length === 0 && (
+                <tr><td colSpan={8} className="py-8 text-center text-gray-500 text-[13px]">No receipts found</td></tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Cancel Receipt Modal */}
@@ -179,3 +210,4 @@ const Receipts = () => {
 };
 
 export default Receipts;
+

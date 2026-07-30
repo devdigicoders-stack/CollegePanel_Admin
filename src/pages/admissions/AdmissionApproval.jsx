@@ -1,19 +1,15 @@
-import React, { useState } from 'react';
-import { Search, CheckCircle, XCircle, Clock, Eye, ChevronDown } from 'lucide-react';
-
-const approvalData = [
-  { id: 1, appNo: 'APP/2024/002', name: 'Neha Verma', course: 'Diploma in IT', category: 'OBC', docVerified: true, eligibilityCheck: true, officerRec: true, headApproval: 'Pending', feePaid: false, stage: 'Head Approval' },
-  { id: 2, appNo: 'APP/2024/004', name: 'Muskan Jain', course: 'Diploma in EE', category: 'General', docVerified: true, eligibilityCheck: true, officerRec: true, headApproval: 'Approved', feePaid: true, stage: 'Confirmed' },
-  { id: 3, appNo: 'APP/2024/007', name: 'Arjun Kumar', course: 'Diploma in ME', category: 'General', docVerified: true, eligibilityCheck: true, officerRec: false, headApproval: 'Pending', feePaid: false, stage: 'Officer Recommendation' },
-  { id: 4, appNo: 'APP/2024/001', name: 'Aarav Singh', course: 'Diploma in CE', category: 'General', docVerified: false, eligibilityCheck: false, officerRec: false, headApproval: 'Pending', feePaid: false, stage: 'Document Verification' },
-];
+import React, { useState, useEffect } from 'react';
+import { Search, CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
+import axios from 'axios';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const stageColors = {
   'Document Verification': 'bg-orange-100 text-orange-700',
   'Officer Recommendation': 'bg-blue-100 text-blue-700',
   'Head Approval': 'bg-purple-100 text-purple-700',
   'Fee Payment': 'bg-yellow-100 text-yellow-700',
-  'Confirmed': 'bg-green-100 text-green-700',
+  'Admitted': 'bg-green-100 text-green-700',
+  'Application': 'bg-gray-100 text-gray-700',
 };
 
 const StepIcon = ({ done }) => done
@@ -21,8 +17,51 @@ const StepIcon = ({ done }) => done
   : <Clock size={16} className="text-gray-400" />;
 
 const AdmissionApproval = () => {
+  const [admissions, setAdmissions] = useState([]);
   const [search, setSearch] = useState('');
-  const filtered = approvalData.filter(a => a.name.toLowerCase().includes(search.toLowerCase()) || a.appNo.includes(search));
+  const [loading, setLoading] = useState(false);
+
+  const fetchAdmissions = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('admin_token');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/admissions`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Fetch apps that are not yet Admitted or Cancelled
+      const data = (res.data.admissions || res.data).filter(
+        a => a.stage !== 'Admitted' && a.stage !== 'Cancelled' && a.stage !== 'Enquiry'
+      );
+      setAdmissions(data);
+    } catch (error) {
+      console.error('Error fetching admissions', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdmissions();
+  }, []);
+
+  const updateStage = async (id, stage, status) => {
+    try {
+      const token = localStorage.getItem('admin_token');
+      await axios.put(`${import.meta.env.VITE_API_URL}/admissions/${id}`,
+        { stage, status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchAdmissions();
+    } catch (error) {
+      console.error('Error updating admission', error);
+    }
+  };
+
+  const filtered = admissions.filter(a =>
+    a.name?.toLowerCase().includes(search.toLowerCase()) || a.appNo?.includes(search)
+  );
+
+  const allDocVerified = (a) => a.documents?.every(d => d.status === 'Verified') ?? false;
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -35,7 +74,7 @@ const AdmissionApproval = () => {
       <div className="px-6 py-4 border-b border-gray-100">
         <div className="flex flex-wrap gap-3 items-center">
           <span className="text-[12px] font-semibold text-gray-600">Workflow:</span>
-          {['Application Submitted','Document Verification','Eligibility Check','Officer Recommendation','Head Approval','Fee Payment','Admission Confirmed'].map((step, idx, arr) => (
+          {['Application Submitted','Document Verification','Officer Recommendation','Head Approval','Admission Confirmed'].map((step, idx, arr) => (
             <React.Fragment key={step}>
               <span className="text-[11px] bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full font-medium">{step}</span>
               {idx < arr.length - 1 && <span className="text-gray-400 text-[12px]">→</span>}
@@ -53,57 +92,67 @@ const AdmissionApproval = () => {
       </div>
 
       <div className="flex-1 overflow-auto p-6">
-        <div className="space-y-4">
-          {filtered.map(app => (
-            <div key={app.id} className="border border-gray-200 rounded-xl p-5">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h4 className="text-[14px] font-bold text-gray-800">{app.name}</h4>
-                  <p className="text-[12px] text-gray-500">{app.appNo} • {app.course} • {app.category}</p>
-                </div>
-                <span className={`px-3 py-1 rounded-full text-[11px] font-semibold ${stageColors[app.stage]}`}>{app.stage}</span>
-              </div>
-
-              {/* Workflow Steps */}
-              <div className="flex flex-wrap gap-4 mb-4">
-                {[
-                  { label: 'Doc Verified', done: app.docVerified },
-                  { label: 'Eligibility', done: app.eligibilityCheck },
-                  { label: 'Officer Rec.', done: app.officerRec },
-                  { label: 'Head Approval', done: app.headApproval === 'Approved' },
-                  { label: 'Fee Paid', done: app.feePaid },
-                ].map(step => (
-                  <div key={step.label} className="flex items-center gap-1.5">
-                    <StepIcon done={step.done} />
-                    <span className={`text-[12px] font-medium ${step.done ? 'text-green-700' : 'text-gray-500'}`}>{step.label}</span>
+        {loading ? (
+          <SkeletonLoader type="table" rows={5} cols={4} />
+        ) : (
+          <div className="space-y-4">
+            {filtered.length === 0 ? (
+              <div className="py-12 text-center text-gray-500 text-[13px]">No applications pending approval.</div>
+            ) : filtered.map(app => (
+              <div key={app._id} className="border border-gray-200 rounded-xl p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h4 className="text-[14px] font-bold text-gray-800">{app.name}</h4>
+                    <p className="text-[12px] text-gray-500">{app.appNo} • {app.course} • {app.category || 'General'}</p>
                   </div>
-                ))}
-              </div>
+                  <span className={`px-3 py-1 rounded-full text-[11px] font-semibold ${stageColors[app.stage] || 'bg-gray-100 text-gray-700'}`}>{app.stage}</span>
+                </div>
 
-              {/* Actions */}
-              <div className="flex gap-2">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-[12px] font-medium text-gray-700 hover:bg-gray-50">
-                  <Eye size={13} /> View
-                </button>
-                {app.stage === 'Head Approval' && (
-                  <>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[12px] font-semibold">
-                      <CheckCircle size={13} /> Approve
-                    </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[12px] font-semibold">
-                      <XCircle size={13} /> Reject
-                    </button>
-                  </>
-                )}
-                {app.stage === 'Officer Recommendation' && (
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[12px] font-semibold">
-                    <CheckCircle size={13} /> Recommend
+                {/* Workflow Steps */}
+                <div className="flex flex-wrap gap-4 mb-4">
+                  {[
+                    { label: 'Application', done: true },
+                    { label: 'Doc Verified', done: allDocVerified(app) },
+                    { label: 'Approved', done: app.stage === 'Admitted' },
+                  ].map(step => (
+                    <div key={step.label} className="flex items-center gap-1.5">
+                      <StepIcon done={step.done} />
+                      <span className={`text-[12px] font-medium ${step.done ? 'text-green-700' : 'text-gray-500'}`}>{step.label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-[12px] font-medium text-gray-700 hover:bg-gray-50">
+                    <Eye size={13} /> View
                   </button>
-                )}
+                  {app.stage !== 'Admitted' && (
+                    <>
+                      <button
+                        onClick={() => updateStage(app._id, 'Admitted', 'Confirmed')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[12px] font-semibold"
+                      >
+                        <CheckCircle size={13} /> Approve & Admit
+                      </button>
+                      <button
+                        onClick={() => updateStage(app._id, 'Cancelled', 'Pending')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[12px] font-semibold"
+                      >
+                        <XCircle size={13} /> Reject
+                      </button>
+                    </>
+                  )}
+                  {app.stage === 'Admitted' && (
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-[12px] font-semibold">
+                      <CheckCircle size={13} /> Admitted
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

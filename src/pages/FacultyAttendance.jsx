@@ -4,6 +4,7 @@ import {
   ChevronLeft, ChevronRight, UserCheck, Clock, AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const FacultyAttendance = () => {
   const [faculty, setFaculty] = useState([]);
@@ -307,7 +308,7 @@ const FacultyAttendance = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="6" className="py-8 text-center text-gray-500">Loading...</td></tr>
+              <tr><td colSpan="6" className="py-8"><SkeletonLoader type="table" rows={3} cols={6} /></td></tr>
             ) : faculty.length === 0 ? (
               <tr><td colSpan="6" className="py-8 text-center text-gray-500">No faculty found</td></tr>
             ) : (

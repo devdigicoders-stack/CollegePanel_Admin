@@ -4,6 +4,7 @@ import {
   ChevronLeft, ChevronRight, BookOpen, AlertTriangle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const InternalMarks = () => {
   const [activeTab, setActiveTab] = useState('Pending');
@@ -299,7 +300,7 @@ const InternalMarks = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="6" className="py-8 text-center text-gray-500">Loading...</td></tr>
+              <tr><td colSpan="6" className="py-8"><SkeletonLoader type="table" rows={3} cols={6} /></td></tr>
             ) : students.length === 0 ? (
               <tr><td colSpan="6" className="py-8 text-center text-gray-500">No students found</td></tr>
             ) : (

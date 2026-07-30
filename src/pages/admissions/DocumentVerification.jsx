@@ -1,23 +1,7 @@
-import React, { useState } from 'react';
-import { Search, CheckCircle, XCircle, Eye, ChevronDown, Download, AlertCircle } from 'lucide-react';
-
-const docsData = [
-  { id: 1, appNo: 'APP/2024/001', name: 'Aarav Singh', course: 'Diploma in CE', docs: [
-    { name: 'Photograph', status: 'Verified' }, { name: 'Aadhaar Card', status: 'Verified' },
-    { name: '10th Marksheet', status: 'Pending' }, { name: 'Transfer Certificate', status: 'Correction Required' },
-    { name: 'Character Certificate', status: 'Not Uploaded' },
-  ]},
-  { id: 2, appNo: 'APP/2024/002', name: 'Neha Verma', course: 'Diploma in IT', docs: [
-    { name: 'Photograph', status: 'Verified' }, { name: 'Aadhaar Card', status: 'Verified' },
-    { name: '10th Marksheet', status: 'Verified' }, { name: 'Transfer Certificate', status: 'Verified' },
-    { name: 'Character Certificate', status: 'Verified' },
-  ]},
-  { id: 3, appNo: 'APP/2024/003', name: 'Vikram Patel', course: 'Diploma in ME', docs: [
-    { name: 'Photograph', status: 'Verified' }, { name: 'Aadhaar Card', status: 'Pending' },
-    { name: '10th Marksheet', status: 'Rejected' }, { name: 'Transfer Certificate', status: 'Pending' },
-    { name: 'Character Certificate', status: 'Not Uploaded' },
-  ]},
-];
+import { useState, useEffect } from 'react';
+import { Search, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import axios from 'axios';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const docStatusColors = {
   'Verified': 'bg-green-100 text-green-700',
@@ -29,10 +13,50 @@ const docStatusColors = {
 };
 
 const DocumentVerification = () => {
+  const [admissions, setAdmissions] = useState([]);
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const filtered = docsData.filter(d => d.name.toLowerCase().includes(search.toLowerCase()) || d.appNo.includes(search));
+  const fetchAdmissions = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('admin_token');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/admissions`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Only show those who have documents to verify
+      const data = (res.data.admissions || res.data).filter(a => a.documents && a.documents.length > 0);
+      setAdmissions(data);
+    } catch (error) {
+      console.error('Error fetching admissions', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdmissions();
+  }, []);
+
+  const handleDocStatus = async (admissionId, docId, newStatus) => {
+    try {
+      const token = localStorage.getItem('admin_token');
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/admissions/${admissionId}/documents/${docId}`,
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Refresh data after update
+      fetchAdmissions();
+    } catch (error) {
+      console.error('Error updating document status', error);
+      alert('Failed to update document status');
+    }
+  };
+
+  const filtered = admissions.filter(a =>
+    a.name?.toLowerCase().includes(search.toLowerCase()) || a.appNo?.includes(search)
+  );
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -50,43 +74,69 @@ const DocumentVerification = () => {
       </div>
 
       <div className="flex-1 overflow-auto p-6">
-        <div className="grid grid-cols-1 gap-4">
-          {filtered.map(student => {
-            const verified = student.docs.filter(d => d.status === 'Verified').length;
-            const total = student.docs.length;
-            return (
-              <div key={student.id} className="border border-gray-200 rounded-xl p-5">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h4 className="text-[14px] font-bold text-gray-800">{student.name}</h4>
-                    <p className="text-[12px] text-gray-500">{student.appNo} • {student.course}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[12px] font-semibold text-gray-700">{verified}/{total} Verified</p>
-                    <div className="w-32 bg-gray-200 rounded-full h-1.5 mt-1">
-                      <div className="bg-[#0A6C54] h-1.5 rounded-full" style={{ width: `${(verified/total)*100}%` }}></div>
+        {loading ? (
+          <SkeletonLoader type="detail" rows={4} cols={3} />
+        ) : filtered.length === 0 ? (
+          <div className="py-12 text-center">
+            <AlertCircle size={40} className="mx-auto text-gray-300 mb-3" />
+            <p className="text-gray-500 text-[13px]">No applications with documents found.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {filtered.map(student => {
+              const verified = student.documents.filter(d => d.status === 'Verified').length;
+              const total = student.documents.length;
+              return (
+                <div key={student._id} className="border border-gray-200 rounded-xl p-5">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h4 className="text-[14px] font-bold text-gray-800">{student.name}</h4>
+                      <p className="text-[12px] text-gray-500">{student.appNo} • {student.course}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[12px] font-semibold text-gray-700">{verified}/{total} Verified</p>
+                      <div className="w-32 bg-gray-200 rounded-full h-1.5 mt-1">
+                        <div className="bg-[#0A6C54] h-1.5 rounded-full" style={{ width: `${total > 0 ? (verified/total)*100 : 0}%` }}></div>
+                      </div>
                     </div>
                   </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {student.documents.map(doc => (
+                      <div key={doc._id} className="border border-gray-100 rounded-lg p-3">
+                        <p className="text-[12px] font-medium text-gray-700 mb-2">{doc.name}</p>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${docStatusColors[doc.status] || 'bg-gray-100 text-gray-500'}`}>
+                          {doc.status}
+                        </span>
+                        {doc.status !== 'Not Uploaded' && doc.status !== 'Not Applicable' && (
+                          <div className="flex gap-1 mt-2">
+                            <button
+                              onClick={() => handleDocStatus(student._id, doc._id, 'Verified')}
+                              className="p-1 hover:bg-green-100 rounded" title="Verify"
+                            >
+                              <CheckCircle size={12} className="text-green-600" />
+                            </button>
+                            <button
+                              onClick={() => handleDocStatus(student._id, doc._id, 'Rejected')}
+                              className="p-1 hover:bg-red-100 rounded" title="Reject"
+                            >
+                              <XCircle size={12} className="text-red-600" />
+                            </button>
+                            <button
+                              onClick={() => handleDocStatus(student._id, doc._id, 'Correction Required')}
+                              className="p-1 hover:bg-yellow-100 rounded" title="Request Correction"
+                            >
+                              <AlertCircle size={12} className="text-yellow-600" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {student.docs.map(doc => (
-                    <div key={doc.name} className="border border-gray-100 rounded-lg p-3">
-                      <p className="text-[12px] font-medium text-gray-700 mb-2">{doc.name}</p>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${docStatusColors[doc.status]}`}>{doc.status}</span>
-                      {doc.status !== 'Not Uploaded' && doc.status !== 'Not Applicable' && (
-                        <div className="flex gap-1 mt-2">
-                          <button className="p-1 hover:bg-gray-100 rounded"><Eye size={12} className="text-gray-500" /></button>
-                          <button className="p-1 hover:bg-green-100 rounded"><CheckCircle size={12} className="text-green-600" /></button>
-                          <button className="p-1 hover:bg-red-100 rounded"><XCircle size={12} className="text-red-600" /></button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Copy, Plus, Search, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, Eye, Edit, Trash2, X, AlertTriangle, Lock, Info } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const Teachers = () => {
   const [isCreating, setIsCreating] = useState(false);
@@ -667,9 +668,7 @@ const Teachers = () => {
       {/* Table */}
       <div className="flex-1 overflow-x-auto">
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="w-8 h-8 border-4 border-[#0A6C54] border-t-transparent rounded-full animate-spin"></div>
-          </div>
+          <SkeletonLoader type="table" rows={5} cols={8} />
         ) : tableData.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <p className="text-gray-500 text-sm">No teachers found</p>

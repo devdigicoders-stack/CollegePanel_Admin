@@ -1,51 +1,90 @@
-import React, { useState } from 'react';
-import { Search, Edit2, Eye, Download, UserCheck, UserX, BookOpen, AlertCircle } from 'lucide-react';
-
-const initialMembers = [
-  { id: 1, memberId: 'LIB-S-101', name: 'Amit Sharma', type: 'Student', department: 'Computer Science', course: 'Diploma CE', semester: '3rd', status: 'Active', issuedCount: 2, fine: 50 },
-  { id: 2, memberId: 'LIB-S-102', name: 'Pooja Patel', type: 'Student', department: 'Computer Science', course: 'Diploma CE', semester: '5th', status: 'Active', issuedCount: 3, fine: 120 },
-  { id: 3, memberId: 'LIB-T-201', name: 'Dr. Ramesh Patil', type: 'Teacher', department: 'Computer Science', course: 'N/A', semester: 'N/A', status: 'Active', issuedCount: 4, fine: 0 },
-  { id: 4, memberId: 'LIB-S-103', name: 'Rohan Joshi', type: 'Student', department: 'Mechanical Engineering', course: 'Diploma ME', semester: '1st', status: 'Inactive', issuedCount: 0, fine: 0 },
-  { id: 5, memberId: 'LIB-H-301', name: 'Prof. S.K. Bose', type: 'HOD', department: 'Electrical Engineering', course: 'N/A', semester: 'N/A', status: 'Active', issuedCount: 5, fine: 0 },
-];
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '../../utils/axiosInstance';
+import toast from 'react-hot-toast';
 
 const Members = () => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
-  const [members, setMembers] = useState(initialMembers);
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [selectedMember, setSelectedMember] = useState(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [memberHistory, setMemberHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
-  const filtered = members.filter(m => {
-    const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase()) || 
-                          m.memberId.toLowerCase().includes(search.toLowerCase());
-    const matchesType = filterType === 'All' || m.type === filterType;
-    const matchesStatus = filterStatus === 'All' || m.status === filterStatus;
-    return matchesSearch && matchesType && matchesStatus;
-  });
+  useEffect(() => {
+    fetchMembers();
+  }, [page, search, filterType, filterStatus]);
 
-  const toggleStatus = (id) => {
-    setMembers(members.map(m => m.id === id ? { ...m, status: m.status === 'Active' ? 'Inactive' : 'Active' } : m));
+  const fetchMembers = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (filterType && filterType !== 'All') params.append('type', filterType);
+      if (filterStatus && filterStatus !== 'All') params.append('status', filterStatus);
+      params.append('page', page);
+      params.append('limit', 10);
+      
+      const response = await axiosInstance.get(`/library/members?${params.toString()}`);
+      setMembers(response.data.members || response.data);
+      setTotalPages(response.data.pagination?.totalPages || response.data.totalPages || 1);
+    } catch (error) {
+      console.error('Error fetching members:', error);
+      toast.error('Failed to load members');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMemberHistory = async (memberId) => {
+    try {
+      setHistoryLoading(true);
+      const response = await axiosInstance.get(`/library/transactions?studentId=${memberId}`);
+      setMemberHistory(response.data);
+    } catch (error) {
+      console.error('Error fetching member history:', error);
+      toast.error('Failed to load member history');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const toggleMemberStatus = async (memberId) => {
+    try {
+      const response = await axiosInstance.put(`/library/members/${memberId}/toggle-status`);
+      toast.success(response.data.message);
+      fetchMembers();
+    } catch (error) {
+      console.error('Error toggling member status:', error);
+      toast.error(error.response?.data?.message || 'Failed to update member status');
+    }
+  };
+
+  const openHistoryModal = async (member) => {
+    setSelectedMember(member);
+    await fetchMemberHistory(member.id);
+    setShowHistoryModal(true);
   };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
-      {/* Header */}
       <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-[16px] font-bold text-gray-800">Library Membership Management</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Activate, suspend, and view issue card limits for college members</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-          <Download size={15} /> Export Card List
+          <span>📄</span> Export Card List
         </button>
       </div>
 
-      {/* Filters */}
       <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row gap-4 flex-wrap">
         <div className="flex-1 min-w-[250px] relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
           <input 
             type="text" 
             placeholder="Search by student name or member ID..." 
@@ -80,50 +119,80 @@ const Members = () => {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[1000px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Member ID</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Name</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Role</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Department / Course</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Books Issued</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-right">Pending Fine</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.memberId}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.name}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.type}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-500">{item.department} {item.course !== 'N/A' && `(${item.course})`}</td>
-                <td className="py-4 px-6 text-[13px] text-center font-semibold text-gray-700">{item.issuedCount}</td>
-                <td className="py-4 px-6 text-[13px] text-right font-bold text-red-500">₹{item.fine}</td>
-                <td className="py-4 px-6">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                    item.status === 'Active' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="py-4 px-6 flex gap-2">
-                  <button onClick={() => { setSelectedMember(item); setShowHistoryModal(true); }} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors" title="Circulation History"><Eye size={15} /></button>
-                  <button onClick={() => toggleStatus(item.id)} className={`p-1.5 rounded-lg transition-colors ${item.status === 'Active' ? 'hover:bg-red-50 text-red-600' : 'hover:bg-green-50 text-green-600'}`} title={item.status === 'Active' ? 'Deactivate Card' : 'Activate Card'}>
-                    {item.status === 'Active' ? <UserX size={15} /> : <UserCheck size={15} />}
-                  </button>
-                </td>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-gray-400">Loading members...</div>
+        </div>
+      ) : (
+        <div className="overflow-x-auto flex-1">
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Member ID</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Name</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Role</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Department / Course</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Books Issued</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-right">Pending Fine</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {members.map(item => (
+                <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.memberId}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.name}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.type}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-500">{item.department} {item.course !== 'N/A' && `(${item.course})`}</td>
+                  <td className="py-4 px-6 text-[13px] text-center font-semibold text-gray-700">{item.issuedCount}</td>
+                  <td className="py-4 px-6 text-[13px] text-right font-bold text-red-500">₹{item.fine}</td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${item.status === 'Active' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>                      {item.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 flex gap-2">
+                    <button onClick={() => openHistoryModal(item)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors" title="Circulation History">👁️</button>
+                    <button onClick={() => toggleMemberStatus(item._id)} className={`p-1.5 rounded-lg transition-colors ${item.status === 'Active' ? 'hover:bg-red-50 text-red-600' : 'hover:bg-green-50 text-green-600'}`} title={item.status === 'Active' ? 'Deactivate Card' : 'Activate Card'}>                      {item.status === 'Active' ? '🔒' : '🔑'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-      {/* Member History Modal */}
+          {members.length === 0 && (
+            <div className="flex items-center justify-center py-12 text-gray-500">
+              No members found.
+            </div>
+          )}
+        </div>
+      )}
+
+      {members.length > 0 && (
+        <div className="p-6 border-t border-gray-100 flex justify-between items-center">
+          <span className="text-[13px] text-gray-500">
+            Showing {members.length} members • Page {page} of {totalPages}
+          </span>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-1 text-[13px] border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button 
+              onClick={() => setPage(p => p + 1)}
+              disabled={page === totalPages}
+              className="px-3 py-1 text-[13px] border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
       {showHistoryModal && selectedMember && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-xl animate-in fade-in zoom-in-95 duration-200">
@@ -142,23 +211,41 @@ const Members = () => {
 
               <div>
                 <h4 className="font-bold text-gray-800 text-[13px] mb-3">Currently Borrowed Books</h4>
-                {selectedMember.issuedCount > 0 ? (
+                {historyLoading ? (
+                  <div className="text-center py-4">Loading history...</div>
+                ) : memberHistory.filter(t => t.status === 'Issued' || t.status === 'Overdue').length > 0 ? (
                   <div className="space-y-2">
-                    {[
-                      { title: 'Introduction to Algorithms', due: '2024-02-28', barcode: 'ACC-8021' },
-                      { title: 'Database System Concepts', due: '2024-02-20', barcode: 'ACC-8022' }
-                    ].slice(0, selectedMember.issuedCount).map((book, idx) => (
+                    {memberHistory.filter(t => t.status === 'Issued' || t.status === 'Overdue').slice(0, selectedMember.issuedCount).map((trans, idx) => (
                       <div key={idx} className="flex justify-between items-center p-3 border border-gray-100 rounded-lg text-[13px]">
                         <div>
-                          <p className="font-semibold text-gray-800">{book.title}</p>
-                          <p className="text-[11px] text-gray-400">Barcode: {book.barcode}</p>
+                          <p className="font-semibold text-gray-800">{trans.bookId?.title || 'Unknown'}</p>
+                          <p className="text-[11px] text-gray-400">Barcode: {trans.bookId?.accessionNo || 'N/A'}</p>
                         </div>
-                        <span className="text-[11px] text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100">Due: {book.due}</span>
+                        <span className="text-[11px] text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100">Due: {trans.dueDate ? new Date(trans.dueDate).toLocaleDateString() : 'N/A'}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <p className="text-[13px] text-gray-500 text-center py-4 bg-gray-50 rounded-lg">No books currently issued to this member.</p>
+                )}
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-800 text-[13px] mb-2">Recent Transactions</h4>
+                {historyLoading ? (
+                  <div className="text-center py-4">Loading history...</div>
+                ) : memberHistory.length > 0 ? (
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {memberHistory.slice(0, 5).map((trans, idx) => (
+                      <div key={idx} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg text-[12px]">
+                        <span className={`font-bold px-2 py-0.5 rounded ${trans.status === 'Issued' || trans.status === 'Renewed' ? 'bg-blue-50 text-blue-600' : trans.status === 'Returned' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>{trans.status}</span>
+                        <span className="text-gray-600">{trans.bookId?.title || 'Unknown'}</span>
+                        <span className="text-gray-400">{new Date(trans.createdAt || trans.issueDate).toLocaleDateString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[12px] text-gray-500 text-center py-3 bg-gray-50 rounded-lg">No transaction history found.</p>
                 )}
               </div>
 

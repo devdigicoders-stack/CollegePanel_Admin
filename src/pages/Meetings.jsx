@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, ChevronDown, Eye, Plus, Edit2, Trash2, X as XIcon,
-  ChevronLeft, ChevronRight, Calendar, Users, Clock, MapPin
+  ChevronLeft, ChevronRight, Calendar, Users, Clock, MapPin, Check, XCircle
 } from 'lucide-react';
+import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const Meetings = () => {
   const [activeTab, setActiveTab] = useState('Upcoming');
@@ -35,60 +37,13 @@ const Meetings = () => {
   });
 
   const tabs = [
-    { name: 'Upcoming', count: 8 },
-    { name: 'Completed', count: 45 },
-    { name: 'Cancelled', count: 3 },
-    { name: 'All', count: 56 }
+    { name: 'Upcoming', status: 'Upcoming' },
+    { name: 'Completed', status: 'Completed' },
+    { name: 'Cancelled', status: 'Cancelled' },
+    { name: 'All', status: 'All' }
   ];
 
-  // Static data
-  const staticMeetings = [
-    {
-      _id: '1',
-      meetingId: 'MTG2024001',
-      title: 'Parent-Teacher Meeting - 3rd Semester',
-      type: 'Parent Meeting',
-      date: '2024-02-25',
-      time: '10:00 AM',
-      duration: 120,
-      location: 'Auditorium',
-      department: 'All Departments',
-      organizer: 'Principal Office',
-      attendees: 150,
-      status: 'Upcoming',
-      agenda: 'Discuss student progress and academic performance'
-    },
-    {
-      _id: '2',
-      meetingId: 'MTG2024002',
-      title: 'Computer Science Department Meeting',
-      type: 'Department Meeting',
-      date: '2024-02-20',
-      time: '02:00 PM',
-      duration: 90,
-      location: 'Conference Room A',
-      department: 'Computer Science',
-      organizer: 'HOD - Dr. Rajesh Kumar',
-      attendees: 25,
-      status: 'Upcoming',
-      agenda: 'Curriculum review and lab equipment requirements'
-    },
-    {
-      _id: '3',
-      meetingId: 'MTG2024003',
-      title: 'Academic Council Meeting',
-      type: 'Academic Meeting',
-      date: '2024-02-15',
-      time: '11:00 AM',
-      duration: 180,
-      location: 'Board Room',
-      department: 'All Departments',
-      organizer: 'Principal',
-      attendees: 35,
-      status: 'Completed',
-      agenda: 'Annual exam schedule and academic calendar discussion'
-    }
-  ];
+  // Remove staticMeetings - will be fetched from API
 
   useEffect(() => {
     fetchMeetings();
@@ -96,14 +51,28 @@ const Meetings = () => {
 
   const fetchMeetings = async () => {
     setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 300));
-    let filtered = staticMeetings;
-    if (activeTab !== 'All') {
-      filtered = staticMeetings.filter(m => m.status === activeTab);
+    try {
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        status: activeTab !== 'All' ? activeTab : '',
+        type: filters.type === 'All Types' ? '' : filters.type,
+        department: filters.department === 'All Departments' ? '' : filters.department,
+        search: filters.search
+      };
+      const res = await axiosInstance.get('/meetings', { params });
+      setMeetings(res.data.data || []);
+      setPagination(prev => ({
+        ...prev,
+        total: res.data.total || 0,
+        pages: res.data.pages || 1
+      }));
+    } catch (error) {
+      toast.error('Failed to fetch meetings');
+      setMeetings([]);
+    } finally {
+      setLoading(false);
     }
-    setMeetings(filtered);
-    setPagination(prev => ({ ...prev, total: filtered.length, pages: Math.ceil(filtered.length / prev.limit) }));
-    setLoading(false);
   };
 
   const getStatusColor = (status) => {
@@ -145,13 +114,48 @@ const Meetings = () => {
       toast.error('Please fill all required fields');
       return;
     }
+    setFormLoading(true);
     try {
-      // TODO: API call
-      toast.success('Meeting scheduled successfully');
-      setShowAddModal(false);
+      const payload = {
+        ...formData,
+        attendees: parseInt(formData.attendees) || 0
+      };
+      if (isEditing) {
+        await axiosInstance.put(`/meetings/${selectedMeeting._id}`, payload);
+        toast.success('Meeting updated successfully');
+        setShowEditModal(false);
+      } else {
+        await axiosInstance.post('/meetings', payload);
+        toast.success('Meeting scheduled successfully');
+        setShowAddModal(false);
+      }
+      setFormData({
+        title: '',
+        type: 'Department Meeting',
+        date: '',
+        time: '',
+        duration: '60',
+        location: '',
+        department: '',
+        agenda: '',
+        attendees: []
+      });
       fetchMeetings();
     } catch (error) {
-      toast.error('Failed to schedule meeting');
+      toast.error(error.response?.data?.message || 'Failed to save meeting');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleDeleteMeeting = async (meeting) => {
+    if (!window.confirm(`Delete meeting "${meeting.title}"?`)) return;
+    try {
+      await axiosInstance.delete(`/meetings/${meeting._id}`);
+      toast.success('Meeting deleted successfully');
+      fetchMeetings();
+    } catch (error) {
+      toast.error('Failed to delete meeting');
     }
   };
 
@@ -257,14 +261,14 @@ const Meetings = () => {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr><td colSpan="8" className="py-8 text-center text-gray-500">Loading...</td></tr>
+{loading ? (
+              <tr><td colSpan="8" className="py-8"><SkeletonLoader type="table" rows={3} cols="8" /></td></tr>
             ) : meetings.length === 0 ? (
               <tr><td colSpan="8" className="py-8 text-center text-gray-500">No meetings found</td></tr>
             ) : (
               meetings.map((meeting) => (
                 <tr key={meeting._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{meeting.meetingId}</td>
+                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{meeting.meetingId || meeting._id}</td>
                   <td className="py-4 px-6">
                     <div className="flex flex-col">
                       <span className="text-[13px] text-gray-800 font-medium">{meeting.title}</span>
@@ -301,14 +305,16 @@ const Meetings = () => {
                       {meeting.status === 'Upcoming' && (
                         <>
                           <button 
+                            onClick={() => { setSelectedMeeting(meeting); setFormData({ title: meeting.title, type: meeting.type, date: meeting.date ? meeting.date.split('T')[0] : '', time: meeting.time, duration: String(meeting.duration), location: meeting.location, department: meeting.department, agenda: meeting.agenda, attendees: meeting.attendees }); setIsEditing(true); setShowAddModal(true); }}
                             className="w-8 h-8 rounded-full border border-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
                             title="Edit"
                           >
                             <Edit2 size={14} />
                           </button>
                           <button 
+                            onClick={() => handleDeleteMeeting(meeting)}
                             className="w-8 h-8 rounded-full border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
-                            title="Cancel"
+                            title="Delete"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -317,7 +323,7 @@ const Meetings = () => {
                     </div>
                   </td>
                 </tr>
-              ))
+))
             )}
           </tbody>
         </table>
@@ -524,14 +530,21 @@ const Meetings = () => {
               {selectedMeeting.status === 'Upcoming' && (
                 <>
                   <button 
+                    onClick={() => {
+                      setFormData({ title: selectedMeeting.title, type: selectedMeeting.type, date: selectedMeeting.date ? selectedMeeting.date.split('T')[0] : '', time: selectedMeeting.time, duration: String(selectedMeeting.duration), location: selectedMeeting.location, department: selectedMeeting.department, agenda: selectedMeeting.agenda, attendees: selectedMeeting.attendees });
+                      setIsEditing(true);
+                      setShowViewModal(false);
+                      setShowAddModal(true);
+                    }}
                     className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium text-sm"
                   >
                     Edit Meeting
                   </button>
                   <button 
+                    onClick={() => { handleDeleteMeeting(selectedMeeting); setShowViewModal(false); }}
                     className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm"
                   >
-                    Cancel Meeting
+                    Delete Meeting
                   </button>
                 </>
               )}
