@@ -103,13 +103,13 @@ export const Header = ({ onMenuClick }) => {
           <Maximize size={20} strokeWidth={1.8} />
         </button>
 
-        <button 
+        {/* <button 
           onClick={() => navigate('/notifications')}
           className="relative text-gray-400 hover:text-gray-600 transition-colors"
         >
           <Bell size={20} strokeWidth={1.5} />
           <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-        </button>
+        </button> */}
         
         <div 
           onClick={() => navigate('/profile')}
@@ -129,7 +129,7 @@ export const Header = ({ onMenuClick }) => {
                 <div className="hidden md:block">
                   <div className="text-[13px] font-bold text-gray-800 flex items-center gap-1 font-['Inter']">
                     {userName}
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-gray-600 transition-colors"><path d="m6 9 6 6 6-6"/></svg>
+                    {/* <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-gray-600 transition-colors"><path d="m6 9 6 6 6-6"/></svg> */}
                   </div>
                   <div className="text-[11px] text-gray-500 font-medium font-['Inter']">{displayRole}</div>
                 </div>

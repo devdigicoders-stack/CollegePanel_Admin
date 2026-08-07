@@ -144,11 +144,11 @@ const Login = () => {
         </div>
 
         {/* Footer */}
-        <div className="absolute bottom-4 lg:bottom-6 left-0 w-full text-center">
+        {/* <div className="absolute bottom-4 lg:bottom-6 left-0 w-full text-center">
           <p className="text-[#9CA3AF] text-[12px] font-['Inter']">
             © 2024 Polytechnic College ERP. All rights reserved.
           </p>
-        </div>
+        </div> */}
       </div>
 
 
