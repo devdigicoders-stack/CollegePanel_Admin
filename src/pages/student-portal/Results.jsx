@@ -136,8 +136,8 @@ const Results = () => {
         <div className="space-y-3">
           <h3 className="font-bold text-gray-800 text-[14px]">Subject Grades</h3>
           {filteredResults.length > 0 ? (
-            <div className="border border-gray-100 rounded-xl overflow-hidden print:border-gray-300">
-              <table className="w-full text-left border-collapse">
+            <div className="border border-gray-100 rounded-xl overflow-x-auto custom-scrollbar print:border-gray-300">
+              <table className="w-full min-w-[500px] text-left border-collapse">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-100 print:bg-gray-100">
                     <th className="py-3 px-4 text-[12px] font-bold text-gray-800">Subject</th>

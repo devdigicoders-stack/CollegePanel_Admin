@@ -1,3 +1,4 @@
+import SkeletonLoader from '../../components/SkeletonLoader';
 const fs = require('fs');
 
 let content = fs.readFileSync('d:/Desktop/DCT_CLG_CRM/admin/src/pages/Roles.jsx', 'utf8');

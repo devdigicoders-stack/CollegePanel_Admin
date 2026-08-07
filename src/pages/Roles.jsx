@@ -374,16 +374,18 @@ const handleSavePermissions = async () => {
   if (view === 'permissions') {
     return (
       <div className="flex flex-col h-full font-['Inter']">
-        <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => setView('list')} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <ArrowLeft size={20} className="text-gray-600" />
-          </button>
-          <div className="flex-1">
-            <h2 className="text-[20px] font-bold text-gray-900">Manage Permissions</h2>
-            <p className="text-[13px] text-gray-500 mt-1">{selectedRole?.name} Role</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <button onClick={() => setView('list')} className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0">
+              <ArrowLeft size={20} className="text-gray-600" />
+            </button>
+            <div>
+              <h2 className="text-[18px] sm:text-[20px] font-bold text-gray-900 leading-tight">Manage Permissions</h2>
+              <p className="text-[12px] sm:text-[13px] text-gray-500 mt-0.5">{selectedRole?.name} Role</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] text-gray-600">
+          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pl-2 sm:pl-0">
+            <span className="text-[12px] text-gray-600 whitespace-nowrap">
               <span className="font-bold text-purple-600">
                 {Object.values(selectedPermissions).filter(Boolean).length}
               </span> / {permissionCategories.reduce((acc, cat) => acc + cat.permissions.length, 0)} selected
@@ -391,7 +393,7 @@ const handleSavePermissions = async () => {
             <button
               onClick={handleSavePermissions}
               disabled={formLoading}
-              className="px-5 py-2 text-[13px] font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors shadow-sm disabled:opacity-50"
+              className="px-5 py-2.5 sm:py-2 text-[13px] font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors shadow-sm disabled:opacity-50 whitespace-nowrap"
             >
               {formLoading ? 'Saving...' : 'Save Changes'}
             </button>

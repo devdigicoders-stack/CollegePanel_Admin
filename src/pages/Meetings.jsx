@@ -176,7 +176,7 @@ const Meetings = () => {
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-6 pt-4 pb-2 gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 pt-4 pb-2 gap-3 sm:gap-0">
         <div>
           <h2 className="text-lg font-bold text-gray-800">Meetings</h2>
           <p className="text-[13px] text-gray-500 mt-1">Schedule and manage meetings via calendar</p>
@@ -184,7 +184,7 @@ const Meetings = () => {
         {checkPermission('Add Meeting') && (
           <button 
             onClick={handleAddMeeting}
-            className="flex items-center gap-2 bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#085a46] transition-colors"
+            className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 bg-[#0A6C54] text-white px-4 py-2.5 sm:py-2 rounded-lg text-sm font-semibold hover:bg-[#085a46] transition-colors shadow-sm"
           >
             <Plus size={16} />
             Schedule Meeting
@@ -193,24 +193,24 @@ const Meetings = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-center justify-between p-6 gap-4 border-b border-gray-100">
-        <div className="relative">
+      <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 gap-4 border-b border-gray-100">
+        <div className="relative w-full sm:w-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input 
             type="text" 
             value={filters.search}
             onChange={(e) => setFilters({...filters, search: e.target.value})}
             placeholder="Search by title or organizer" 
-            className="w-[260px] bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none"
+            className="w-full sm:w-[260px] bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none"
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full">
             <select 
               value={filters.type}
               onChange={(e) => setFilters({...filters, type: e.target.value})}
-              className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-3 sm:pl-4 pr-8 sm:pr-10 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none cursor-pointer"
             >
               <option>All Types</option>
               <option>Department Meeting</option>
@@ -218,26 +218,26 @@ const Meetings = () => {
               <option>Academic Meeting</option>
               <option>Staff Meeting</option>
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+            <ChevronDown className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
           </div>
 
-          <div className="relative">
+          <div className="relative w-full">
             <select 
               value={filters.department}
               onChange={(e) => setFilters({...filters, department: e.target.value})}
-              className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer bg-white"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-3 sm:pl-4 pr-8 sm:pr-10 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none cursor-pointer bg-white"
             >
               <option>All Departments</option>
               {departments.map(dept => (
                 <option key={dept._id} value={dept.name}>{dept.name}</option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+            <ChevronDown className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
           </div>
         </div>
       </div>
 
-      <div className="flex-1 p-6 bg-[#F9FAFB] overflow-y-auto custom-scrollbar">
+      <div className="flex-1 p-4 sm:p-6 bg-[#F9FAFB] overflow-y-auto custom-scrollbar">
         {loading ? (
           <div className="p-8"><SkeletonLoader type="table" rows={6} cols={1} /></div>
         ) : (

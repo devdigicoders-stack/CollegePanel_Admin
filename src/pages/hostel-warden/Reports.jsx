@@ -188,20 +188,20 @@ const HostelReports = () => {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
       {/* Header */}
-      <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-[16px] font-bold text-gray-800">Hostel Audits & Reports Engine</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Generate real-time occupancy, discipline, and audit reports</p>
         </div>
-        <div className="flex gap-3">
-          <button onClick={handleExportExcel} disabled={reportData.length === 0} className="flex items-center gap-2 px-5 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold transition-colors">
+        <div className="flex gap-3 w-full md:w-auto">
+          <button onClick={handleExportExcel} disabled={reportData.length === 0} className="w-full md:w-auto flex justify-center items-center gap-2 px-5 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold transition-colors">
             <Download size={15} /> Export Report
           </button>
         </div>
       </div>
 
       {/* Global Occupancy Stats */}
-      <div className="px-6 py-4 border-b border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6 bg-gradient-to-br from-white to-gray-50/50">
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 bg-gradient-to-br from-white to-gray-50/50">
         <div className="bg-green-50/50 border border-green-100 rounded-xl p-4 flex items-center justify-between shadow-sm">
           <div>
             <span className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">Total Capacity</span>
@@ -226,7 +226,7 @@ const HostelReports = () => {
       </div>
 
       {/* Report Generator Controls */}
-      <div className="p-5 border-b border-gray-100 grid grid-cols-1 md:grid-cols-12 gap-4 bg-gray-50/30 items-end">
+      <div className="p-4 sm:p-5 border-b border-gray-100 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 bg-gray-50/30 items-end">
         <div className="md:col-span-4">
           <label className="block text-[12px] font-semibold text-gray-600 mb-1">Select Report Topic *</label>
           <select 

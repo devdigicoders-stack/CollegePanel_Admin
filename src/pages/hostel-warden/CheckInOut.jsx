@@ -176,7 +176,7 @@ const CheckInOut = () => {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
       {/* Tab Header */}
-      <div className="flex border-b border-gray-100 px-6 pt-2">
+      <div className="flex border-b border-gray-100 px-4 sm:px-6 pt-2 overflow-x-auto custom-scrollbar">
         {[
           { key: 'CheckIn', label: 'Student Check-In', icon: LogIn },
           { key: 'CheckOut', label: 'Student Check-Out & Clearance', icon: LogOut },
@@ -185,7 +185,7 @@ const CheckInOut = () => {
           <button
             key={key}
             onClick={() => { setActiveTab(key); setTargetStudent(null); }}
-            className={`flex items-center gap-2 px-5 py-4 text-[13px] font-semibold relative transition-colors ${activeTab === key ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex items-center gap-2 px-4 sm:px-5 py-4 text-[13px] font-semibold relative transition-colors whitespace-nowrap flex-shrink-0 ${activeTab === key ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'}`}
           >
             <Icon size={14} />
             {label}

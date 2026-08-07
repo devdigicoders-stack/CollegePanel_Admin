@@ -399,7 +399,7 @@ const Hods = () => {
                 <div className="flex items-center gap-4 mb-4">
                   {selectedHod.profileImage ? (
                     <img 
-                      src={`http://localhost:5000${selectedHod.profileImage}`} 
+                      src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${selectedHod.profileImage}`} 
                       alt={selectedHod.name} 
                       className="w-16 h-16 rounded-full object-cover border-2 border-[#0A6C54] bg-white shadow-sm"
                     />

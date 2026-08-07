@@ -124,7 +124,7 @@ const AccountLedger = () => {
           <h2 className="text-[18px] font-bold text-gray-800">Account Ledger</h2>
           <p className="text-[12px] text-gray-500 mt-0.5">Audit all debit / credit transactions by account head</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button onClick={() => { fetchData(); fetchAccounts(); }} className="p-2.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50" title="Refresh">
             <RefreshCw size={16} />
           </button>
@@ -136,7 +136,7 @@ const AccountLedger = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="px-6 py-4 border-b border-gray-100 grid grid-cols-3 gap-4">
+      <div className="px-6 py-4 border-b border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-red-50 rounded-xl p-4 flex items-center gap-3">
           <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
             <TrendingDown size={18} className="text-red-600" />
@@ -172,7 +172,7 @@ const AccountLedger = () => {
       </div>
 
       {/* Filters */}
-      <div className="px-6 py-4 border-b border-gray-100 flex flex-wrap gap-3">
+      <div className="px-6 py-4 border-b border-gray-100 flex flex-col md:flex-row gap-3">
         {/* Search */}
         <div className="flex-1 min-w-[220px] relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />

@@ -132,7 +132,7 @@ const Teachers = () => {
     setSelectedTeacher(teacher);
     setFormData(teacher);
     setSelectedImage(null);
-    setImagePreview(teacher.profileImage ? `http://localhost:5000${teacher.profileImage}` : null);
+    setImagePreview(teacher.profileImage ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${teacher.profileImage}` : null);
     setIsCreating(true);
   };
 
@@ -871,7 +871,7 @@ const Teachers = () => {
                 <div className="flex items-center gap-4 mb-4">
                   {selectedTeacher.profileImage ? (
                     <img 
-                      src={`http://localhost:5000${selectedTeacher.profileImage}`}
+                      src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${selectedTeacher.profileImage}`}
                       alt={selectedTeacher.name}
                       className="w-16 h-16 rounded-full object-cover border-2 border-[#0A6C54]"
                     />
@@ -890,14 +890,14 @@ const Teachers = () => {
                     </span>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-500">Employee ID:</span>
-                    <span className="ml-2 font-semibold text-[#0A6C54]">{selectedTeacher.empId}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm mt-4 sm:mt-0 pt-4 sm:pt-0 border-t border-[#0A6C54]/10 sm:border-none">
+                  <div className="flex flex-col sm:flex-row sm:items-center">
+                    <span className="text-gray-500 text-xs sm:text-sm">Employee ID:</span>
+                    <span className="sm:ml-2 font-semibold text-[#0A6C54] break-all">{selectedTeacher.empId}</span>
                   </div>
-                  <div>
-                    <span className="text-gray-500">Department:</span>
-                    <span className="ml-2 font-semibold text-gray-800">{selectedTeacher.department}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center">
+                    <span className="text-gray-500 text-xs sm:text-sm">Department:</span>
+                    <span className="sm:ml-2 font-semibold text-gray-800 break-words">{selectedTeacher.department}</span>
                   </div>
                 </div>
               </div>

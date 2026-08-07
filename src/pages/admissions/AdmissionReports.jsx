@@ -130,12 +130,12 @@ const AdmissionReports = () => {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
-      <div className="p-6 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
+      <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-[18px] font-bold text-gray-800">Admission Reports</h2>
           <p className="text-[12px] text-gray-500 mt-0.5">Generate and export dynamic admission reports</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button onClick={exportPDF} disabled={loading || reportData.data.length === 0} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
             <Download size={15} /> Export PDF
           </button>
@@ -146,26 +146,28 @@ const AdmissionReports = () => {
       </div>
 
       {/* Filters */}
-      <div className="px-6 py-4 border-b border-gray-100 flex flex-wrap items-end gap-4">
-        <div className="relative">
+      <div className="px-6 py-4 border-b border-gray-100 flex flex-col md:flex-row md:items-end gap-4">
+        <div className="relative w-full md:w-auto md:flex-1">
           <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Report Type</label>
           <select value={selectedReport} onChange={e => setSelectedReport(e.target.value)}
-            className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer min-w-[220px]">
+            className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer md:min-w-[220px]">
             {reportTypes.map(r => <option key={r}>{r}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-9 text-gray-400 pointer-events-none" size={14} />
         </div>
-        <div>
-          <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">From Date</label>
-          <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
-            className="px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+        <div className="flex gap-4 w-full md:w-auto">
+          <div className="flex-1">
+            <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">From Date</label>
+            <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+          </div>
+          <div className="flex-1">
+            <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">To Date</label>
+            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+          </div>
         </div>
-        <div>
-          <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">To Date</label>
-          <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
-            className="px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
-        </div>
-        <button onClick={generateReport} disabled={loading} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold disabled:opacity-70">
+        <button onClick={generateReport} disabled={loading} className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold disabled:opacity-70">
           {loading ? 'Generating...' : 'Generate Report'}
         </button>
       </div>

@@ -287,10 +287,10 @@ const LessonPlans = () => {
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
 
       {/* Header */}
-      <div className="flex justify-between items-center px-6 pt-4 pb-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-6 pt-4 pb-2 gap-3 sm:gap-4">
         <div>
           <h2 className="text-lg font-bold text-gray-800">Lesson Plans</h2>
-          <p className="text-[13px] text-gray-500 mt-1">Manage teacher lesson plans and approvals</p>
+          <p className="text-[12px] sm:text-[13px] text-gray-500 mt-1">Manage teacher lesson plans and approvals</p>
         </div>
         {canEdit && (
           <button
@@ -299,7 +299,7 @@ const LessonPlans = () => {
               semester: '', section: '', week: '', month: '', topic: '', description: '',
               objectives: '', resources: '', status: 'Pending'
             }); }}
-            className="flex items-center gap-2 bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-[13px] font-semibold hover:bg-[#085a46] transition-colors"
+            className="flex items-center justify-center sm:justify-start gap-2 bg-[#0A6C54] text-white px-4 py-2.5 sm:py-2 rounded-lg text-[13px] font-semibold hover:bg-[#085a46] transition-colors whitespace-nowrap w-full sm:w-auto shadow-sm"
           >
             <Plus size={16} />
             Add Lesson Plan

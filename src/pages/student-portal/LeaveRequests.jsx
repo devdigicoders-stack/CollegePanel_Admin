@@ -126,8 +126,8 @@ const LeaveRequests = () => {
     <div className="flex flex-col h-full font-['Inter'] bg-[#f8faf9]" style={{ minHeight: 0 }}>
 
       {/* ── Top Header ─────────────────────────────────────────── */}
-      <div className="bg-white border-b border-gray-100 px-6 pt-5 pb-4">
-        <div className="flex items-start justify-between gap-4">
+      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 pt-5 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-8 h-8 rounded-xl bg-[#0A6C54]/10 flex items-center justify-center">
@@ -139,7 +139,7 @@ const LeaveRequests = () => {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 bg-[#0A6C54] hover:bg-[#085a46] active:scale-95 text-white px-4 py-2.5 rounded-xl text-[13px] font-semibold shadow-md shadow-[#0A6C54]/20 transition-all duration-150"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto bg-[#0A6C54] hover:bg-[#085a46] active:scale-95 text-white px-4 py-2.5 rounded-xl text-[13px] font-semibold shadow-md shadow-[#0A6C54]/20 transition-all duration-150"
           >
             <Plus size={15} strokeWidth={2.5} />
             New Request
@@ -147,7 +147,7 @@ const LeaveRequests = () => {
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-3 mt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 sm:mt-5">
           {[
             { label: 'Total', value: stats.total, color: 'text-gray-700', bg: 'bg-gray-50 border-gray-100' },
             { label: 'Pending', value: stats.pending, color: 'text-amber-700', bg: 'bg-amber-50 border-amber-100' },
@@ -162,7 +162,7 @@ const LeaveRequests = () => {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex gap-2 mt-4">
+        <div className="flex flex-wrap gap-2 mt-4 sm:mt-5">
           {filters.map(f => (
             <button
               key={f}

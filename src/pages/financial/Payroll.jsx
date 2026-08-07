@@ -210,14 +210,6 @@ const Payroll = () => {
       <div className="overflow-x-auto flex-1 p-4">
         {loading ? (
           <SkeletonLoader type="table" rows={5} cols={9} />
-        ) : data.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 text-center">
-            <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mb-3">
-              <Users size={22} className="text-gray-300" />
-            </div>
-            <p className="text-gray-500 text-[14px] font-medium">No payroll records for {filterMonth}</p>
-            <p className="text-gray-400 text-[12px] mt-1">Click "Add Payroll Entry" to create one</p>
-          </div>
         ) : (
           <table className="w-full text-left border-collapse min-w-[1100px]">
             <thead>
@@ -228,38 +220,52 @@ const Payroll = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map(item => (
-                <tr key={item._id || item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-3 px-4 text-[13px] font-bold text-[#0A6C54] whitespace-nowrap">{item.empId}</td>
-                  <td className="py-3 px-4 text-[13px] font-semibold text-gray-800 whitespace-nowrap">{item.name}</td>
-                  <td className="py-3 px-4 text-[13px] text-gray-600 whitespace-nowrap">{item.designation}</td>
-                  <td className="py-3 px-4 text-[13px] text-gray-800 whitespace-nowrap">₹{(item.basic || 0).toLocaleString()}</td>
-                  <td className="py-3 px-4 text-[13px] text-green-600 font-medium whitespace-nowrap">+₹{(item.allowances || 0).toLocaleString()}</td>
-                  <td className="py-3 px-4 text-[13px] text-red-500 font-medium whitespace-nowrap">-₹{(item.deductions || 0).toLocaleString()}</td>
-                  <td className="py-3 px-4 text-[13px] font-black text-gray-900 whitespace-nowrap">₹{(item.net || 0).toLocaleString()}</td>
-                  <td className="py-3 px-4 whitespace-nowrap">
-                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusColors[item.status] || 'bg-gray-50 text-gray-600'}`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-[13px] text-gray-500 whitespace-nowrap">{item.datePaid ? formatDate(item.datePaid) : '—'}</td>
-                  <td className="py-3 px-4 whitespace-nowrap">
-                    <div className="flex gap-1">
-                      <button onClick={() => setViewPayslip(item)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500" title="View Payslip">
-                        <Eye size={14} />
-                      </button>
-                      <button onClick={() => openEdit(item)} className="p-1.5 hover:bg-blue-50 rounded-lg text-blue-500" title="Edit">
-                        <Edit2 size={14} />
-                      </button>
-                      {item.status === 'Pending' && (
-                        <button onClick={() => handleMarkPaid(item)} className="p-1.5 hover:bg-green-50 rounded-lg text-green-600" title="Mark as Paid">
-                          <CheckCircle size={14} />
-                        </button>
-                      )}
+              {data.length === 0 ? (
+                <tr>
+                  <td colSpan="10" className="py-16 text-center">
+                    <div className="flex flex-col items-center justify-center h-32 text-center">
+                      <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mb-3">
+                        <Users size={22} className="text-gray-300" />
+                      </div>
+                      <p className="text-gray-500 text-[14px] font-medium">No payroll records for {filterMonth}</p>
+                      <p className="text-gray-400 text-[12px] mt-1">Click "Add Payroll Entry" to create one</p>
                     </div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                data.map(item => (
+                  <tr key={item._id || item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <td className="py-3 px-4 text-[13px] font-bold text-[#0A6C54] whitespace-nowrap">{item.empId}</td>
+                    <td className="py-3 px-4 text-[13px] font-semibold text-gray-800 whitespace-nowrap">{item.name}</td>
+                    <td className="py-3 px-4 text-[13px] text-gray-600 whitespace-nowrap">{item.designation}</td>
+                    <td className="py-3 px-4 text-[13px] text-gray-800 whitespace-nowrap">₹{(item.basic || 0).toLocaleString()}</td>
+                    <td className="py-3 px-4 text-[13px] text-green-600 font-medium whitespace-nowrap">+₹{(item.allowances || 0).toLocaleString()}</td>
+                    <td className="py-3 px-4 text-[13px] text-red-500 font-medium whitespace-nowrap">-₹{(item.deductions || 0).toLocaleString()}</td>
+                    <td className="py-3 px-4 text-[13px] font-black text-gray-900 whitespace-nowrap">₹{(item.net || 0).toLocaleString()}</td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusColors[item.status] || 'bg-gray-50 text-gray-600'}`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-[13px] text-gray-500 whitespace-nowrap">{item.datePaid ? formatDate(item.datePaid) : '—'}</td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <div className="flex gap-1">
+                        <button onClick={() => setViewPayslip(item)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500" title="View Payslip">
+                          <Eye size={14} />
+                        </button>
+                        <button onClick={() => { setEditItem(item); setShowModal(true); }} className="p-1.5 hover:bg-blue-50 rounded-lg text-blue-500" title="Edit">
+                          <Edit2 size={14} />
+                        </button>
+                        {item.status === 'Pending' && (
+                          <button onClick={() => handleMarkPaid(item)} className="p-1.5 hover:bg-green-50 rounded-lg text-green-600" title="Mark as Paid">
+                            <CheckCircle size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         )}
@@ -354,9 +360,9 @@ const Payroll = () => {
       {/* Payslip View + Print Modal */}
       {viewPayslip && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl max-h-[95vh] flex flex-col">
             {/* Modal Header (hidden on print) */}
-            <div className="sticky top-0 bg-white border-b border-gray-100 p-4 px-6 flex items-center justify-between z-10 print:hidden">
+            <div className="bg-white border-b border-gray-100 p-4 px-6 flex flex-shrink-0 items-center justify-between z-10 print:hidden rounded-t-2xl">
               <h3 className="font-bold text-gray-800 text-[15px]">Employee Payslip</h3>
               <div className="flex gap-3">
                 <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2 rounded-lg text-[13px] font-semibold transition-colors">
@@ -369,8 +375,8 @@ const Payroll = () => {
             </div>
 
             {/* Payslip Content */}
-            <div className="p-8 sm:p-10">
-              <div className="border border-gray-200 rounded-2xl p-8 print:border-none print:rounded-none">
+            <div className="p-5 sm:p-10 overflow-y-auto flex-1">
+              <div className="border border-gray-200 rounded-2xl p-6 sm:p-8 print:border-none print:rounded-none">
                 {/* Header */}
                 <div className="text-center border-b border-dashed border-gray-200 pb-6 mb-6">
                   <h4 className="text-2xl font-black text-[#0A6C54] tracking-tight">DIGITAL COLLEGE</h4>
@@ -398,7 +404,7 @@ const Payroll = () => {
                 </div>
 
                 {/* Earnings & Deductions */}
-                <div className="grid grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                   <div>
                     <h5 className="text-[11px] font-black text-gray-600 uppercase tracking-wider mb-3 pb-1 border-b border-gray-100">Earnings</h5>
                     <div className="space-y-2">
@@ -428,7 +434,7 @@ const Payroll = () => {
                 </div>
 
                 {/* Net Salary */}
-                <div className="bg-gradient-to-r from-[#0A6C54] to-emerald-600 rounded-2xl p-5 flex justify-between items-center text-white">
+                <div className="bg-gradient-to-r from-[#0A6C54] to-emerald-600 rounded-2xl p-5 flex flex-col sm:flex-row gap-3 sm:gap-0 justify-between sm:items-center items-start text-white">
                   <div>
                     <p className="text-[11px] font-semibold opacity-80 uppercase tracking-wider">Net Salary Payable</p>
                     <p className="text-[12px] opacity-60 mt-0.5">Transfer to employee account</p>

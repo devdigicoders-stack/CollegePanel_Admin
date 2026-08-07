@@ -152,24 +152,24 @@ const Inventory = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="px-6 py-4 border-b border-gray-100 grid grid-cols-3 gap-3">
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-blue-50 rounded-xl p-3 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600"><ShoppingCart size={16} /></div>
-          <div><p className="text-[10px] text-gray-500 font-medium">Total Assets (Qty)</p><p className="text-[17px] font-bold text-blue-700">{totalAssets}</p></div>
+          <div><p className="text-[11px] sm:text-[10px] text-gray-500 font-medium">Total Assets (Qty)</p><p className="text-[18px] sm:text-[17px] font-bold text-blue-700">{totalAssets}</p></div>
         </div>
         <div className="bg-orange-50 rounded-xl p-3 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600"><PenTool size={15} /></div>
-          <div><p className="text-[10px] text-gray-500 font-medium">Needs Repair</p><p className="text-[17px] font-bold text-orange-700">{repairCount} Items</p></div>
+          <div><p className="text-[11px] sm:text-[10px] text-gray-500 font-medium">Needs Repair</p><p className="text-[18px] sm:text-[17px] font-bold text-orange-700">{repairCount} Items</p></div>
         </div>
         <div className="bg-red-50 rounded-xl p-3 flex items-center gap-3 border border-red-100/30">
           <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600"><AlertCircle size={15} /></div>
-          <div><p className="text-[10px] text-gray-500 font-medium">Damaged</p><p className="text-[17px] font-bold text-red-700">{damagedCount} Items</p></div>
+          <div><p className="text-[11px] sm:text-[10px] text-gray-500 font-medium">Damaged</p><p className="text-[18px] sm:text-[17px] font-bold text-red-700">{damagedCount} Items</p></div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="p-5 border-b border-gray-100 flex gap-3 flex-wrap bg-gray-50/30">
-        <div className="flex-1 min-w-[200px] relative">
+      <div className="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-3 bg-gray-50/30">
+        <div className="flex-1 w-full sm:min-w-[200px] relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
           <input
             type="text"
@@ -179,16 +179,18 @@ const Inventory = () => {
             className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
           />
         </div>
-        <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
-          <option value="All">All Categories</option>
-          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select value={filterCondition} onChange={(e) => setFilterCondition(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
-          <option value="All">All Conditions</option>
-          {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <div className="grid grid-cols-2 sm:flex gap-3 w-full sm:w-auto">
+          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
+            className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2.5 px-3 sm:px-4 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+            <option value="All">All Categories</option>
+            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <select value={filterCondition} onChange={(e) => setFilterCondition(e.target.value)}
+            className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2.5 px-3 sm:px-4 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+            <option value="All">All Conditions</option>
+            {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
       </div>
 
       {/* Table */}

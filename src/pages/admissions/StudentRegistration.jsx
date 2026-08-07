@@ -241,8 +241,8 @@ const StudentRegistration = () => {
       {/* Registration Modal */}
       {showModal && selectedAdmission && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-2xl">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[95vh]">
+            <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-2xl flex-shrink-0">
               <div className="flex items-center gap-3">
                  <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[14px]">
                     {selectedAdmission.name?.charAt(0).toUpperCase()}
@@ -255,74 +255,76 @@ const StudentRegistration = () => {
               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors"><X size={18} className="text-gray-500" /></button>
             </div>
 
-            {/* Student Info Preview */}
-            <div className="px-6 pt-5 pb-2">
-              <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 grid grid-cols-2 gap-4">
+            <div className="overflow-y-auto flex-1">
+              {/* Student Info Preview */}
+              <div className="px-6 pt-5 pb-2">
+                <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 grid grid-cols-2 gap-4">
+                  {[
+                    { label: 'App No.', value: selectedAdmission.appNo },
+                    { label: 'Mobile', value: selectedAdmission.mobile },
+                    { label: 'Category', value: selectedAdmission.category || 'General' },
+                    { label: 'Session', value: selectedAdmission.academicSession || '-' },
+                  ].map(item => (
+                    <div key={item.label}>
+                      <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">{item.label}</p>
+                      <p className="text-[13px] font-semibold text-gray-800">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5 pt-4">
+                <div className="md:col-span-2">
+                  <p className="text-[12px] font-medium text-gray-500 bg-gray-50 p-2.5 rounded-lg border border-gray-100">
+                    <span className="font-bold text-gray-700">Note:</span> Leave fields empty to auto-generate IDs based on college configuration.
+                  </p>
+                </div>
                 {[
-                  { label: 'App No.', value: selectedAdmission.appNo },
-                  { label: 'Mobile', value: selectedAdmission.mobile },
-                  { label: 'Category', value: selectedAdmission.category || 'General' },
-                  { label: 'Session', value: selectedAdmission.academicSession || '-' },
-                ].map(item => (
-                  <div key={item.label}>
-                    <p className="text-[11px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">{item.label}</p>
-                    <p className="text-[13px] font-semibold text-gray-800">{item.value}</p>
+                  { label: 'Enrollment No.', name: 'enrollNo', placeholder: 'e.g. ENR/2024/001' },
+                  { label: 'Student ID', name: 'studentId', placeholder: 'e.g. STU2024001' },
+                  { label: 'Roll No.', name: 'rollNo', placeholder: 'e.g. 101' },
+                ].map(f => (
+                  <div key={f.name}>
+                    <label className="block text-[12px] font-bold text-gray-700 mb-1.5">{f.label}</label>
+                    <input
+                      type="text"
+                      value={regForm[f.name]}
+                      onChange={e => setRegForm({ ...regForm, [f.name]: e.target.value })}
+                      placeholder={f.placeholder}
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] transition-shadow placeholder:text-gray-300"
+                    />
                   </div>
                 ))}
-              </div>
-            </div>
-
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="md:col-span-2">
-                <p className="text-[12px] font-medium text-gray-500 bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-                  <span className="font-bold text-gray-700">Note:</span> Leave fields empty to auto-generate IDs based on college configuration.
-                </p>
-              </div>
-              {[
-                { label: 'Enrollment No.', name: 'enrollNo', placeholder: 'e.g. ENR/2024/001' },
-                { label: 'Student ID', name: 'studentId', placeholder: 'e.g. STU2024001' },
-                { label: 'Roll No.', name: 'rollNo', placeholder: 'e.g. 101' },
-              ].map(f => (
-                <div key={f.name}>
-                  <label className="block text-[12px] font-bold text-gray-700 mb-1.5">{f.label}</label>
-                  <input
-                    type="text"
-                    value={regForm[f.name]}
-                    onChange={e => setRegForm({ ...regForm, [f.name]: e.target.value })}
-                    placeholder={f.placeholder}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] transition-shadow placeholder:text-gray-300"
-                  />
+                
+                {/* Dynamic Semesters Dropdown */}
+                <div>
+                  <label className="block text-[12px] font-bold text-gray-700 mb-1.5">Semester</label>
+                  <select
+                    value={regForm.semester}
+                    onChange={e => setRegForm({ ...regForm, semester: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  >
+                    <option value="">Select Semester</option>
+                    {semesters.map(s => <option key={s._id || s.semesterNumber} value={s.semesterNumber}>Semester {s.semesterNumber}</option>)}
+                  </select>
                 </div>
-              ))}
-              
-              {/* Dynamic Semesters Dropdown */}
-              <div>
-                <label className="block text-[12px] font-bold text-gray-700 mb-1.5">Semester</label>
-                <select
-                  value={regForm.semester}
-                  onChange={e => setRegForm({ ...regForm, semester: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
-                >
-                  <option value="">Select Semester</option>
-                  {semesters.map(s => <option key={s._id || s.semesterNumber} value={s.semesterNumber}>Semester {s.semesterNumber}</option>)}
-                </select>
-              </div>
 
-              {/* Dynamic Sections Dropdown */}
-              <div>
-                <label className="block text-[12px] font-bold text-gray-700 mb-1.5">Section</label>
-                <select
-                  value={regForm.section}
-                  onChange={e => setRegForm({ ...regForm, section: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
-                >
-                  <option value="">Select Section</option>
-                  {sections.map(s => <option key={s._id || s.name} value={s.name}>{s.name}</option>)}
-                </select>
+                {/* Dynamic Sections Dropdown */}
+                <div>
+                  <label className="block text-[12px] font-bold text-gray-700 mb-1.5">Section</label>
+                  <select
+                    value={regForm.section}
+                    onChange={e => setRegForm({ ...regForm, section: e.target.value })}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  >
+                    <option value="">Select Section</option>
+                    {sections.map(s => <option key={s._id || s.name} value={s.name}>{s.name}</option>)}
+                  </select>
+                </div>
               </div>
             </div>
 
-            <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+            <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl flex-shrink-0">
               <button onClick={() => setShowModal(false)} className="px-5 py-2.5 border border-gray-200 rounded-lg text-[13px] font-bold text-gray-600 hover:bg-gray-100 transition-colors">
                 Cancel
               </button>

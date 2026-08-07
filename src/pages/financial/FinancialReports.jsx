@@ -110,7 +110,7 @@ const FinancialReports = () => {
           <h2 className="text-[18px] font-bold text-gray-800">Financial Reports</h2>
           <p className="text-[12px] text-gray-500 mt-0.5">Generate, view, and export accounting and ledger statements</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button onClick={() => toast.success('Exporting PDF...')} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={15} /> Export PDF
           </button>
@@ -121,8 +121,8 @@ const FinancialReports = () => {
       </div>
 
       {/* Selector and Parameters */}
-      <div className="p-6 border-b border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
+      <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row gap-4">
+        <div className="w-full md:w-1/3">
           <label className="block text-[12px] font-semibold text-gray-600 mb-1">Select Report Type</label>
           <select 
             value={reportType} 
@@ -133,24 +133,26 @@ const FinancialReports = () => {
           </select>
         </div>
 
-        <div>
-          <label className="block text-[12px] font-semibold text-gray-600 mb-1">From Date</label>
-          <input 
-            type="date" 
-            value={dateRange.start}
-            onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
-            className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
-          />
-        </div>
+        <div className="flex gap-4 w-full md:w-2/3">
+          <div className="flex-1">
+            <label className="block text-[12px] font-semibold text-gray-600 mb-1">From Date</label>
+            <input 
+              type="date" 
+              value={dateRange.start}
+              onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+              className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+            />
+          </div>
 
-        <div>
-          <label className="block text-[12px] font-semibold text-gray-600 mb-1">To Date</label>
-          <input 
-            type="date" 
-            value={dateRange.end}
-            onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
-            className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
-          />
+          <div className="flex-1">
+            <label className="block text-[12px] font-semibold text-gray-600 mb-1">To Date</label>
+            <input 
+              type="date" 
+              value={dateRange.end}
+              onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+              className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+            />
+          </div>
         </div>
       </div>
 

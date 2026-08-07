@@ -252,59 +252,61 @@ const FeeStructure = () => {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-xl shadow-xl">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div className="bg-white rounded-2xl w-full max-w-xl shadow-xl flex flex-col max-h-[95vh]">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
               <h3 className="text-[16px] font-bold text-gray-800">{isViewOnly ? 'View Fee Structure' : editingItem ? 'Edit Fee Structure' : 'New Fee Structure'}</h3>
               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Course</label>
-                <select disabled={isViewOnly} value={formData.courseName} onChange={e => setFormData({ ...formData, courseName: e.target.value})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50">
-                  <option value="">Select Course</option>
-                  {coursesList.map(c => (
-                    <option key={c._id || c.name || c} value={c.name || c.courseName || c.title || c}>{c.name || c.courseName || c.title || c}</option>
-                  ))}
-                </select>
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto flex-1">
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Course</label>
+                  <select disabled={isViewOnly} value={formData.courseName} onChange={e => setFormData({ ...formData, courseName: e.target.value})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50">
+                    <option value="">Select Course</option>
+                    {coursesList.map(c => (
+                      <option key={c._id || c.name || c} value={c.name || c.courseName || c.title || c}>{c.name || c.courseName || c.title || c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Semester</label>
+                  <select disabled={isViewOnly} value={formData.semester} onChange={e => setFormData({ ...formData, semester: e.target.value})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50">
+                    <option value="">Select Semester</option>
+                    {semestersList.map(s => (
+                      <option key={s._id || s.semesterNumber || s} value={s.semesterNumber?.toString() || s.name || s.semesterName || s}>{s.semesterNumber?.toString() || s.name || s.semesterName || s}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Admission Fee</label>
+                  <input disabled={isViewOnly} type="number" placeholder="0" value={formData.admissionFee} onChange={e => setFormData({ ...formData, admissionFee: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Tuition Fee</label>
+                  <input disabled={isViewOnly} type="number" placeholder="0" value={formData.tuitionFee} onChange={e => setFormData({ ...formData, tuitionFee: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Registration Fee</label>
+                  <input disabled={isViewOnly} type="number" placeholder="0" value={formData.registrationFee} onChange={e => setFormData({ ...formData, registrationFee: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Exam Fee</label>
+                  <input disabled={isViewOnly} type="number" placeholder="0" value={formData.examFee} onChange={e => setFormData({ ...formData, examFee: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Lab Fee</label>
+                  <input disabled={isViewOnly} type="number" placeholder="0" value={formData.labFee} onChange={e => setFormData({ ...formData, labFee: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Installments</label>
+                  <input disabled={isViewOnly} type="number" placeholder="1" value={formData.installments} onChange={e => setFormData({ ...formData, installments: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Due Date</label>
+                  <input disabled={isViewOnly} type="date" value={formData.dueDate} onChange={e => setFormData({ ...formData, dueDate: e.target.value})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
+                </div>
               </div>
-              <div>
-                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Semester</label>
-                <select disabled={isViewOnly} value={formData.semester} onChange={e => setFormData({ ...formData, semester: e.target.value})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50">
-                  <option value="">Select Semester</option>
-                  {semestersList.map(s => (
-                    <option key={s._id || s.semesterNumber || s} value={s.semesterNumber?.toString() || s.name || s.semesterName || s}>{s.semesterNumber?.toString() || s.name || s.semesterName || s}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Admission Fee</label>
-                <input disabled={isViewOnly} type="number" placeholder="0" value={formData.admissionFee} onChange={e => setFormData({ ...formData, admissionFee: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
-              </div>
-              <div>
-                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Tuition Fee</label>
-                <input disabled={isViewOnly} type="number" placeholder="0" value={formData.tuitionFee} onChange={e => setFormData({ ...formData, tuitionFee: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
-              </div>
-              <div>
-                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Registration Fee</label>
-                <input disabled={isViewOnly} type="number" placeholder="0" value={formData.registrationFee} onChange={e => setFormData({ ...formData, registrationFee: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
-              </div>
-              <div>
-                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Exam Fee</label>
-                <input disabled={isViewOnly} type="number" placeholder="0" value={formData.examFee} onChange={e => setFormData({ ...formData, examFee: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
-              </div>
-              <div>
-                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Lab Fee</label>
-                <input disabled={isViewOnly} type="number" placeholder="0" value={formData.labFee} onChange={e => setFormData({ ...formData, labFee: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
-              </div>
-              <div>
-                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Installments</label>
-                <input disabled={isViewOnly} type="number" placeholder="1" value={formData.installments} onChange={e => setFormData({ ...formData, installments: e.target.value === '' ? '' : Number(e.target.value)})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Due Date</label>
-                <input disabled={isViewOnly} type="date" value={formData.dueDate} onChange={e => setFormData({ ...formData, dueDate: e.target.value})} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] disabled:opacity-70 disabled:bg-gray-50" />
-              </div>
-              <div className="md:col-span-2 flex justify-end gap-3 pt-2">
+              <div className="p-5 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0 bg-gray-50 rounded-b-2xl">
                 <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">{isViewOnly ? 'Close' : 'Cancel'}</button>
                 {!isViewOnly && (
                   <button type="submit" className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold">Save</button>

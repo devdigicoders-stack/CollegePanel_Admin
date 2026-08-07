@@ -163,7 +163,7 @@ const CashBank = () => {
       </div>
 
       {/* Summary Stats */}
-      <div className="px-6 py-4 border-b border-gray-100 grid grid-cols-3 gap-4">
+      <div className="px-6 py-4 border-b border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: 'Total Balance',  value: `₹${totalBalance.toLocaleString()}`,  color: 'bg-[#0A6C54]/5 text-[#0A6C54]',  sub: `${accounts.filter(a=>a.status==='Active').length} active accounts` },
           { label: 'Bank Accounts',  value: `₹${bankBalance.toLocaleString()}`,   color: 'bg-blue-50 text-blue-700',          sub: `${accounts.filter(a=>a.type==='Bank').length} bank accounts` },

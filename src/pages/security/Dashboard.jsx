@@ -78,21 +78,22 @@ const SecurityDashboard = () => {
 
       <div className="p-6 space-y-6 flex-1 overflow-y-auto bg-gray-50/30">
         {/* Metric Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
           {stats.map((stat, idx) => {
             const Icon = stat.icon;
             return (
-              <div key={idx} className={`bg-white border-b-4 ${stat.color} rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow`}>
-                <div className="flex justify-between items-start mb-4">
-                  <div className={`w-12 h-12 rounded-xl ${stat.iconBg} flex items-center justify-center ${stat.iconColor}`}>
-                    <Icon size={24} />
+              <div key={idx} className={`bg-white border-b-4 ${stat.color} rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow`}>
+                <div className="flex justify-between items-start mb-3 sm:mb-4">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${stat.iconBg} flex items-center justify-center ${stat.iconColor}`}>
+                    <Icon size={20} className="sm:hidden" />
+                    <Icon size={24} className="hidden sm:block" />
                   </div>
-                  <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${stat.badgeBg}`}>
+                  <span className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border ${stat.badgeBg}`}>
                     {stat.badge}
                   </span>
                 </div>
-                <h4 className="text-[28px] font-black text-gray-800">{stat.value}</h4>
-                <span className="text-[13px] text-gray-500 font-medium">{stat.label}</span>
+                <h4 className="text-[24px] sm:text-[28px] font-black text-gray-800">{stat.value}</h4>
+                <span className="text-[11px] sm:text-[13px] text-gray-500 font-medium">{stat.label}</span>
               </div>
             );
           })}

@@ -393,15 +393,15 @@ const Academics = () => {
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col md:flex-row h-full font-['Inter'] w-full overflow-hidden">
       
       {/* Inner Sidebar */}
-      <div className="w-full md:w-[240px] border-b md:border-b-0 md:border-r border-gray-100 py-2 md:py-4 flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible flex-shrink-0 custom-scrollbar">
+      <div className="w-full md:w-[240px] border-b md:border-b-0 md:border-r border-gray-100 p-4 md:p-0 md:py-4 flex flex-row md:flex-col flex-wrap md:flex-nowrap justify-start gap-2 md:gap-0 flex-shrink-0">
         {sideMenu.map((item) => (
           <button
             key={item.name}
             onClick={() => setActiveMenu(item.name)}
-            className={`w-auto md:w-full flex-shrink-0 flex items-center justify-between px-4 md:px-6 py-2.5 md:py-3.5 transition-colors text-left mx-2 md:mx-0 rounded-full md:rounded-none md:rounded-r-full ${
+            className={`w-auto md:w-full flex-shrink-0 flex items-center justify-between px-4 md:px-6 py-2 md:py-3.5 transition-all text-left rounded-full md:rounded-none md:rounded-r-full border md:border-transparent ${
               activeMenu === item.name 
-                ? 'bg-[#0A6C54] text-white font-medium' 
-                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 font-medium'
+                ? 'bg-[#0A6C54] border-[#0A6C54] text-white font-medium shadow-sm' 
+                : 'bg-white md:bg-transparent border-gray-200 text-gray-600 hover:bg-gray-50 md:hover:bg-gray-50 md:text-gray-700 font-medium'
             }`}
           >
             <span className="text-[13px] md:text-[14px] whitespace-nowrap">{item.name}</span>
@@ -413,21 +413,22 @@ const Academics = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header inside content */}
-        <div className="flex items-center justify-between p-6">
-          <h2 className="text-[18px] font-bold text-[#0A6C54] font-['Outfit']">{activeMenu}</h2>
+        <div className="flex items-center justify-between p-4 md:p-6 gap-2 border-b border-gray-100 md:border-none mb-2 md:mb-0">
+          <h2 className="text-[17px] md:text-[18px] font-bold text-[#0A6C54] font-['Outfit']">{activeMenu}</h2>
           {canManage(activeMenu) && (
             <button 
               onClick={handleAddClick}
-              className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm font-['Inter']"
+              className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-3 md:px-4 py-2 md:py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 transition-colors shadow-sm font-['Inter'] flex-shrink-0"
             >
               <Plus size={16} strokeWidth={2.5} />
-              Add {activeMenu.slice(0, -1)}
+              <span className="hidden sm:inline">Add {activeMenu.slice(0, -1)}</span>
+              <span className="sm:hidden">Add</span>
             </button>
           )}
         </div>
 
         {/* Table */}
-        <div className="flex-1 overflow-x-auto px-6 pb-6">
+        <div className="flex-1 overflow-x-auto px-4 md:px-6 pb-6">
           {loading ? (
             <SkeletonLoader type="detail" rows={5} cols={4} />
           ) : !Array.isArray(data) || data.length === 0 ? (

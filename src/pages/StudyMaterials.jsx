@@ -120,14 +120,14 @@ const StudyMaterials = () => {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
-      <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+      <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
         <div>
           <h2 className="text-[16px] font-bold text-gray-800">Study Materials Management</h2>
           <p className="text-[12px] text-gray-500 mt-0.5">Upload notes, PDFs, and video links for students</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2 rounded-xl text-[13px] font-semibold transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 sm:py-2 rounded-xl text-[13px] font-semibold transition-colors flex justify-center sm:justify-start items-center gap-2 whitespace-nowrap shadow-sm"
         >
           <Plus size={16} /> Add Material
         </button>

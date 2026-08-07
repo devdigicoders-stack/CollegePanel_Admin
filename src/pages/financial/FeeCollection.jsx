@@ -332,10 +332,10 @@ const FeeCollection = () => {
       {/* Awesome Printable Receipt Modal */}
       {printData && (
         <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 sm:p-6 print:static print:bg-transparent print:p-0 print:block">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden print:shadow-none print:max-h-none print:w-full print:overflow-visible">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] flex flex-col print:shadow-none print:max-h-none print:w-full print:block">
             
             {/* Action Bar (Hidden on Print) */}
-            <div className="sticky top-0 bg-white border-b border-gray-100 p-4 px-6 flex items-center justify-between print:hidden z-10">
+            <div className="bg-white border-b border-gray-100 p-4 px-6 flex items-center justify-between print:hidden z-10 flex-shrink-0 rounded-t-2xl">
               <h3 className="font-bold text-gray-800 text-[15px]">Fee Receipt</h3>
               <div className="flex items-center gap-3">
                 <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2 rounded-lg text-[13px] font-semibold transition-colors">
@@ -348,17 +348,17 @@ const FeeCollection = () => {
             </div>
 
             {/* Printable Content */}
-            <div className="p-8 sm:p-12 print:p-0 bg-white" id="printable-receipt">
-              <div className="border border-gray-200 rounded-2xl p-8 sm:p-10 print:border-none print:p-0">
+            <div className="p-5 sm:p-12 overflow-y-auto flex-1 print:p-0 bg-white" id="printable-receipt">
+              <div className="border border-gray-200 rounded-2xl p-6 sm:p-10 print:border-none print:p-0">
                 
                 {/* Header */}
-                <div className="flex justify-between items-start border-b border-gray-200 pb-8 mb-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-6 border-b border-gray-200 pb-6 mb-6">
                   <div>
                     <h1 className="text-2xl sm:text-3xl font-black text-[#0A6C54] tracking-tight">DIGITAL COLLEGE</h1>
                     <p className="text-[13px] text-gray-500 mt-2 font-medium">123 Education Lane, Tech City, 10001</p>
                     <p className="text-[13px] text-gray-500 mt-0.5 font-medium">Phone: +1 234 567 8900 | Email: accounts@college.edu</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-left sm:text-right">
                     <h2 className="text-xl sm:text-2xl font-bold text-gray-800 tracking-wider">FEE RECEIPT</h2>
                     <p className="text-[13px] font-semibold text-gray-600 mt-3">Receipt No: <span className="text-gray-900 font-bold">{printData.receiptNo}</span></p>
                     <p className="text-[13px] font-semibold text-gray-500 mt-0.5">Date: <span className="text-gray-800">{new Date(printData.date).toLocaleDateString('en-GB')}</span></p>
@@ -366,7 +366,7 @@ const FeeCollection = () => {
                 </div>
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-2 gap-8 mb-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 mb-8">
                   <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 print:bg-transparent print:border-none print:p-0">
                     <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-2">Student Details</p>
                     <p className="font-bold text-gray-900 text-[16px]">{printData.studentName}</p>
@@ -409,11 +409,11 @@ const FeeCollection = () => {
                 </table>
 
                 {/* Footer Signatures */}
-                <div className="flex justify-between items-end mt-16 pt-8 border-t border-gray-200">
-                  <div className="max-w-[60%]">
+                <div className="flex flex-col-reverse sm:flex-row justify-between items-center sm:items-end gap-8 mt-12 pt-6 border-t border-gray-200">
+                  <div className="max-w-full sm:max-w-[60%] text-center sm:text-left">
                     <p className="text-[11px] text-gray-500 italic">This is a computer generated receipt and does not require a physical signature.</p>
                   </div>
-                  <div className="text-center">
+                  <div className="text-center w-full sm:w-auto flex flex-col items-center">
                     <div className="w-40 border-b-2 border-gray-400 mb-2"></div>
                     <p className="text-[13px] font-bold text-gray-700">Authorized Signatory</p>
                   </div>

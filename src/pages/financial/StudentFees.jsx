@@ -171,20 +171,20 @@ const StudentFees = () => {
 
       {selectedStudent && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-3xl shadow-xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white">
+          <div className="bg-white rounded-2xl w-full max-w-3xl shadow-xl flex flex-col max-h-[95vh]">
+            <div className="p-6 border-b border-gray-100 flex items-start sm:items-center justify-between gap-4 flex-shrink-0 bg-white rounded-t-2xl">
               <div>
                 <h3 className="text-[16px] font-bold text-gray-800">{(selectedStudent.studentName || selectedStudent.name)} - Fee Ledger</h3>
                 <p className="text-[12px] text-gray-500">{selectedStudent.enrollNo} • {selectedStudent.course}</p>
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={() => navigate('/financial/fee-collection', { state: { student: selectedStudent } })} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2 rounded-lg text-[13px] font-semibold flex items-center gap-2">
-                  <Wallet size={15} /> Collect Fee
+                <button onClick={() => navigate('/financial/fee-collection', { state: { student: selectedStudent } })} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2 rounded-lg text-[13px] font-semibold flex items-center gap-2 flex-shrink-0">
+                  <Wallet size={15} /> <span className="hidden sm:inline">Collect Fee</span>
                 </button>
                 <button onClick={() => setSelectedStudent(null)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500">✕</button>
               </div>
             </div>
-            <div className="p-6 space-y-5">
+            <div className="p-6 space-y-5 overflow-y-auto flex-1">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: 'Total Fee', value: `₹${(selectedStudent.totalFee || 0).toLocaleString()}`, color: 'text-gray-800' },
@@ -200,31 +200,33 @@ const StudentFees = () => {
               </div>
               <div>
                 <h4 className="text-[14px] font-bold text-gray-800 mb-3">Payment History</h4>
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50 border-y border-gray-100">
-                      {['Date', 'Receipt No.', 'Fee Head', 'Amount', 'Mode', 'Status'].map(h => (
-                        <th key={h} className="py-2.5 px-4 text-[12px] font-bold text-gray-700">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loadingHistory ? (
-                      <tr><SkeletonLoader type="table" rows={5} cols={5} /></tr>
-                    ) : paymentHistory.length === 0 ? (
-                      <tr><td colSpan={6} className="py-4 text-center text-gray-500 text-[13px]">No payment history found</td></tr>
-                    ) : paymentHistory.map((p, idx) => (
-                      <tr key={p._id || idx} className="border-b border-gray-50">
-                        <td className="py-2.5 px-4 text-[13px] text-gray-600">{new Date(p.date).toLocaleDateString()}</td>
-                        <td className="py-2.5 px-4 text-[13px] font-semibold text-[#0A6C54]">{p.receiptNo}</td>
-                        <td className="py-2.5 px-4 text-[13px] text-gray-700">{p.feeHeads?.map(h => typeof h === 'string' ? h : h.head).join(', ') || 'Fee'}</td>
-                        <td className="py-2.5 px-4 text-[13px] font-semibold text-gray-800">₹{(p.amount || 0).toLocaleString()}</td>
-                        <td className="py-2.5 px-4 text-[13px] text-gray-600">{p.mode}</td>
-                        <td className="py-2.5 px-4"><span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${p.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>{p.status}</span></td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse whitespace-nowrap min-w-[500px]">
+                    <thead>
+                      <tr className="bg-gray-50 border-y border-gray-100">
+                        {['Date', 'Receipt No.', 'Fee Head', 'Amount', 'Mode', 'Status'].map(h => (
+                          <th key={h} className="py-2.5 px-4 text-[12px] font-bold text-gray-700">{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {loadingHistory ? (
+                        <tr><td colSpan={6}><SkeletonLoader type="table" rows={5} cols={5} /></td></tr>
+                      ) : paymentHistory.length === 0 ? (
+                        <tr><td colSpan={6} className="py-4 text-center text-gray-500 text-[13px]">No payment history found</td></tr>
+                      ) : paymentHistory.map((p, idx) => (
+                        <tr key={p._id || idx} className="border-b border-gray-50">
+                          <td className="py-2.5 px-4 text-[13px] text-gray-600">{new Date(p.date).toLocaleDateString()}</td>
+                          <td className="py-2.5 px-4 text-[13px] font-semibold text-[#0A6C54]">{p.receiptNo}</td>
+                          <td className="py-2.5 px-4 text-[13px] text-gray-700">{p.feeHeads?.map(h => typeof h === 'string' ? h : h.head).join(', ') || 'Fee'}</td>
+                          <td className="py-2.5 px-4 text-[13px] font-semibold text-gray-800">₹{(p.amount || 0).toLocaleString()}</td>
+                          <td className="py-2.5 px-4 text-[13px] text-gray-600">{p.mode}</td>
+                          <td className="py-2.5 px-4"><span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${p.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>{p.status}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>

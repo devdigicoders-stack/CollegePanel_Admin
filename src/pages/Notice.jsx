@@ -735,7 +735,7 @@ const Notice = () => {
                     {selectedNotice.attachments.map((att, i) => (
                       <a 
                         key={i} 
-                        href={`http://localhost:5000${att}`} 
+                        href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${att}`} 
                         target="_blank" 
                         rel="noreferrer"
                         className="text-[13px] text-blue-600 hover:underline flex items-center gap-2 bg-blue-50/50 p-2 rounded-lg border border-blue-100 w-fit"

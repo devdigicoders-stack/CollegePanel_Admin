@@ -203,12 +203,12 @@ const SeatManagement = () => {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
-      <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+      <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-[18px] font-bold text-gray-800">Seat Management</h2>
           <p className="text-[12px] text-gray-500 mt-0.5">Configure and track course-wise seat allocations</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button onClick={fetchSeatData} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">
             <RefreshCw size={15} /> Refresh
           </button>

@@ -146,7 +146,7 @@ const Income = () => {
           <h2 className="text-[18px] font-bold text-gray-800">Other Income</h2>
           <p className="text-[12px] text-gray-500 mt-0.5">Track and record all non-academic income sources</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button onClick={fetchData} className="p-2.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50" title="Refresh">
             <RefreshCw size={16} />
           </button>
@@ -173,26 +173,28 @@ const Income = () => {
       </div>
 
       {/* Filters */}
-      <div className="p-5 border-b border-gray-100 flex flex-wrap gap-3">
-        <div className="flex-1 min-w-[220px] relative">
+      <div className="p-5 border-b border-gray-100 flex flex-col lg:flex-row gap-3">
+        <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input type="text" placeholder="Search by source or receipt no..."
             value={search} onChange={e => setSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
         </div>
-        {[
-          { label:'Category', value:filterCategory, set:setFilterCategory, opts:categories },
-          { label:'Status',   value:filterStatus,   set:setFilterStatus,   opts:statusList },
-          { label:'Mode',     value:filterMode,     set:setFilterMode,     opts:['All', ...payModes] },
-        ].map(f => (
-          <div key={f.label} className="relative">
-            <select value={f.value} onChange={e => f.set(e.target.value)}
-              className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
-              {f.opts.map(o => <option key={o}>{o}</option>)}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
-          </div>
-        ))}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {[
+            { label:'Category', value:filterCategory, set:setFilterCategory, opts:categories },
+            { label:'Status',   value:filterStatus,   set:setFilterStatus,   opts:statusList },
+            { label:'Mode',     value:filterMode,     set:setFilterMode,     opts:['All', ...payModes] },
+          ].map(f => (
+            <div key={f.label} className="relative">
+              <select value={f.value} onChange={e => f.set(e.target.value)}
+                className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+                {f.opts.map(o => <option key={o}>{o}</option>)}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Table */}

@@ -55,7 +55,7 @@ const MeetingCalendar = ({ meetings, onDateClick, onMeetingClick }) => {
 
     // Empty cells for days before start of month
     for (let i = 0; i < startDayOfMonth; i++) {
-      cells.push(<div key={`empty-${i}`} className="min-h-[120px] bg-gray-50/50 border border-gray-100 rounded-xl" />);
+      cells.push(<div key={`empty-${i}`} className="min-h-[70px] sm:min-h-[120px] bg-gray-50/50 border border-gray-100 rounded-xl" />);
     }
 
     for (let d = 1; d <= daysInMonth; d++) {
@@ -78,7 +78,7 @@ const MeetingCalendar = ({ meetings, onDateClick, onMeetingClick }) => {
         <div 
           key={d} 
           onClick={() => onDateClick(dateStr)}
-          className={`min-h-[130px] p-2 bg-white border border-gray-100 rounded-xl transition-all duration-200 cursor-pointer flex flex-col relative group hover:shadow-lg hover:border-emerald-200 hover:-translate-y-0.5 z-10 hover:z-20
+          className={`min-h-[70px] sm:min-h-[130px] p-1 sm:p-2 bg-white border border-gray-100 rounded-lg sm:rounded-xl transition-all duration-200 cursor-pointer flex flex-col relative group hover:shadow-lg hover:border-emerald-200 hover:-translate-y-0.5 z-10 hover:z-20
             ${isToday ? 'ring-2 ring-emerald-500 bg-emerald-50/10' : ''}`}
         >
           {/* Header of the cell */}
@@ -95,7 +95,7 @@ const MeetingCalendar = ({ meetings, onDateClick, onMeetingClick }) => {
           </div>
 
           {/* Meetings list */}
-          <div className="flex-1 space-y-1.5">
+          <div className="flex-1 space-y-1.5 overflow-hidden">
             {dayMeetings.slice(0, 3).map((meeting, idx) => {
               const isPast = dateStr < todayStr;
               const statusLabel = isPast ? 'CLOSED' : 'UPCOMING';
@@ -226,9 +226,9 @@ const MeetingCalendar = ({ meetings, onDateClick, onMeetingClick }) => {
       </div>
 
       {/* Days of Week Header */}
-      <div className="grid grid-cols-7 gap-3 mb-3">
+      <div className="grid grid-cols-7 gap-1 sm:gap-3 mb-1 sm:mb-3">
         {daysOfWeek.map((day, idx) => (
-          <div key={day} className={`text-center text-[11px] font-extrabold uppercase tracking-widest py-2
+          <div key={day} className={`text-center text-[9px] sm:text-[11px] font-extrabold uppercase tracking-widest py-1 sm:py-2
             ${idx === 0 || idx === 6 ? 'text-orange-400' : 'text-gray-400'}`}>
             {day}
           </div>
@@ -236,7 +236,7 @@ const MeetingCalendar = ({ meetings, onDateClick, onMeetingClick }) => {
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-3">
+      <div className="grid grid-cols-7 gap-1 sm:gap-3">
         {renderCells()}
       </div>
       

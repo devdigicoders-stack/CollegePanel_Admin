@@ -435,8 +435,8 @@ const Examinations = () => {
 
       {/* Dashboard Tab */}
       {activeTab === 'Dashboard' && (
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {[
               { label: 'Upcoming Exams', value: stats.upcoming, icon: Calendar, color: 'bg-blue-50', iconColor: 'text-blue-500' },
               { label: 'Ongoing Exams', value: stats.ongoing, icon: Clock, color: 'bg-purple-50', iconColor: 'text-purple-500' },
@@ -453,14 +453,14 @@ const Examinations = () => {
             ].map((stat, idx) => {
               const Icon = stat.icon;
               return (
-                <div key={idx} className="bg-gradient-to-br from-white to-gray-50 p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between">
+                <div key={idx} className="bg-gradient-to-br from-white to-gray-50 p-4 sm:p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex flex-col-reverse sm:flex-row items-start sm:justify-between gap-3 sm:gap-0">
                     <div>
-                      <p className="text-[12px] text-gray-600 font-medium mb-1">{stat.label}</p>
-                      <h3 className="text-[24px] font-bold text-gray-800">{stat.value}</h3>
+                      <p className="text-[11px] sm:text-[12px] text-gray-600 font-medium mb-1 leading-tight">{stat.label}</p>
+                      <h3 className="text-[20px] sm:text-[24px] font-bold text-gray-800">{stat.value}</h3>
                     </div>
-                    <div className={`${stat.color} p-3 rounded-lg`}>
-                      <Icon className={`${stat.iconColor}`} size={20} />
+                    <div className={`${stat.color} p-2 sm:p-3 rounded-lg self-end sm:self-auto`}>
+                      <Icon className={`${stat.iconColor} w-4 h-4 sm:w-5 sm:h-5`} />
                     </div>
                   </div>
                 </div>

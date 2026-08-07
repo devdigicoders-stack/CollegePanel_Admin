@@ -1,3 +1,4 @@
+import SkeletonLoader from '../../components/SkeletonLoader';
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
@@ -232,7 +233,6 @@ const Books = () => {
             <div>
               <h2 className="text-[16px] font-bold text-gray-800">Book Inventory</h2>
               <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Add, edit, barcode and import library volumes</p>
-import SkeletonLoader from '../../components/SkeletonLoader';
             </div>
             <div className="flex gap-3">
               <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">

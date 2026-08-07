@@ -48,7 +48,7 @@ const Hostel = () => {
       if (new Date(newOuting.toDate) <= new Date(newOuting.fromDate)) {
         return toast.error('Return time must be after leaving time');
       }
-      await axiosInstance.post('/student-portal/leaves', {
+      await axiosInstance.post('/student-portal/hostel/leaves', {
         reason: newOuting.purpose,
         duration: newOuting.type,
         fromDate: newOuting.fromDate,

@@ -195,7 +195,7 @@ const Visitors = () => {
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-bold flex items-center gap-3">
                     {item.photoUrl ? (
-                      <img src={`http://localhost:5000${item.photoUrl}`} alt={item.visitorName} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
+                      <img src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${item.photoUrl}`} alt={item.visitorName} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-[11px] border border-blue-100">
                         {item.visitorName.charAt(0).toUpperCase()}

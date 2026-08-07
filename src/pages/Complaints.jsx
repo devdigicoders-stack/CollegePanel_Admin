@@ -182,7 +182,7 @@ const Complaints = () => {
         {!selectedComplaint ? (
           <>
             {/* Top Bar Filter */}
-            <div className="p-6 border-b border-gray-50 flex items-center justify-between gap-4 flex-wrap">
+            <div className="p-4 sm:p-6 border-b border-gray-50 flex items-center justify-between gap-4 flex-wrap">
               <div className="relative w-full sm:w-[300px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input 
@@ -193,11 +193,11 @@ const Complaints = () => {
                   className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
                 <select 
                   value={filters.status}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
                 >
                   <option value="All">All Status</option>
                   <option value="Pending">Pending</option>
@@ -208,7 +208,7 @@ const Complaints = () => {
                 <select 
                   value={filters.category}
                   onChange={(e) => handleFilterChange('category', e.target.value)}
-                  className="bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
                 >
                   <option value="All">All Categories</option>
                   <option value="Hostel">Hostel</option>
@@ -223,7 +223,7 @@ const Complaints = () => {
                 <select 
                   value={filters.priority}
                   onChange={(e) => handleFilterChange('priority', e.target.value)}
-                  className="bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full sm:w-auto bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] col-span-2 sm:col-span-1"
                 >
                   <option value="All">All Priority</option>
                   <option value="Urgent">Urgent</option>
@@ -327,16 +327,16 @@ const Complaints = () => {
             </div>
           </>
         ) : (
-          <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar">
             
             <div className="max-w-3xl mx-auto">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8">
                 <div>
                   <h3 className="text-[18px] font-bold text-[#022A36]">{selectedComplaint.subject}</h3>
-                  <div className="flex items-center gap-4 mt-2">
-                    <span className="text-[13px] text-gray-500 font-medium">Ticket: <span className="text-[#0A6C54] font-bold">{selectedComplaint.complaintId || selectedComplaint._id}</span></span>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
+                    <span className="text-[12px] sm:text-[13px] text-gray-500 font-medium">Ticket: <span className="text-[#0A6C54] font-bold">{selectedComplaint.complaintId || selectedComplaint._id}</span></span>
                     <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                    <span className="text-[13px] text-gray-500 font-medium">Date: {new Date(selectedComplaint.createdAt).toLocaleDateString('en-IN')}</span>
+                    <span className="text-[12px] sm:text-[13px] text-gray-500 font-medium">Date: {new Date(selectedComplaint.createdAt).toLocaleDateString('en-IN')}</span>
                     <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                     <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${getStatusColor(selectedComplaint.status)}`}>
                       {selectedComplaint.status}
@@ -345,8 +345,8 @@ const Complaints = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-50/50 border border-gray-100 rounded-xl p-6 mb-8">
-                <div className="grid grid-cols-2 gap-y-6">
+              <div className="bg-gray-50/50 border border-gray-100 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-6">
                   <div>
                     <div className="text-[12px] font-semibold text-gray-400 mb-1">Submitted By</div>
                     <div className="text-[14px] font-medium text-[#022A36]">{selectedComplaint.submittedBy}</div>
@@ -393,22 +393,22 @@ const Complaints = () => {
                   <label className="block text-[13px] font-semibold text-gray-700 mb-2">
                     Update Status
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <button
                       onClick={() => handleUpdateStatus(selectedComplaint._id, 'In Progress')}
-                      className="flex-1 bg-blue-500 text-white py-2.5 rounded-lg hover:bg-blue-600 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                      className="flex-1 bg-blue-500 text-white py-2.5 rounded-lg hover:bg-blue-600 transition-colors font-medium text-sm flex items-center justify-center gap-2 shadow-sm"
                     >
                       <Clock size={14} /> Mark In Progress
                     </button>
                     <button
                       onClick={() => handleUpdateStatus(selectedComplaint._id, 'Resolved')}
-                      className="flex-1 bg-green-500 text-white py-2.5 rounded-lg hover:bg-green-600 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                      className="flex-1 bg-green-500 text-white py-2.5 rounded-lg hover:bg-green-600 transition-colors font-medium text-sm flex items-center justify-center gap-2 shadow-sm"
                     >
                       <CheckCircle size={14} /> Mark Resolved
                     </button>
                     <button
                       onClick={() => handleUpdateStatus(selectedComplaint._id, 'Rejected')}
-                      className="flex-1 bg-red-500 text-white py-2.5 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                      className="flex-1 bg-red-500 text-white py-2.5 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm flex items-center justify-center gap-2 shadow-sm"
                     >
                       <XCircle size={14} /> Reject
                     </button>
@@ -431,25 +431,25 @@ const Complaints = () => {
               )}
 
               {/* Action Buttons */}
-              <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
+              <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <button 
                   onClick={() => setSelectedComplaint(null)}
-                  className="px-6 py-2.5 text-[13px] font-semibold text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                  className="w-full sm:w-auto px-6 py-2.5 text-[13px] font-semibold text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 whitespace-nowrap text-center"
                 >
                   Back to List
                 </button>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
                   {checkPermission('Manage Complaints') && (
                     <>
                       <button 
                         onClick={() => { setDeleteTarget(selectedComplaint); setShowDeleteModal(true); }}
-                        className="px-6 py-2.5 text-[13px] font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+                        className="w-full sm:w-auto px-6 py-2.5 text-[13px] font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200 whitespace-nowrap text-center"
                       >
                         Delete Complaint
                       </button>
                       <button 
                         onClick={handleAdminReply}
-                        className="px-8 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm flex items-center gap-2"
+                        className="w-full sm:w-auto px-6 sm:px-8 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm flex justify-center items-center gap-2 whitespace-nowrap"
                       >
                         <Send size={14} /> Submit Update
                       </button>

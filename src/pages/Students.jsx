@@ -57,6 +57,7 @@ const Students = () => {
     course: '',
     branch: '',
     year: '',
+    session: '',
     status: 'Active',
     enrollmentDate: ''
   };
@@ -108,11 +109,12 @@ const Students = () => {
   }, [filters]);
 
   useEffect(() => {
-    const init = async () => {
-      await Promise.all([fetchStaticData(), fetchStudents()]);
-    };
-    init();
-  }, []);
+    fetchStaticData();
+  }, [fetchStaticData]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [filters, fetchStudents]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
@@ -206,6 +208,7 @@ const Students = () => {
       course: student.course || '',
       branch: student.branch || '',
       year: student.year || '',
+      session: student.session || '',
       status: student.status || 'Active',
       enrollmentDate: student.enrollmentDate ? student.enrollmentDate.split('T')[0] : ''
     });
@@ -313,9 +316,9 @@ const Students = () => {
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
 
       {/* Filters Top Row */}
-      <div className="p-5 flex flex-col md:flex-row gap-4 justify-between items-center border-b border-gray-50">
-        <div className="flex flex-wrap gap-3 w-full md:w-auto">
-          <div className="relative flex-1 md:flex-none">
+      <div className="p-5 flex flex-col lg:flex-row gap-4 justify-between items-center border-b border-gray-50">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-row gap-3 w-full lg:w-auto">
+          <div className="relative w-full lg:w-36 xl:w-40">
             <select
               value={filters.branch}
               onChange={(e) => handleFilterChange('branch', e.target.value)}
@@ -329,7 +332,7 @@ const Students = () => {
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
           </div>
 
-          <div className="relative flex-1 md:flex-none">
+          <div className="relative w-full lg:w-36 xl:w-40">
             <select
               value={filters.course}
               onChange={(e) => handleFilterChange('course', e.target.value)}
@@ -343,7 +346,7 @@ const Students = () => {
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
           </div>
 
-          <div className="relative flex-1 md:flex-none">
+          <div className="relative w-full lg:w-36 xl:w-40">
             <select
               value={filters.year}
               onChange={(e) => handleFilterChange('year', e.target.value)}
@@ -357,7 +360,7 @@ const Students = () => {
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
           </div>
 
-          <div className="relative flex-1 md:flex-none">
+          <div className="relative w-full lg:w-36 xl:w-40">
             <select
               value={filters.session}
               onChange={(e) => handleFilterChange('session', e.target.value)}
@@ -371,7 +374,7 @@ const Students = () => {
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
           </div>
 
-          <div className="relative flex-1 md:flex-none">
+          <div className="relative w-full col-span-2 sm:col-span-1 lg:w-36 xl:w-40">
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -389,7 +392,7 @@ const Students = () => {
         {checkPermission('Add Student') && (
           <button
             onClick={() => { setIsAddPanelOpen(true); resetForm(); }}
-            className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
+            className="w-full lg:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
           >
             <Plus size={16} strokeWidth={2.5} />
             Add Student
@@ -450,11 +453,6 @@ const Students = () => {
       <div className="flex-1 overflow-x-auto">
         {loading ? (
           <SkeletonLoader type="table" rows={5} cols={9} />
-        ) : students.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-            <Search size={40} className="mb-3 opacity-30" />
-            <p className="text-[13px] font-medium">No students found.</p>
-          </div>
         ) : (
           <table className="w-full text-left border-collapse min-w-[950px]">
             <thead>
@@ -471,51 +469,62 @@ const Students = () => {
               </tr>
             </thead>
             <tbody>
-              {students.map((row, index) => (
-                <tr key={row._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] text-gray-600">{index + 1}</td>
-                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54] cursor-pointer hover:underline">{row.studentId}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{row.studentName}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-600">{row.branch}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-600">{row.course}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-600">{row.year}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-600">{row.phone}</td>
-                  <td className="py-4 px-6">
-                    <span className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide ${getStatusColor(row.status)}`}>
-                      {row.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => handleViewStudent(row)}
-                        className="text-gray-400 hover:text-[#0A6C54] transition-colors p-1"
-                        title="View"
-                      >
-                        <Eye size={18} strokeWidth={2} />
-                      </button>
-                      {checkPermission('Edit Student') && (
-                        <button
-                          onClick={() => handleEditStudent(row)}
-                          className="text-gray-400 hover:text-[#0A6C54] transition-colors p-1"
-                          title="Edit"
-                        >
-                          <Edit2 size={18} strokeWidth={2} />
-                        </button>
-                      )}
-                      {checkPermission('Delete Student') && (
-                        <button
-                          onClick={() => { setDeleteTarget(row); setIsDeleteConfirmOpen(true); }}
-                          className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                          title="Delete"
-                        >
-                          <Trash2 size={18} strokeWidth={2} />
-                        </button>
-                      )}
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="py-16 text-center text-gray-400">
+                    <div className="flex flex-col items-center justify-center">
+                      <Search size={40} className="mb-3 opacity-30" />
+                      <p className="text-[13px] font-medium">No students found.</p>
                     </div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                students.map((row, index) => (
+                  <tr key={row._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <td className="py-4 px-6 text-[13px] text-gray-600">{index + 1}</td>
+                    <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54] cursor-pointer hover:underline">{row.studentId}</td>
+                    <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{row.studentName}</td>
+                    <td className="py-4 px-6 text-[13px] text-gray-600">{row.branch}</td>
+                    <td className="py-4 px-6 text-[13px] text-gray-600">{row.course}</td>
+                    <td className="py-4 px-6 text-[13px] text-gray-600">{row.year}</td>
+                    <td className="py-4 px-6 text-[13px] text-gray-600">{row.phone}</td>
+                    <td className="py-4 px-6">
+                      <span className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide ${getStatusColor(row.status)}`}>
+                        {row.status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleViewStudent(row)}
+                          className="text-gray-400 hover:text-[#0A6C54] transition-colors p-1"
+                          title="View"
+                        >
+                          <Eye size={18} strokeWidth={2} />
+                        </button>
+                        {checkPermission('Edit Student') && (
+                          <button
+                            onClick={() => handleEditStudent(row)}
+                            className="text-gray-400 hover:text-[#0A6C54] transition-colors p-1"
+                            title="Edit"
+                          >
+                            <Edit2 size={18} strokeWidth={2} />
+                          </button>
+                        )}
+                        {checkPermission('Delete Student') && (
+                          <button
+                            onClick={() => { setDeleteTarget(row); setIsDeleteConfirmOpen(true); }}
+                            className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                            title="Delete"
+                          >
+                            <Trash2 size={18} strokeWidth={2} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         )}
@@ -639,7 +648,7 @@ const Students = () => {
                       <div className="relative">
                         <select name="course" value={formData.course} onChange={handleInputChange} required className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Course</option>
-                          {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
+                          {filterOptions.courses.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
@@ -649,7 +658,7 @@ const Students = () => {
                       <div className="relative">
                         <select name="branch" value={formData.branch} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Branch</option>
-                          {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
+                          {filterOptions.branches.map(b => <option key={b} value={b}>{b}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
@@ -659,8 +668,8 @@ const Students = () => {
                       <div className="relative">
                         <select name="year" value={formData.year} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Year/Sem</option>
-                          {semesters.map(s => (
-                            <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber} ({s.courseName})</option>
+                          {filterOptions.years.map(y => (
+                            <option key={y} value={y}>{y}</option>
                           ))}
                           <option value="1st Year">1st Year</option>
                           <option value="2nd Year">2nd Year</option>
@@ -669,6 +678,13 @@ const Students = () => {
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Session / Batch</label>
+                      <input type="text" name="session" list="session-options" value={formData.session} onChange={handleInputChange} placeholder="e.g. 2023-2027" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white placeholder:text-gray-400" />
+                      <datalist id="session-options">
+                        {filterOptions.sessions.map(s => <option key={s} value={s} />)}
+                      </datalist>
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Status</label>
@@ -773,7 +789,7 @@ const Students = () => {
                       <div className="relative">
                         <select name="course" value={editFormData.course} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Course</option>
-                          {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
+                          {filterOptions.courses.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
@@ -783,7 +799,7 @@ const Students = () => {
                       <div className="relative">
                         <select name="branch" value={editFormData.branch} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Branch</option>
-                          {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
+                          {filterOptions.branches.map(b => <option key={b} value={b}>{b}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
@@ -793,8 +809,8 @@ const Students = () => {
                       <div className="relative">
                         <select name="year" value={editFormData.year} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Year/Sem</option>
-                          {semesters.map(s => (
-                            <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber} ({s.courseName})</option>
+                          {filterOptions.years.map(y => (
+                            <option key={y} value={y}>{y}</option>
                           ))}
                           <option value="1st Year">1st Year</option>
                           <option value="2nd Year">2nd Year</option>
@@ -803,6 +819,10 @@ const Students = () => {
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Session / Batch</label>
+                      <input type="text" name="session" list="session-options" value={editFormData.session} onChange={handleEditInputChange} placeholder="e.g. 2023-2027" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white placeholder:text-gray-400" />
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Status</label>
@@ -864,18 +884,22 @@ const Students = () => {
                     </span>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4 text-sm mt-4 pt-4 border-t border-[#0A6C54]/10">
-                  <div>
-                    <span className="text-gray-500 font-medium">Enrollment No:</span>
-                    <span className="ml-2 font-bold text-gray-800">{selectedStudent.studentId}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm mt-4 pt-4 border-t border-[#0A6C54]/10">
+                  <div className="flex flex-col sm:flex-row sm:items-center">
+                    <span className="text-gray-500 font-medium text-[11px] sm:text-sm">Enrollment No:</span>
+                    <span className="sm:ml-2 font-bold text-gray-800 break-all">{selectedStudent.studentId}</span>
                   </div>
-                  <div>
-                    <span className="text-gray-500 font-medium">Year:</span>
-                    <span className="ml-2 font-bold text-gray-800">{selectedStudent.year}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center">
+                    <span className="text-gray-500 font-medium text-[11px] sm:text-sm">Year:</span>
+                    <span className="sm:ml-2 font-bold text-gray-800">{selectedStudent.year}</span>
                   </div>
-                  <div>
-                    <span className="text-gray-500 font-medium">Enrollment Date:</span>
-                    <span className="ml-2 font-bold text-gray-800">{selectedStudent.enrollmentDate ? new Date(selectedStudent.enrollmentDate).toLocaleDateString() : 'N/A'}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center">
+                    <span className="text-gray-500 font-medium text-[11px] sm:text-sm">Session:</span>
+                    <span className="sm:ml-2 font-bold text-gray-800">{selectedStudent.session || 'N/A'}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center">
+                    <span className="text-gray-500 font-medium text-[11px] sm:text-sm">Enrollment Date:</span>
+                    <span className="sm:ml-2 font-bold text-gray-800">{selectedStudent.enrollmentDate ? new Date(selectedStudent.enrollmentDate).toLocaleDateString() : 'N/A'}</span>
                   </div>
                 </div>
               </div>
@@ -935,7 +959,7 @@ const Students = () => {
                   {/* Portal Credentials */}
                   <div className="pt-4 mt-4 border-t border-gray-100">
                     <h6 className="text-[11px] font-semibold text-[#0A6C54] uppercase tracking-wider mb-3">Portal Credentials</h6>
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
                       <div className="flex-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
                         <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">Username</label>
                         <p className="text-[13px] font-bold text-gray-800">{selectedStudent.username || 'N/A'}</p>
@@ -1044,7 +1068,7 @@ const Students = () => {
                           </div>
                         </div>
                         {doc.url ? (
-                          <a href={doc.url.startsWith('http') ? doc.url : `http://localhost:5000${doc.url.startsWith('/') ? doc.url : '/' + doc.url}`} target="_blank" rel="noopener noreferrer" className="mt-auto block w-full text-center px-3 py-2 text-[12px] font-bold text-[#0A6C54] bg-[#0A6C54]/5 border border-[#0A6C54]/20 rounded-lg hover:bg-[#0A6C54] hover:text-white transition-all">
+                          <a href={doc.url.startsWith('http') ? doc.url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${doc.url.startsWith('/') ? doc.url : '/' + doc.url}`} target="_blank" rel="noopener noreferrer" className="mt-auto block w-full text-center px-3 py-2 text-[12px] font-bold text-[#0A6C54] bg-[#0A6C54]/5 border border-[#0A6C54]/20 rounded-lg hover:bg-[#0A6C54] hover:text-white transition-all">
                             View Document
                           </a>
                         ) : (
