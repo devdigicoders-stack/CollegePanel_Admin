@@ -1,18 +1,40 @@
+import React, { useState, useEffect } from 'react';
 import { Users, ClipboardList, AlertTriangle, MessageSquare, ShoppingBag, Coffee, ChevronRight } from 'lucide-react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import axiosInstance from '../../utils/axiosInstance';
+import toast from 'react-hot-toast';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const HCReact = HighchartsReact.default || HighchartsReact;
 
 const MessDashboard = () => {
-  const stats = [
-    { label: 'Total Mess Students', value: '380', icon: Users, color: 'bg-blue-50', iconColor: 'text-blue-500' },
-    { label: 'Breakfast Served Today', value: '312', icon: Coffee, color: 'bg-green-50', iconColor: 'text-green-500' },
-    { label: 'Lunch Served Today', value: '345', icon: Coffee, color: 'bg-indigo-50', iconColor: 'text-indigo-500' },
-    { label: 'Dinner Served Today', value: '320', icon: Coffee, color: 'bg-purple-50', iconColor: 'text-purple-500' },
-    { label: 'Low Stock Alerts', value: '4 Items', icon: AlertTriangle, color: 'bg-red-50', iconColor: 'text-red-500' },
+  const [stats, setStats] = useState({
+    activeMembers: 0,
+    lowStockItems: 0,
+    todaysMenu: null
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const res = await axiosInstance.get('/mess/dashboard-stats');
+        setStats(res.data);
+      } catch (error) {
+        toast.error('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const statCards = [
+    { label: 'Total Mess Students', value: stats.activeMembers, icon: Users, color: 'bg-blue-50', iconColor: 'text-blue-500' },
+    { label: 'Low Stock Alerts', value: `${stats.lowStockItems} Items`, icon: AlertTriangle, color: 'bg-red-50', iconColor: 'text-red-500' },
     { label: 'Pending Purchases', value: '3 Requests', icon: ShoppingBag, color: 'bg-orange-50', iconColor: 'text-orange-500' },
-    { label: 'Active Complaints', value: '5 Open', icon: MessageSquare, color: 'bg-amber-50', iconColor: 'text-amber-500' },
     { label: 'Daily Cost (Est.)', value: '₹14,500', icon: ClipboardList, color: 'bg-teal-50', iconColor: 'text-teal-500' },
   ];
 
@@ -32,14 +54,14 @@ const MessDashboard = () => {
   return (
     <div className="space-y-6 font-['Inter']">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {stats.map((stat, idx) => {
+        {statCards.map((stat, idx) => {
           const Icon = stat.icon;
           return (
             <div key={idx} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-[12px] text-gray-500 font-semibold uppercase tracking-wider">{stat.label}</p>
-                  <h3 className="text-[22px] font-bold text-gray-800 mt-2">{stat.value}</h3>
+                  <h3 className="text-[22px] font-bold text-gray-800 mt-2">{loading ? '...' : stat.value}</h3>
                 </div>
                 <div className={`${stat.color} p-3 rounded-lg`}>
                   <Icon className={stat.iconColor} size={20} />
@@ -59,17 +81,23 @@ const MessDashboard = () => {
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
           <h3 className="text-[14px] font-bold text-gray-800 font-semibold uppercase tracking-wider">Today's Menu Overview</h3>
           <div className="space-y-3">
-            {[
-              { meal: 'Breakfast (07:30 AM - 09:00 AM)', items: 'Aloo Paratha, Curd, Pickle, Tea' },
-              { meal: 'Lunch (12:30 PM - 02:00 PM)', items: 'Jeera Rice, Dal Fry, Roti, Paneer Butter Masala, Salad' },
-              { meal: 'Snacks (05:00 PM - 06:00 PM)', items: 'Samosa, Mint Chutney, Tea' },
-              { meal: 'Dinner (08:00 PM - 09:30 PM)', items: 'Veg Pulav, Tawa Roti, Mix Veg Sabzi, Custard' },
-            ].map((menu, idx) => (
-              <div key={idx} className="p-3 bg-gray-50 rounded-lg text-[13px] border border-gray-100">
-                <h4 className="font-bold text-gray-800">{menu.meal}</h4>
-                <p className="text-[12px] text-gray-600 mt-1">{menu.items}</p>
-              </div>
-            ))}
+            {loading ? (
+              <SkeletonLoader type="list" rows={4} />
+            ) : !stats.todaysMenu ? (
+              <p className="text-[13px] text-gray-500">No menu configured for today.</p>
+            ) : (
+              [
+                { meal: 'Breakfast (07:30 AM - 09:00 AM)', items: stats.todaysMenu.breakfast },
+                { meal: 'Lunch (12:30 PM - 02:00 PM)', items: stats.todaysMenu.lunch },
+                { meal: 'Snacks (05:00 PM - 06:00 PM)', items: stats.todaysMenu.snacks },
+                { meal: 'Dinner (08:00 PM - 09:30 PM)', items: stats.todaysMenu.dinner },
+              ].map((menu, idx) => (
+                <div key={idx} className="p-3 bg-gray-50 rounded-lg text-[13px] border border-gray-100">
+                  <h4 className="font-bold text-gray-800">{menu.meal}</h4>
+                  <p className="text-[12px] text-gray-600 mt-1">{menu.items}</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

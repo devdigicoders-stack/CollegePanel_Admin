@@ -3,8 +3,13 @@ import { ChevronLeft, ChevronRight, Eye, Search, Filter, CheckCircle, XCircle, A
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
 
 const Complaints = () => {
+  if (!checkPermission('View Students') && !checkPermission('View Employees')) {
+    return <AccessDenied />;
+  }
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -20,6 +25,7 @@ const Complaints = () => {
   });
   const [filterDepartment, setFilterDepartment] = useState('All');
   const [filterAudience, setFilterAudience] = useState('All Audiences');
+  const [adminReplyText, setAdminReplyText] = useState('');
   const searchTimeout = useRef(null);
 
   useEffect(() => {
@@ -64,6 +70,7 @@ const Complaints = () => {
 
   const handleViewComplaint = (complaint) => {
     setSelectedComplaint(complaint);
+    setAdminReplyText('');
     setShowViewModal(true);
   };
 
@@ -96,7 +103,7 @@ const Complaints = () => {
     try {
       await axiosInstance.put(`/complaints/${selectedComplaint._id}`, {
         status: 'Resolved',
-        adminReply: 'Your complaint has been reviewed and resolved.'
+        adminReply: adminReplyText || 'Your complaint has been reviewed and resolved.'
       });
       toast.success('Complaint resolved successfully');
       setShowViewModal(false);
@@ -381,7 +388,7 @@ const Complaints = () => {
                 </div>
               </div>
 
-              {selectedComplaint.status !== 'Resolved' && selectedComplaint.status !== 'Rejected' && (
+              {checkPermission('Manage Complaints') && selectedComplaint.status !== 'Resolved' && selectedComplaint.status !== 'Rejected' && (
                 <div className="mb-6">
                   <label className="block text-[13px] font-semibold text-gray-700 mb-2">
                     Update Status
@@ -409,15 +416,19 @@ const Complaints = () => {
                 </div>
               )}
 
-              <div className="mb-8">
-                <label className="block text-[13px] font-semibold text-gray-700 mb-2">
-                  Admin Reply / Resolution Notes
-                </label>
-                <textarea 
-                  placeholder="Write your response here..." 
-                  className="w-full bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm min-h-[120px] resize-none"
-                ></textarea>
-              </div>
+              {checkPermission('Manage Complaints') && (
+                <div className="mb-8">
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">
+                    Admin Reply / Resolution Notes
+                  </label>
+                  <textarea 
+                    value={adminReplyText}
+                    onChange={(e) => setAdminReplyText(e.target.value)}
+                    placeholder="Write your response here..." 
+                    className="w-full bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm min-h-[120px] resize-none"
+                  ></textarea>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
@@ -428,18 +439,22 @@ const Complaints = () => {
                   Back to List
                 </button>
                 <div className="flex gap-3">
-                  <button 
-                    onClick={() => { setDeleteTarget(selectedComplaint); setShowDeleteModal(true); }}
-                    className="px-6 py-2.5 text-[13px] font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
-                  >
-                    Delete Complaint
-                  </button>
-                  <button 
-                    onClick={handleAdminReply}
-                    className="px-8 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm flex items-center gap-2"
-                  >
-                    <Send size={14} /> Submit Update
-                  </button>
+                  {checkPermission('Manage Complaints') && (
+                    <>
+                      <button 
+                        onClick={() => { setDeleteTarget(selectedComplaint); setShowDeleteModal(true); }}
+                        className="px-6 py-2.5 text-[13px] font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+                      >
+                        Delete Complaint
+                      </button>
+                      <button 
+                        onClick={handleAdminReply}
+                        className="px-8 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm flex items-center gap-2"
+                      >
+                        <Send size={14} /> Submit Update
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

@@ -27,6 +27,7 @@ import InternalMarks from './pages/InternalMarks';
 import FacultyAttendance from './pages/FacultyAttendance';
 import Timetable from './pages/Timetable';
 import Assignments from './pages/Assignments';
+import StudyMaterials from './pages/StudyMaterials';
 import Meetings from './pages/Meetings';
 
 // Admissions Pages
@@ -224,6 +225,7 @@ function App() {
                 <Route path="/faculty-attendance" element={<FacultyAttendance />} />
                 <Route path="/timetable" element={<Timetable />} />
                 <Route path="/assignments" element={<Assignments />} />
+                <Route path="/study-materials" element={<StudyMaterials />} />
                 <Route path="/meetings" element={<Meetings />} />
 
                 {/* Admissions Specific Routes */}

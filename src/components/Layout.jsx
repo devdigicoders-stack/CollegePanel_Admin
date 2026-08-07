@@ -1,14 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { X, AlertTriangle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import axiosInstance from '../utils/axiosInstance';
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [permissionsKey, setPermissionsKey] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const syncPermissions = async () => {
+      try {
+        const res = await axiosInstance.get('/college-admin/me');
+        const latestData = res.data;
+        const currentInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+        
+        const latestPerms = latestData.permissions || [];
+        const currentPerms = currentInfo.permissions || [];
+        
+        // Check if permissions have changed
+        const isIdentical = latestPerms.length === currentPerms.length &&
+          latestPerms.every((val, index) => val === currentPerms[index]);
+          
+        if (!isIdentical) {
+          const updatedInfo = { ...currentInfo, permissions: latestPerms };
+          localStorage.setItem('admin_info', JSON.stringify(updatedInfo));
+          setPermissionsKey(JSON.stringify(latestPerms));
+        }
+      } catch (error) {
+        console.error('Failed to sync permissions:', error);
+      }
+    };
+    
+    syncPermissions();
+  }, [location.pathname]);
 
   const handleLogoutConfirm = () => {
     // Clear all auth data from localStorage
@@ -43,7 +73,7 @@ const Layout = ({ children }) => {
         fixed md:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out h-full
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <Sidebar isOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} onLogoutClick={() => setShowLogoutModal(true)} />
+        <Sidebar key={permissionsKey} isOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} onLogoutClick={() => setShowLogoutModal(true)} />
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden w-full">

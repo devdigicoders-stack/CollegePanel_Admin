@@ -1,13 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Search, ChevronDown, Eye, Check, X as XIcon, 
-  ChevronLeft, ChevronRight, Calendar, User, FileText, AlertTriangle, Trash2
+  ChevronLeft, ChevronRight, AlertTriangle, Trash2
 } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
 
 const LeaveRequests = () => {
+  if (!checkPermission('View Students') && !checkPermission('View Attendance')) {
+    return <AccessDenied />;
+  }
   const [activeTab, setActiveTab] = useState('Pending');
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +57,7 @@ const LeaveRequests = () => {
   const fetchDepartments = async () => {
     try {
       const res = await axiosInstance.get('/academics/departments');
-      setDepartments(res.data.data || []);
+      setDepartments(res.data.data || res.data || []);
     } catch (error) {
       console.error('Failed to fetch departments', error);
     }
@@ -61,7 +66,7 @@ const LeaveRequests = () => {
   const fetchEmployees = async () => {
     try {
       const res = await axiosInstance.get('/leave-requests/employees');
-      setEmployees(res.data || []);
+      setEmployees(res.data.data || res.data || []);
     } catch (error) {
       console.error('Failed to fetch employees', error);
     }
@@ -211,6 +216,10 @@ const LeaveRequests = () => {
     }
   };
 
+  const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+  const userRole = adminInfo.role || 'college_admin';
+  const canEdit = userRole === 'college_admin' || userRole === 'HR' || userRole === 'Principal' || userRole === 'HOD';
+
   return (
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
 
@@ -342,7 +351,7 @@ const LeaveRequests = () => {
                     >
                       <Eye size={14} strokeWidth={2} />
                     </button>
-                    {row.status === 'Pending' && (
+                    {canEdit && row.status === 'Pending' && (
                       <>
                         <button
                           onClick={() => handleApproveClick(row)}

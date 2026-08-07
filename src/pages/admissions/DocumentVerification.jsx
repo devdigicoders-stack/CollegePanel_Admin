@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Search, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Search, CheckCircle, XCircle, AlertCircle, Eye } from 'lucide-react';
 import axios from 'axios';
 import SkeletonLoader from '../../components/SkeletonLoader';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
 
 const docStatusColors = {
   'Verified': 'bg-green-100 text-green-700',
@@ -13,6 +15,9 @@ const docStatusColors = {
 };
 
 const DocumentVerification = () => {
+  if (!checkPermission('View Admissions') && !checkPermission('Approve Admission')) {
+    return <AccessDenied />;
+  }
   const [admissions, setAdmissions] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -108,24 +113,34 @@ const DocumentVerification = () => {
                           {doc.status}
                         </span>
                         {doc.status !== 'Not Uploaded' && doc.status !== 'Not Applicable' && (
-                          <div className="flex gap-1 mt-2">
+                          <div className="flex gap-1 mt-3">
+                            {doc.url && (
+                              <a
+                                href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${doc.url}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1.5 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors" title="View Document"
+                              >
+                                <Eye size={14} className="text-blue-600" />
+                              </a>
+                            )}
                             <button
                               onClick={() => handleDocStatus(student._id, doc._id, 'Verified')}
-                              className="p-1 hover:bg-green-100 rounded" title="Verify"
+                              className="p-1.5 bg-green-50 hover:bg-green-100 rounded-md transition-colors" title="Verify"
                             >
-                              <CheckCircle size={12} className="text-green-600" />
+                              <CheckCircle size={14} className="text-green-600" />
                             </button>
                             <button
                               onClick={() => handleDocStatus(student._id, doc._id, 'Rejected')}
-                              className="p-1 hover:bg-red-100 rounded" title="Reject"
+                              className="p-1.5 bg-red-50 hover:bg-red-100 rounded-md transition-colors" title="Reject"
                             >
-                              <XCircle size={12} className="text-red-600" />
+                              <XCircle size={14} className="text-red-600" />
                             </button>
                             <button
                               onClick={() => handleDocStatus(student._id, doc._id, 'Correction Required')}
-                              className="p-1 hover:bg-yellow-100 rounded" title="Request Correction"
+                              className="p-1.5 bg-yellow-50 hover:bg-yellow-100 rounded-md transition-colors" title="Request Correction"
                             >
-                              <AlertCircle size={12} className="text-yellow-600" />
+                              <AlertCircle size={14} className="text-yellow-600" />
                             </button>
                           </div>
                         )}

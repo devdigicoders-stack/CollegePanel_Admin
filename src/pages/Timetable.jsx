@@ -7,11 +7,16 @@ import {
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const Timetable = () => {
+  if (!checkPermission('View Courses') && !checkPermission('Manage Courses')) {
+    return <AccessDenied />;
+  }
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -702,28 +707,45 @@ const Timetable = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Course</label>
-                  <input
-                    type="text"
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Course *</label>
+                  <select
                     name="course"
                     value={formData.course}
                     onChange={handleInputChange}
-                    placeholder="e.g., Diploma in CE"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
-                  />
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  >
+                    <option value="">Select Course</option>
+                    {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Semester</label>
-                  <input
-                    type="text"
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Semester *</label>
+                  <select
                     name="semester"
                     value={formData.semester}
                     onChange={handleInputChange}
-                    placeholder="e.g., 3rd"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
-                  />
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  >
+                    <option value="">Select Sem</option>
+                    {semesters.map(s => <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Section *</label>
+                  <select
+                    name="section"
+                    value={formData.section}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  >
+                    <option value="">Select Sec</option>
+                    {sections.map(s => <option key={s._id} value={s.name}>{s.name}</option>)}
+                  </select>
                 </div>
               </div>
 
@@ -826,6 +848,48 @@ const Timetable = () => {
                   >
                     <option value="Theory">Theory</option>
                     <option value="Lab">Lab</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Course *</label>
+                  <select
+                    name="course"
+                    value={editFormData.course || ''}
+                    onChange={handleEditInputChange}
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  >
+                    <option value="">Select Course</option>
+                    {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Semester *</label>
+                  <select
+                    name="semester"
+                    value={editFormData.semester || ''}
+                    onChange={handleEditInputChange}
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  >
+                    <option value="">Select Sem</option>
+                    {semesters.map(s => <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Section *</label>
+                  <select
+                    name="section"
+                    value={editFormData.section || ''}
+                    onChange={handleEditInputChange}
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  >
+                    <option value="">Select Sec</option>
+                    {sections.map(s => <option key={s._id} value={s.name}>{s.name}</option>)}
                   </select>
                 </div>
               </div>

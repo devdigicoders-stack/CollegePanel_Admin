@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, ChevronDown, Edit, Trash2, X, AlertTriangle, Eye, User, Lock, Upload } from 'lucide-react';
+import { Plus, Search, ChevronDown, Edit, Trash2, X, AlertTriangle, Eye, User, Lock, Upload, Copy } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
+import Swal from 'sweetalert2';
 
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
@@ -115,12 +117,49 @@ const Employees = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
+      const submitData = new FormData();
+      Object.keys(formData).forEach(key => {
+        if (formData[key] !== null && formData[key] !== undefined) {
+          submitData.append(key, formData[key]);
+        }
+      });
+      
+      const config = {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      };
+
       if (isEditing) {
-        await axiosInstance.put(`/employees/${selectedEmployee._id}`, formData);
+        await axiosInstance.put(`/employees/${selectedEmployee._id}`, submitData, config);
         toast.success('Employee updated successfully');
       } else {
-        await axiosInstance.post('/employees', formData);
-        toast.success('Employee created successfully');
+        const res = await axiosInstance.post('/employees', submitData, config);
+        const newEmp = res.data.data;
+        
+        // Show credentials popup for new employee
+        Swal.fire({
+          title: 'Employee Created!',
+          html: `
+            <div style="text-align: left; margin-top: 15px;">
+              <p style="margin-bottom: 8px;"><strong>Name:</strong> ${newEmp.name}</p>
+              <p style="margin-bottom: 8px;"><strong>Role:</strong> ${newEmp.role}</p>
+              <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 15px;">
+                <p style="margin-bottom: 8px;"><strong>Username:</strong> <span style="color: #0A6C54; font-weight: 600;">${newEmp.username}</span></p>
+                <p style="margin-bottom: 0;"><strong>Password:</strong> <span style="color: #0A6C54; font-weight: 600;">${newEmp.password}</span></p>
+              </div>
+              <p style="font-size: 12px; color: #64748b; margin-top: 10px;">Please copy and share these credentials securely.</p>
+            </div>
+          `,
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonText: 'Copy Credentials',
+          cancelButtonText: 'Close',
+          confirmButtonColor: '#0A6C54'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigator.clipboard.writeText(`Login Details for ${newEmp.name}\nUsername: ${newEmp.username}\nPassword: ${newEmp.password}\nPortal URL: ${window.location.origin}`);
+            toast.success('Credentials copied to clipboard!');
+          }
+        });
       }
       setShowModal(false);
       setFormData({});
@@ -222,13 +261,15 @@ const Employees = () => {
           </div>
         </div>
 
-        <button 
-          onClick={handleAddClick}
-          className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
-        >
-          <Plus size={16} strokeWidth={2.5} />
-          Add Employee
-        </button>
+        {checkPermission('Add Employee') && (
+          <button 
+            onClick={handleAddClick}
+            className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
+          >
+            <Plus size={16} strokeWidth={2.5} />
+            Add Employee
+          </button>
+        )}
       </div>
 
       {/* Search Row */}
@@ -290,20 +331,24 @@ const Employees = () => {
                       >
                         <Eye size={14} strokeWidth={2} />
                       </button>
-                      <button 
-                        onClick={() => handleEditClick(employee)}
-                        className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm flex-shrink-0"
-                        title="Edit"
-                      >
-                        <Edit size={14} strokeWidth={2} />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteClick(employee)}
-                        className="w-8 h-8 rounded border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm bg-red-50/50 flex-shrink-0"
-                        title="Delete"
-                      >
-                        <Trash2 size={14} strokeWidth={2} />
-                      </button>
+                      {checkPermission('Edit Employee') && (
+                        <button 
+                          onClick={() => handleEditClick(employee)}
+                          className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm flex-shrink-0"
+                          title="Edit"
+                        >
+                          <Edit size={14} strokeWidth={2} />
+                        </button>
+                      )}
+                      {checkPermission('Delete Employee') && (
+                        <button 
+                          onClick={() => handleDeleteClick(employee)}
+                          className="w-8 h-8 rounded border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm bg-red-50/50 flex-shrink-0"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} strokeWidth={2} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -716,6 +761,13 @@ const ViewEmployeeModal = ({ employee, onClose }) => {
               <InfoRow label="Email" value={employee.email || 'N/A'} />
               <InfoRow label="Mobile" value={employee.mobile || 'N/A'} />
               {employee.address && <InfoRow label="Address" value={employee.address} />}
+            </div>
+
+            {/* Login Credentials */}
+            <h5 className="text-sm font-bold text-gray-700 mt-6 mb-4 pb-2 border-b border-gray-200">Login Credentials</h5>
+            <div className="space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <InfoRow label="Username" value={<span className="font-semibold text-[#0A6C54]">{employee.username || 'Not Generated'}</span>} />
+              <InfoRow label="Password" value={<span className="font-semibold text-[#0A6C54]">{employee.password || 'Not Generated'}</span>} />
             </div>
           </div>
 

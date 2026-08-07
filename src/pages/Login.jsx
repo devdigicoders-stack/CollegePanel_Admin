@@ -121,7 +121,7 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-1 pb-1 lg:pt-2 lg:pb-2">
+            {/* <div className="flex items-center justify-between pt-1 pb-1 lg:pt-2 lg:pb-2">
               <label className="flex items-center cursor-pointer group">
                 <div className="relative flex items-center">
                   <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-[#0A6C54] focus:ring-[#0A6C54] accent-[#0A6C54] cursor-pointer" />
@@ -131,7 +131,7 @@ const Login = () => {
               <a href="#" className="text-[13px] font-semibold text-[#0A6C54] hover:text-[#075340] transition-colors font-['Inter']">
                 Forgot Password?
               </a>
-            </div>
+            </div> */}
 
             <button 
               type="submit"

@@ -1,64 +1,122 @@
-import React, { useState } from 'react';
-import { Search, Plus, Barcode, CheckCircle, AlertTriangle, FileText, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Plus, Barcode, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
-
-const initialItems = [
-  { id: 1, accessionNo: 'ACC-8021', title: 'Introduction to Algorithms', rack: 'Rack B2', lastVerified: '2024-02-15', status: 'Verified' },
-  { id: 2, accessionNo: 'ACC-8022', title: 'Database System Concepts', rack: 'Rack A4', lastVerified: '2024-02-14', status: 'Verified' },
-  { id: 3, accessionNo: 'ACC-8023', title: 'Engineering Physics', rack: 'Rack C1', lastVerified: '2024-02-10', status: 'Missing' },
-  { id: 4, accessionNo: 'ACC-8024', title: 'Advanced Engineering Mathematics', rack: 'Rack D2', lastVerified: '2024-02-12', status: 'Wrong Rack' },
-  { id: 5, accessionNo: 'ACC-8025', title: 'Theory of Machines', rack: 'Rack E3', lastVerified: '2024-02-11', status: 'Damaged' },
-];
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const StockVerification = () => {
+  if (!checkPermission('View Books')) {
+    return <AccessDenied />;
+  }
   const [activeSession, setActiveSession] = useState('Annual Audit 2024');
   const [search, setSearch] = useState('');
   const [barcodeInput, setBarcodeInput] = useState('');
-  const [items, setItems] = useState(initialItems);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleScanVerify = (e) => {
-    e.preventDefault();
-    const foundIdx = items.findIndex(item => item.accessionNo.toLowerCase() === barcodeInput.toLowerCase());
-    if (foundIdx > -1) {
-      const updated = [...items];
-      updated[foundIdx] = {
-        ...updated[foundIdx],
-        status: 'Verified',
-        lastVerified: new Date().toISOString().split('T')[0]
-      };
-      setItems(updated);
-      toast.success(`Book ${updated[foundIdx].title} verified successfully!`);
-      setBarcodeInput('');
-    } else {
-      toast.error('Accession code not found in current session inventory!');
+  useEffect(() => {
+    fetchStock();
+  }, []);
+
+  const fetchStock = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/library/stock');
+      const mapped = res.data.map(book => {
+        let isVerifiedToday = false;
+        if (book.lastVerified) {
+          const verifiedDate = new Date(book.lastVerified).toDateString();
+          if (verifiedDate === new Date().toDateString()) isVerifiedToday = true;
+        }
+
+        return {
+          ...book,
+          status: book.status === 'Lost' ? 'Missing' : (isVerifiedToday ? 'Verified' : 'Pending Verification'),
+          lastVerified: book.lastVerified ? new Date(book.lastVerified).toISOString().split('T')[0] : 'N/A'
+        };
+      });
+      setItems(mapped);
+    } catch (error) {
+      toast.error('Failed to load stock data');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleScanVerify = async (e) => {
+    e.preventDefault();
+    if(!barcodeInput) return;
+
+    try {
+      // Just hit the dummy verify endpoint
+      await axiosInstance.post('/library/stock/verify', { accessionNo: barcodeInput });
+      
+      const foundIdx = items.findIndex(item => item.accessionNo?.toLowerCase() === barcodeInput.toLowerCase());
+      if (foundIdx > -1) {
+        const updated = [...items];
+        updated[foundIdx] = {
+          ...updated[foundIdx],
+          status: 'Verified',
+          lastVerified: new Date().toISOString().split('T')[0]
+        };
+        setItems(updated);
+        toast.success(`Book ${updated[foundIdx].title} verified successfully!`);
+      } else {
+        toast.error('Accession code not found in current session inventory!');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Verification failed');
+    } finally {
+      setBarcodeInput('');
+    }
+  };
+
+  const handleExport = () => {
+    if (items.length === 0) {
+      toast.error('No stock data to export');
+      return;
+    }
+
+    const exportData = filtered.map(item => ({
+      'Accession No': item.accessionNo,
+      'Book Title': item.title,
+      'Category': item.category,
+      'Last Audited Date': item.lastVerified,
+      'Audit Status': item.status
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Stock_Audit');
+    XLSX.writeFile(workbook, 'Library_Stock_Verification.xlsx');
+  };
+
   const filtered = items.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase()) || 
-                          item.accessionNo.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = item.title?.toLowerCase().includes(search.toLowerCase()) || 
+                          item.accessionNo?.toLowerCase().includes(search.toLowerCase());
     return matchesSearch;
   });
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
-      {/* Header */}
       <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-[16px] font-bold text-gray-800">Physical Stock Verification</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Verify catalog inventory, perform rack audits, and mark missing volumes</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={15} /> Discrepancy Report
           </button>
-          <button className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+          <button onClick={() => { setActiveSession(`Audit Session ${new Date().toLocaleDateString()}`); fetchStock(); }} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
             <Plus size={16} /> New Session
           </button>
         </div>
       </div>
 
-      {/* Barcode scanner panel */}
       <div className="p-6 border-b border-gray-100 bg-gray-50/50 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-2">
           <h3 className="font-bold text-gray-800 text-[14px]">Scan Barcode to Verify</h3>
@@ -80,13 +138,12 @@ const StockVerification = () => {
           <h4 className="font-bold text-gray-800 text-[14px] mt-1">{activeSession}</h4>
           <div className="flex gap-3 text-[11px] text-gray-500 mt-2 font-medium">
             <span>Verified: {items.filter(i => i.status === 'Verified').length}</span>
+            <span>Pending: {items.filter(i => i.status === 'Pending Verification').length}</span>
             <span>Missing: {items.filter(i => i.status === 'Missing').length}</span>
-            <span>Wrong Rack: {items.filter(i => i.status === 'Wrong Rack').length}</span>
           </div>
         </div>
       </div>
 
-      {/* Filters & search */}
       <div className="p-6 border-b border-gray-100">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
@@ -100,39 +157,47 @@ const StockVerification = () => {
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[1000px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Accession No</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Book Title</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Designated Rack</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Last Audited Date</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Audit Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.accessionNo}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.title}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.rack}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-500">{item.lastVerified}</td>
-                <td className="py-4 px-6">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                    item.status === 'Verified' ? 'bg-green-50 text-green-700 border border-green-100' :
-                    item.status === 'Missing' ? 'bg-red-50 text-red-700 border border-red-100' :
-                    item.status === 'Damaged' ? 'bg-orange-50 text-orange-700 border border-orange-100' :
-                    'bg-yellow-50 text-yellow-700 border border-yellow-100'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
+        {loading ? (
+          <SkeletonLoader type="table" rows={5} cols={5} />
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Accession No</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Book Title</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Category</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Last Audited Date</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Audit Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(item => (
+                <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.accessionNo}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.title}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.category}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-500">{item.lastVerified}</td>
+                  <td className="py-4 px-6">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                      item.status === 'Verified' ? 'bg-green-50 text-green-700 border border-green-100' :
+                      item.status === 'Missing' ? 'bg-red-50 text-red-700 border border-red-100' :
+                      item.status === 'Pending Verification' ? 'bg-yellow-50 text-yellow-700 border border-yellow-100' :
+                      'bg-gray-50 text-gray-700 border border-gray-200'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="p-12 text-center text-gray-500">No books found in catalog.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

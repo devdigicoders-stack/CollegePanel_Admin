@@ -1,13 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Plus, Receipt, Printer, Mail, ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Receipt, Printer, Mail, ChevronDown, X } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
 
 const FeeCollection = () => {
+  if (!checkPermission('Collect Fees') && !checkPermission('Generate Receipt')) {
+    return <AccessDenied />;
+  }
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Collect');
   const [studentSearch, setStudentSearch] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [printData, setPrintData] = useState(null);
   const [students, setStudents] = useState([]);
   const [collections, setCollections] = useState([]);
   const [loadingCollections, setLoadingCollections] = useState(true);
@@ -48,6 +57,24 @@ const FeeCollection = () => {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    if (location.state?.student) {
+      setSelectedStudent(location.state.student);
+      
+      // If a specific amount or feeHead was passed, pre-fill it
+      if (location.state?.amount || location.state?.feeHead) {
+        setFormData(prev => ({ 
+          ...prev, 
+          amount: location.state?.amount || prev.amount,
+          feeHeads: location.state?.feeHead || prev.feeHeads
+        }));
+      }
+      
+      // Clear the state so it doesn't persist on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate]);
+
   const handleCollect = async (e) => {
     e.preventDefault();
     if (!selectedStudent) {
@@ -58,12 +85,12 @@ const FeeCollection = () => {
     try {
       const payload = {
         studentId: selectedStudent._id || selectedStudent.id,
-        studentName: selectedStudent.name,
+        studentName: selectedStudent.studentName || selectedStudent.name,
         enrollNo: selectedStudent.enrollNo,
         amount: Number(formData.amount),
         mode: formData.mode,
         status: formData.status,
-        feeHeads: formData.feeHeads ? [formData.feeHeads] : [],
+        feeHeads: formData.feeHeads ? [{ head: formData.feeHeads, amount: Number(formData.amount) }] : [],
         remarks: formData.remarks
       };
       await axiosInstance.post('/fees/collections', payload);
@@ -81,11 +108,11 @@ const FeeCollection = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
-      
-      {/* Tabs */}
-      <div className="flex border-b border-gray-100 px-6 pt-2">
-        {['Collect', 'History'].map(tab => (
+    <div className={`h-full flex flex-col font-['Inter'] ${printData ? 'print:hidden' : ''}`}>
+      <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col flex-1">
+        {/* Tabs */}
+        <div className="flex border-b border-gray-100 px-6 pt-2">
+          {['Collect', 'History'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -132,7 +159,7 @@ const FeeCollection = () => {
                         onClick={() => { setSelectedStudent(student); setStudentSearch(''); }}
                         className="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
                       >
-                        <p className="text-[13px] font-medium text-gray-800">{student.name}</p>
+                        <p className="text-[13px] font-medium text-gray-800">{student.studentName || student.name}</p>
                         <p className="text-[11px] text-gray-600">{student.enrollNo} • {student.course}</p>
                       </div>
                     ))
@@ -149,7 +176,7 @@ const FeeCollection = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-[11px] text-gray-600">Student Name</p>
-                    <p className="text-[13px] font-semibold text-gray-800">{selectedStudent.name}</p>
+                    <p className="text-[13px] font-semibold text-gray-800">{selectedStudent.studentName || selectedStudent.name}</p>
                   </div>
                   <div>
                     <p className="text-[11px] text-gray-600">Enrollment No.</p>
@@ -273,7 +300,7 @@ const FeeCollection = () => {
                     <td className="py-3 px-4 text-[13px] font-semibold text-[#0A6C54]">{collection.receiptNo}</td>
                     <td className="py-3 px-4 text-[13px] text-gray-800">{collection.studentName}</td>
                     <td className="py-3 px-4 text-[13px] font-semibold text-gray-800">₹{(collection.amount || 0).toLocaleString()}</td>
-                    <td className="py-3 px-4 text-[13px] text-gray-600">{collection.date}</td>
+                    <td className="py-3 px-4 text-[13px] text-gray-600">{collection.date ? new Date(collection.date).toLocaleDateString('en-GB') : '-'}</td>
                     <td className="py-3 px-4 text-[13px] text-gray-600">{collection.mode}</td>
                     <td className="py-3 px-4">
                       <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-green-100 text-green-700">
@@ -282,7 +309,7 @@ const FeeCollection = () => {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
-                        <button onClick={() => toast.success('Printing receipt...')} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Print">
+                        <button onClick={() => setPrintData(collection)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Print">
                           <Printer size={16} className="text-gray-600" />
                         </button>
                         <button onClick={() => toast.success('Sending email...')} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Email">
@@ -298,6 +325,103 @@ const FeeCollection = () => {
               </tbody>
             </table>
           )}
+        </div>
+      )}
+      </div>
+
+      {/* Awesome Printable Receipt Modal */}
+      {printData && (
+        <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 sm:p-6 print:static print:bg-transparent print:p-0 print:block">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden print:shadow-none print:max-h-none print:w-full print:overflow-visible">
+            
+            {/* Action Bar (Hidden on Print) */}
+            <div className="sticky top-0 bg-white border-b border-gray-100 p-4 px-6 flex items-center justify-between print:hidden z-10">
+              <h3 className="font-bold text-gray-800 text-[15px]">Fee Receipt</h3>
+              <div className="flex items-center gap-3">
+                <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2 rounded-lg text-[13px] font-semibold transition-colors">
+                  <Printer size={16}/> Print
+                </button>
+                <button onClick={() => setPrintData(null)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Printable Content */}
+            <div className="p-8 sm:p-12 print:p-0 bg-white" id="printable-receipt">
+              <div className="border border-gray-200 rounded-2xl p-8 sm:p-10 print:border-none print:p-0">
+                
+                {/* Header */}
+                <div className="flex justify-between items-start border-b border-gray-200 pb-8 mb-8">
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-black text-[#0A6C54] tracking-tight">DIGITAL COLLEGE</h1>
+                    <p className="text-[13px] text-gray-500 mt-2 font-medium">123 Education Lane, Tech City, 10001</p>
+                    <p className="text-[13px] text-gray-500 mt-0.5 font-medium">Phone: +1 234 567 8900 | Email: accounts@college.edu</p>
+                  </div>
+                  <div className="text-right">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-800 tracking-wider">FEE RECEIPT</h2>
+                    <p className="text-[13px] font-semibold text-gray-600 mt-3">Receipt No: <span className="text-gray-900 font-bold">{printData.receiptNo}</span></p>
+                    <p className="text-[13px] font-semibold text-gray-500 mt-0.5">Date: <span className="text-gray-800">{new Date(printData.date).toLocaleDateString('en-GB')}</span></p>
+                  </div>
+                </div>
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-2 gap-8 mb-10">
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 print:bg-transparent print:border-none print:p-0">
+                    <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-2">Student Details</p>
+                    <p className="font-bold text-gray-900 text-[16px]">{printData.studentName}</p>
+                    <p className="text-[13px] text-gray-600 mt-1">Enrollment No: <span className="font-semibold text-gray-800">{printData.enrollNo}</span></p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 print:bg-transparent print:border-none print:p-0 text-right">
+                    <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-2">Payment Details</p>
+                    <p className="text-[13px] text-gray-600">Payment Mode: <span className="font-semibold text-gray-800">{printData.mode}</span></p>
+                    <p className="text-[13px] text-gray-600 mt-1">Status: <span className="font-bold text-green-600">{printData.status}</span></p>
+                  </div>
+                </div>
+
+                {/* Amount Table */}
+                <table className="w-full mb-10">
+                  <thead>
+                    <tr className="bg-gray-50 border-y border-gray-200">
+                      <th className="py-3 px-4 text-left text-[13px] font-bold text-gray-800">Description / Fee Head</th>
+                      <th className="py-3 px-4 text-right text-[13px] font-bold text-gray-800">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {printData.feeHeads && printData.feeHeads.length > 0 ? printData.feeHeads.map((fh, idx) => (
+                      <tr key={idx} className="border-b border-gray-100">
+                        <td className="py-4 px-4 text-[14px] font-medium text-gray-700">{fh.head}</td>
+                        <td className="py-4 px-4 text-[14px] font-bold text-gray-900 text-right">₹{(fh.amount || printData.amount).toLocaleString()}</td>
+                      </tr>
+                    )) : (
+                      <tr className="border-b border-gray-100">
+                        <td className="py-4 px-4 text-[14px] font-medium text-gray-700">Fee Payment</td>
+                        <td className="py-4 px-4 text-[14px] font-bold text-gray-900 text-right">₹{(printData.amount || 0).toLocaleString()}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-gray-50">
+                      <td className="py-4 px-4 text-right font-bold text-gray-800 text-[14px]">Total Amount Received</td>
+                      <td className="py-4 px-4 text-right font-black text-xl text-[#0A6C54]">₹{(printData.amount || 0).toLocaleString()}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+
+                {/* Footer Signatures */}
+                <div className="flex justify-between items-end mt-16 pt-8 border-t border-gray-200">
+                  <div className="max-w-[60%]">
+                    <p className="text-[11px] text-gray-500 italic">This is a computer generated receipt and does not require a physical signature.</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-40 border-b-2 border-gray-400 mb-2"></div>
+                    <p className="text-[13px] font-bold text-gray-700">Authorized Signatory</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

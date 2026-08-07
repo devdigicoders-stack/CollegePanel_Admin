@@ -1,56 +1,73 @@
-import React, { useState } from 'react';
-import { Search, Download, Plus, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Download, Plus, AlertTriangle, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-const initialStock = [
-  { id: 1, name: 'Basmati Rice', category: 'Grains', qty: 450, unit: 'kg', minLevel: 100, status: 'In Stock' },
-  { id: 2, name: 'Wheat Flour (Atta)', category: 'Grains', qty: 600, unit: 'kg', minLevel: 150, status: 'In Stock' },
-  { id: 3, name: 'Mustard Oil', category: 'Oils', qty: 45, unit: 'Liters', minLevel: 50, status: 'Low Stock' },
-  { id: 4, name: 'Fresh Potatoes', category: 'Vegetables', qty: 80, unit: 'kg', minLevel: 30, status: 'In Stock' },
-  { id: 5, name: 'Mess Spices Combo', category: 'Spices', qty: 8, unit: 'kg', minLevel: 10, status: 'Low Stock' },
-];
+import axiosInstance from '../../utils/axiosInstance';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const StockInventory = () => {
   const [search, setSearch] = useState('');
-  const [stock, setStock] = useState(initialStock);
+  const [stock, setStock] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newStock, setNewStock] = useState({
-    name: '',
+    item: '',
     category: 'Grains',
-    qty: '',
+    quantity: '',
     unit: 'kg',
-    minLevel: '',
+    threshold: '',
   });
+
+  const fetchStock = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/mess/inventory');
+      setStock(res.data);
+    } catch (error) {
+      toast.error('Failed to load inventory');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStock();
+  }, []);
 
   const filtered = stock.filter(item => {
-    return item.name.toLowerCase().includes(search.toLowerCase());
+    return item.item.toLowerCase().includes(search.toLowerCase());
   });
 
-  const handleAddStock = (e) => {
+  const handleAddStock = async (e) => {
     e.preventDefault();
-    const qtyVal = parseFloat(newStock.qty) || 0;
-    const minVal = parseFloat(newStock.minLevel) || 0;
-    const status = qtyVal <= minVal ? 'Low Stock' : 'In Stock';
+    try {
+      setIsSubmitting(true);
+      await axiosInstance.post('/mess/inventory', {
+        ...newStock,
+        quantity: parseFloat(newStock.quantity),
+        threshold: parseFloat(newStock.threshold)
+      });
+      toast.success(`Inventory updated for ${newStock.item}!`);
+      setShowAddModal(false);
+      setNewStock({ item: '', category: 'Grains', quantity: '', unit: 'kg', threshold: '' });
+      fetchStock();
+    } catch (error) {
+      toast.error('Failed to update inventory');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    const itemToAdd = {
-      id: stock.length + 1,
-      name: newStock.name,
-      category: newStock.category,
-      qty: qtyVal,
-      unit: newStock.unit,
-      minLevel: minVal,
-      status
-    };
-    setStock([...stock, itemToAdd]);
-    setShowAddModal(false);
-    toast.success(`Inventory updated for ${newStock.name}!`);
-    setNewStock({
-      name: '',
-      category: 'Grains',
-      qty: '',
-      unit: 'kg',
-      minLevel: '',
-    });
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this item?')) {
+      try {
+        await axiosInstance.delete(`/mess/inventory/${id}`);
+        toast.success('Item deleted successfully');
+        fetchStock();
+      } catch (error) {
+        toast.error('Error deleting item');
+      }
+    }
   };
 
   return (
@@ -87,34 +104,47 @@ const StockInventory = () => {
 
       {/* Table */}
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[900px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Item Name</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Category</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Available Stock</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Minimum Alert Limit</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.name}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.category}</td>
-                <td className="py-4 px-6 text-[13px] text-center font-bold text-gray-900">{item.qty} {item.unit}</td>
-                <td className="py-4 px-6 text-[13px] text-center font-semibold text-gray-500">{item.minLevel} {item.unit}</td>
-                <td className="py-4 px-6 text-[13px]">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                    item.status === 'In Stock' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
+        {loading ? (
+          <SkeletonLoader type="table" rows={6} cols={6} />
+        ) : filtered.length === 0 ? (
+          <div className="py-12 text-center text-gray-500 text-[13px]">No inventory items found.</div>
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Item Name</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Category</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Available Stock</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Minimum Alert Limit</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(item => {
+                const status = item.quantity <= item.threshold ? 'Low Stock' : 'In Stock';
+                return (
+                  <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.item}</td>
+                    <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.category}</td>
+                    <td className="py-4 px-6 text-[13px] text-center font-bold text-gray-900">{item.quantity} {item.unit}</td>
+                    <td className="py-4 px-6 text-[13px] text-center font-semibold text-gray-500">{item.threshold} {item.unit}</td>
+                    <td className="py-4 px-6 text-[13px]">
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                        status === 'In Stock' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
+                      }`}>
+                        {status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 flex gap-2">
+                      <button onClick={() => handleDelete(item._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-red-600 transition-colors" title="Delete Item"><Trash2 size={15} /></button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Add Stock Modal */}
@@ -131,8 +161,8 @@ const StockInventory = () => {
                 <input 
                   type="text" 
                   required
-                  value={newStock.name}
-                  onChange={(e) => setNewStock({...newStock, name: e.target.value})}
+                  value={newStock.item}
+                  onChange={(e) => setNewStock({...newStock, item: e.target.value})}
                   className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                 />
               </div>
@@ -150,6 +180,7 @@ const StockInventory = () => {
                     <option value="Vegetables">Vegetables</option>
                     <option value="Spices">Spices</option>
                     <option value="Dairy">Dairy</option>
+                    <option value="Others">Others</option>
                   </select>
                 </div>
                 <div>
@@ -172,8 +203,8 @@ const StockInventory = () => {
                   <input 
                     type="number" 
                     required
-                    value={newStock.qty}
-                    onChange={(e) => setNewStock({...newStock, qty: e.target.value})}
+                    value={newStock.quantity}
+                    onChange={(e) => setNewStock({...newStock, quantity: e.target.value})}
                     className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                   />
                 </div>
@@ -182,8 +213,8 @@ const StockInventory = () => {
                   <input 
                     type="number" 
                     required
-                    value={newStock.minLevel}
-                    onChange={(e) => setNewStock({...newStock, minLevel: e.target.value})}
+                    value={newStock.threshold}
+                    onChange={(e) => setNewStock({...newStock, threshold: e.target.value})}
                     className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                   />
                 </div>
@@ -199,9 +230,10 @@ const StockInventory = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold"
                 >
-                  Record Inward
+                  {isSubmitting ? 'Saving...' : 'Record Inward'}
                 </button>
               </div>
             </form>

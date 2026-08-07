@@ -1,50 +1,72 @@
-import React, { useState } from 'react';
-import { Search, Download, Plus, Edit2, Eye } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Download, Plus, Edit2, Eye, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-const initialCompanies = [
-  { id: 1, name: 'Tata Consultancy Services', industry: 'IT/Software', contactPerson: 'Arun Kumar (HR)', email: 'arun.k@tcs.com', packageRange: '₹3.6 - ₹7.0 LPA', status: 'Active' },
-  { id: 2, name: 'Cognizant Technology Solutions', industry: 'IT/Software', contactPerson: 'Priyanka Sharma (HR)', email: 'priyanka.s@cts.com', packageRange: '₹4.0 - ₹8.0 LPA', status: 'Active' },
-  { id: 3, name: 'Larsen & Toubro', industry: 'Core Engineering', contactPerson: 'R.S. Yadav (HR Coordinator)', email: 'rs.yadav@lntecc.com', packageRange: '₹5.5 - ₹7.2 LPA', status: 'Active' },
-];
+import axiosInstance from '../../utils/axiosInstance';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const Companies = () => {
   const [search, setSearch] = useState('');
-  const [companies, setCompanies] = useState(initialCompanies);
+  const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newCompany, setNewCompany] = useState({
     name: '',
     industry: 'IT/Software',
     contactPerson: '',
-    email: '',
-    packageRange: '',
+    contactEmail: '',
+    contactPhone: '',
+    website: ''
   });
+
+  const fetchCompanies = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/placement/companies');
+      setCompanies(res.data);
+    } catch (error) {
+      toast.error('Failed to fetch companies');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
 
   const filtered = companies.filter(c => {
     return c.name.toLowerCase().includes(search.toLowerCase());
   });
 
-  const handleAddCompany = (e) => {
+  const handleAddCompany = async (e) => {
     e.preventDefault();
-    const companyToAdd = {
-      id: companies.length + 1,
-      name: newCompany.name,
-      industry: newCompany.industry,
-      contactPerson: newCompany.contactPerson,
-      email: newCompany.email,
-      packageRange: newCompany.packageRange,
-      status: 'Active'
-    };
-    setCompanies([...companies, companyToAdd]);
-    setShowAddModal(false);
-    toast.success(`Recruitment firm ${newCompany.name} registered!`);
-    setNewCompany({
-      name: '',
-      industry: 'IT/Software',
-      contactPerson: '',
-      email: '',
-      packageRange: '',
-    });
+    try {
+      setIsSubmitting(true);
+      await axiosInstance.post('/placement/companies', newCompany);
+      toast.success(`Recruitment firm ${newCompany.name} registered!`);
+      setShowAddModal(false);
+      setNewCompany({
+        name: '', industry: 'IT/Software', contactPerson: '', contactEmail: '', contactPhone: '', website: ''
+      });
+      fetchCompanies();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error adding company');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this company?')) {
+      try {
+        await axiosInstance.delete(`/placement/companies/${id}`);
+        toast.success('Company deleted successfully');
+        fetchCompanies();
+      } catch (error) {
+        toast.error('Error deleting company');
+      }
+    }
   };
 
   return (
@@ -81,34 +103,43 @@ const Companies = () => {
 
       {/* Table */}
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[900px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Company Name</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Sector</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">HR Contact Name</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">HR Email</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">CTC Package Range</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.name}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.industry}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-700 font-semibold">{item.contactPerson}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-500 font-mono">{item.email}</td>
-                <td className="py-4 px-6 text-[13px] text-[#0A6C54] font-bold">{item.packageRange}</td>
-                <td className="py-4 px-6 text-[13px]">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-100`}>
-                    {item.status}
-                  </span>
-                </td>
+        {loading ? (
+          <SkeletonLoader type="table" rows={5} cols={6} />
+        ) : filtered.length === 0 ? (
+          <div className="py-12 text-center text-gray-500 text-[13px]">No companies found.</div>
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Company Name</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Sector</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">HR Contact Name</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">HR Email</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(item => (
+                <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.name}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.industry || '-'}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-700 font-semibold">{item.contactPerson || '-'}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-500 font-mono">{item.contactEmail || '-'}</td>
+                  <td className="py-4 px-6 text-[13px]">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-100`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 text-[13px] flex gap-2">
+                    <button className="p-1.5 bg-gray-50 rounded hover:bg-gray-100 text-gray-600"><Edit2 size={14}/></button>
+                    <button onClick={() => handleDelete(item._id)} className="p-1.5 bg-red-50 rounded hover:bg-red-100 text-red-600"><Trash2 size={14}/></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Add Company Modal */}
@@ -148,8 +179,7 @@ const Companies = () => {
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-600 mb-1">HR Contact Person</label>
                   <input 
-                    type="text" 
-                    required
+                    type="text"
                     value={newCompany.contactPerson}
                     onChange={(e) => setNewCompany({...newCompany, contactPerson: e.target.value})}
                     className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
@@ -161,21 +191,18 @@ const Companies = () => {
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-600 mb-1">HR Contact Email</label>
                   <input 
-                    type="email" 
-                    required
-                    value={newCompany.email}
-                    onChange={(e) => setNewCompany({...newCompany, email: e.target.value})}
+                    type="email"
+                    value={newCompany.contactEmail}
+                    onChange={(e) => setNewCompany({...newCompany, contactEmail: e.target.value})}
                     className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-semibold text-gray-600 mb-1">CTC Package Range</label>
+                  <label className="block text-[12px] font-semibold text-gray-600 mb-1">Phone Number</label>
                   <input 
-                    type="text" 
-                    required
-                    value={newCompany.packageRange}
-                    onChange={(e) => setNewCompany({...newCompany, packageRange: e.target.value})}
-                    placeholder="e.g. ₹5.0 - ₹8.0 LPA"
+                    type="text"
+                    value={newCompany.contactPhone}
+                    onChange={(e) => setNewCompany({...newCompany, contactPhone: e.target.value})}
                     className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                   />
                 </div>
@@ -191,9 +218,10 @@ const Companies = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold"
                 >
-                  Save Company
+                  {isSubmitting ? 'Saving...' : 'Save Company'}
                 </button>
               </div>
             </form>

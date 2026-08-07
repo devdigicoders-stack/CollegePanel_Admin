@@ -7,10 +7,15 @@ import {
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
 
 const STATUS_OPTIONS = ['Pending', 'Submitted', 'Approved', 'Rejected'];
 
 const LessonPlans = () => {
+  if (!checkPermission('View Courses') && !checkPermission('Manage Courses')) {
+    return <AccessDenied />;
+  }
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -19,6 +24,8 @@ const LessonPlans = () => {
   const [departments, setDepartments] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [sections, setSections] = useState([]);
 
   const [filters, setFilters] = useState({
     department: 'All Departments',
@@ -57,15 +64,19 @@ const LessonPlans = () => {
 
   const fetchStaticData = useCallback(async () => {
     try {
-      const [deptRes, subjRes, teacherRes] = await Promise.all([
+      const [deptRes, subjRes, teacherRes, semRes, secRes] = await Promise.all([
         axiosInstance.get('/academics/departments'),
         axiosInstance.get('/academics/subjects'),
-        axiosInstance.get('/employees')
+        axiosInstance.get('/teachers/list/all'),
+        axiosInstance.get('/academics/semesters'),
+        axiosInstance.get('/academics/sections')
       ]);
       setDepartments(deptRes.data.data || deptRes.data || []);
       setSubjects(subjRes.data.data || subjRes.data || []);
       const allTeachers = teacherRes.data.data || teacherRes.data || [];
-      setTeachers(allTeachers.filter(t => t.role === 'Teacher' || t.role === 'Professor'));
+      setTeachers(allTeachers);
+      setSemesters(semRes.data.data || semRes.data || []);
+      setSections(secRes.data.data || secRes.data || []);
     } catch {
       toast.error('Failed to load filter options');
     }
@@ -267,6 +278,11 @@ const LessonPlans = () => {
     { name: 'All', status: 'All' }
   ];
 
+  const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+  const userRole = adminInfo.role || 'college_admin';
+  const canApprove = userRole === 'college_admin' || userRole === 'Principal' || userRole === 'HOD';
+  const canEdit = canApprove || userRole === 'Teacher';
+
   return (
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
 
@@ -276,17 +292,19 @@ const LessonPlans = () => {
           <h2 className="text-lg font-bold text-gray-800">Lesson Plans</h2>
           <p className="text-[13px] text-gray-500 mt-1">Manage teacher lesson plans and approvals</p>
         </div>
-        <button
-          onClick={() => { setShowAddModal(true); setFormData({
-            planId: '', teacherId: '', teacherName: '', department: '', subject: '',
-            semester: '', section: '', week: '', month: '', topic: '', description: '',
-            objectives: '', resources: '', status: 'Pending'
-          }); }}
-          className="flex items-center gap-2 bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-[13px] font-semibold hover:bg-[#085a46] transition-colors"
-        >
-          <Plus size={16} />
-          Add Lesson Plan
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => { setShowAddModal(true); setFormData({
+              planId: '', teacherId: '', teacherName: '', department: '', subject: '',
+              semester: '', section: '', week: '', month: '', topic: '', description: '',
+              objectives: '', resources: '', status: 'Pending'
+            }); }}
+            className="flex items-center gap-2 bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-[13px] font-semibold hover:bg-[#085a46] transition-colors"
+          >
+            <Plus size={16} />
+            Add Lesson Plan
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
@@ -425,31 +443,37 @@ const LessonPlans = () => {
                       >
                         <Eye size={14} />
                       </button>
-                      {plan.status === 'Submitted' && (
+                      {canApprove && (
                         <>
-                          <button
-                            onClick={() => handleApprove(plan)}
-                            className="w-8 h-8 rounded-full border border-green-100 flex items-center justify-center text-green-600 hover:bg-green-50 transition-colors"
-                            title="Approve"
-                          >
-                            <Check size={14} />
-                          </button>
-                          <button
-                            onClick={() => { setSelectedPlan(plan); setShowRejectModal(true); }}
-                            className="w-8 h-8 rounded-full border border-red-100 flex items-center justify-center text-red-600 hover:bg-red-50 transition-colors"
-                            title="Reject"
-                          >
-                            <XCircle size={14} />
-                          </button>
+                          {plan.status !== 'Approved' && (
+                            <button
+                              onClick={() => handleApprove(plan)}
+                              className="w-8 h-8 rounded-full border border-green-100 flex items-center justify-center text-green-600 hover:bg-green-50 transition-colors"
+                              title="Approve"
+                            >
+                              <Check size={14} />
+                            </button>
+                          )}
+                          {plan.status !== 'Rejected' && (
+                            <button
+                              onClick={() => { setSelectedPlan(plan); setShowRejectModal(true); }}
+                              className="w-8 h-8 rounded-full border border-red-100 flex items-center justify-center text-red-600 hover:bg-red-50 transition-colors"
+                              title="Reject"
+                            >
+                              <XCircle size={14} />
+                            </button>
+                          )}
                         </>
                       )}
-                      <button
-                        onClick={() => { setDeleteTarget(plan); handleDelete(); }}
-                        className="w-8 h-8 rounded-full border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => { setDeleteTarget(plan); handleDelete(); }}
+                          className="w-8 h-8 rounded-full border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -536,50 +560,55 @@ const LessonPlans = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[13px] font-semibold text-gray-700 mb-2">Subject *</label>
-                  <input
-                    type="text"
+                  <select
                     name="subject"
                     value={formData.subject}
                     onChange={handleInputChange}
-                    placeholder="e.g., Data Structures"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
-                  />
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  >
+                    <option value="">Select Subject</option>
+                    {subjects.map(s => <option key={s._id} value={s.name}>{s.name}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[13px] font-semibold text-gray-700 mb-2">Department</label>
-                  <input
-                    type="text"
+                  <select
                     name="department"
                     value={formData.department}
                     onChange={handleInputChange}
-                    placeholder="e.g., Computer Science"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
-                  />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  >
+                    <option value="">Select Department</option>
+                    {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
+                  </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[13px] font-semibold text-gray-700 mb-2">Semester</label>
-                  <input
-                    type="text"
+                  <select
                     name="semester"
                     value={formData.semester}
                     onChange={handleInputChange}
-                    placeholder="e.g., 3rd"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
-                  />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  >
+                    <option value="">Select Semester</option>
+                    {semesters.map(s => <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[13px] font-semibold text-gray-700 mb-2">Section</label>
-                  <input
-                    type="text"
+                  <select
                     name="section"
                     value={formData.section}
                     onChange={handleInputChange}
-                    placeholder="e.g., A"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
-                  />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  >
+                    <option value="">Select Section</option>
+                    {sections.map(s => <option key={s._id} value={s.name}>{s.name}</option>)}
+                  </select>
                 </div>
               </div>
 
@@ -761,23 +790,23 @@ const LessonPlans = () => {
             </div>
 
             <div className="mt-6 flex gap-3">
-              {selectedPlan.status === 'Submitted' && (
-                <>
-                  <button
-                    onClick={() => { setShowViewModal(false); handleApproveConfirm(); }}
-                    disabled={actionLoading}
-                    className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 disabled:bg-green-300 transition-colors font-medium text-sm flex items-center justify-center gap-2"
-                  >
-                    {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => { setShowViewModal(false); setShowRejectModal(true); }}
-                    className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm"
-                  >
-                    Reject
-                  </button>
-                </>
+              {selectedPlan.status !== 'Approved' && (
+                <button
+                  onClick={() => { setShowViewModal(false); handleApproveConfirm(); }}
+                  disabled={actionLoading}
+                  className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 disabled:bg-green-300 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                >
+                  {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                  Approve
+                </button>
+              )}
+              {selectedPlan.status !== 'Rejected' && (
+                <button
+                  onClick={() => { setShowViewModal(false); setShowRejectModal(true); }}
+                  className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm"
+                >
+                  Reject
+                </button>
               )}
               <button
                 onClick={() => setShowViewModal(false)}

@@ -1,25 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Download, Eye, Check, X } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-const initialApplications = [
-  { id: 1, name: 'Amit Sharma', enrollNo: 'OP/23/CS/001', scheme: 'Post-Matric Scholarship for OBC', status: 'Under Verification', date: '2024-02-14' },
-  { id: 2, name: 'Neha Verma', enrollNo: 'OP/23/IT/002', scheme: 'NSP Merit-cum-Means', status: 'Submitted', date: '2024-02-15' },
-  { id: 3, name: 'Vikram Patel', enrollNo: 'OP/23/ME/015', scheme: 'AICTE Pragati Scholarship', status: 'Approved', date: '2024-02-10' },
-];
+import axiosInstance from '../../utils/axiosInstance';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const Applications = () => {
   const [search, setSearch] = useState('');
-  const [apps, setApps] = useState(initialApplications);
+  const [apps, setApps] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchApplications = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/scholarships/applications');
+      setApps(res.data);
+    } catch (error) {
+      toast.error('Failed to load applications');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApplications();
+  }, []);
 
   const filtered = apps.filter(a => {
-    return a.name.toLowerCase().includes(search.toLowerCase()) || 
-           a.enrollNo.toLowerCase().includes(search.toLowerCase());
+    const name = a.studentId?.studentName?.toLowerCase() || '';
+    const enroll = a.studentId?.studentId?.toLowerCase() || '';
+    return name.includes(search.toLowerCase()) || enroll.includes(search.toLowerCase());
   });
 
-  const handleVerify = (id) => {
-    setApps(apps.map(a => a.id === id ? { ...a, status: 'Under Verification' } : a));
-    toast.success('Application status updated to Under Verification.');
+  const handleVerify = async (id) => {
+    try {
+      await axiosInstance.put(`/scholarships/applications/${id}/status`, { status: 'Under Verification' });
+      toast.success('Application status updated to Under Verification.');
+      fetchApplications();
+    } catch (error) {
+      toast.error('Failed to update status');
+    }
   };
 
   return (
@@ -51,43 +70,50 @@ const Applications = () => {
 
       {/* Table */}
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[900px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Enrollment No</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Student Name</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Selected Scheme</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Date Submitted</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Verification Status</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.enrollNo}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.name}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-700 font-semibold">{item.scheme}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-500 font-semibold">{item.date}</td>
-                <td className="py-4 px-6 text-[13px]">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                    item.status === 'Approved' ? 'bg-green-50 text-green-700 border border-green-100' :
-                    item.status === 'Under Verification' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
-                    'bg-yellow-50 text-yellow-700 border border-yellow-100'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="py-4 px-6 flex gap-2">
-                  <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"><Eye size={15} /></button>
-                  {item.status === 'Submitted' && (
-                    <button onClick={() => handleVerify(item.id)} className="px-2.5 py-1 text-[11px] font-bold bg-[#0A6C54] text-white rounded hover:bg-[#085a46]">Verify File</button>
-                  )}
-                </td>
+        {loading ? (
+          <SkeletonLoader type="table" rows={5} cols={6} />
+        ) : filtered.length === 0 ? (
+          <div className="py-12 text-center text-gray-500 text-[13px]">No applications found.</div>
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Enrollment No</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Student Name</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Selected Scheme</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Date Submitted</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Verification Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(item => (
+                <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.studentId?.studentId || 'N/A'}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.studentId?.studentName || 'Unknown'}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-700 font-semibold">{item.schemeId?.name || 'Unknown'}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-500 font-semibold">{new Date(item.createdAt).toLocaleDateString()}</td>
+                  <td className="py-4 px-6 text-[13px]">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                      ['Approved', 'Disbursed', 'Verified'].includes(item.status) ? 'bg-green-50 text-green-700 border border-green-100' :
+                      item.status === 'Under Verification' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
+                      item.status === 'Rejected' ? 'bg-red-50 text-red-700 border border-red-100' :
+                      'bg-yellow-50 text-yellow-700 border border-yellow-100'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 flex gap-2">
+                    <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors" title="View Details"><Eye size={15} /></button>
+                    {item.status === 'Submitted' && (
+                      <button onClick={() => handleVerify(item._id)} className="px-2.5 py-1 text-[11px] font-bold bg-[#0A6C54] text-white rounded hover:bg-[#085a46]">Verify File</button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

@@ -1,57 +1,86 @@
-import React, { useState } from 'react';
-import { Search, Download, Plus, AlertCircle, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Download, Plus, Trash2, Edit2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-const initialJobs = [
-  { id: 1, title: 'Systems Engineer', company: 'Tata Consultancy Services', branches: 'CSE, ECE, IT', minCgpa: '6.5', backlogs: 0, deadline: '2024-02-18', package: '₹3.6 - ₹7.0 LPA', status: 'Open' },
-  { id: 2, title: 'Associate Software Engineer', company: 'Cognizant Technology Solutions', branches: 'CSE, IT', minCgpa: '7.0', backlogs: 1, deadline: '2024-02-22', package: '₹4.0 LPA', status: 'Open' },
-  { id: 3, title: 'Graduate Engineer Trainee', company: 'Larsen & Toubro', branches: 'ME, CE', minCgpa: '6.0', backlogs: 0, deadline: '2024-02-25', package: '₹5.5 LPA', status: 'Open' },
-];
+import axiosInstance from '../../utils/axiosInstance';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const JobOpportunities = () => {
   const [search, setSearch] = useState('');
-  const [jobs, setJobs] = useState(initialJobs);
+  const [jobs, setJobs] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [newJob, setNewJob] = useState({
     title: '',
-    company: 'Tata Consultancy Services',
-    branches: '',
+    companyId: '',
+    eligibleCourses: '',
     minCgpa: '',
-    backlogs: '0',
     deadline: '',
-    package: '',
+    salaryPkg: '',
   });
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [jobsRes, compRes] = await Promise.all([
+        axiosInstance.get('/placement/jobs'),
+        axiosInstance.get('/placement/companies')
+      ]);
+      setJobs(jobsRes.data);
+      setCompanies(compRes.data);
+      if (compRes.data.length > 0) {
+        setNewJob(prev => ({ ...prev, companyId: compRes.data[0]._id }));
+      }
+    } catch (error) {
+      toast.error('Failed to fetch data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const filtered = jobs.filter(j => {
     return j.title.toLowerCase().includes(search.toLowerCase()) || 
-           j.company.toLowerCase().includes(search.toLowerCase());
+           j.companyId?.name?.toLowerCase().includes(search.toLowerCase());
   });
 
-  const handleAddJob = (e) => {
+  const handleAddJob = async (e) => {
     e.preventDefault();
-    const jobToAdd = {
-      id: jobs.length + 1,
-      title: newJob.title,
-      company: newJob.company,
-      branches: newJob.branches,
-      minCgpa: newJob.minCgpa,
-      backlogs: parseInt(newJob.backlogs) || 0,
-      deadline: newJob.deadline,
-      package: newJob.package,
-      status: 'Open'
-    };
-    setJobs([...jobs, jobToAdd]);
-    setShowAddModal(false);
-    toast.success(`Job Opening for ${newJob.title} posted successfully!`);
-    setNewJob({
-      title: '',
-      company: 'Tata Consultancy Services',
-      branches: '',
-      minCgpa: '',
-      backlogs: '0',
-      deadline: '',
-      package: '',
-    });
+    try {
+      setIsSubmitting(true);
+      const payload = {
+        ...newJob,
+        eligibleCourses: newJob.eligibleCourses.split(',').map(s => s.trim())
+      };
+      await axiosInstance.post('/placement/jobs', payload);
+      toast.success(`Job Opening for ${newJob.title} posted successfully!`);
+      setShowAddModal(false);
+      setNewJob({
+        title: '', companyId: companies[0]?._id || '', eligibleCourses: '', minCgpa: '', deadline: '', salaryPkg: ''
+      });
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error adding job');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this job?')) {
+      try {
+        await axiosInstance.delete(`/placement/jobs/${id}`);
+        toast.success('Job deleted successfully');
+        fetchData();
+      } catch (error) {
+        toast.error('Error deleting job');
+      }
+    }
   };
 
   return (
@@ -83,38 +112,47 @@ const JobOpportunities = () => {
 
       {/* Table */}
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[1000px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Job Title</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Company</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Eligible Branches</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Min CGPA</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Max Backlogs</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Deadline</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Salary Package</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.title}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-700 font-semibold">{item.company}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{item.branches}</td>
-                <td className="py-4 px-6 text-[13px] text-center font-bold text-gray-900">{item.minCgpa}</td>
-                <td className="py-4 px-6 text-[13px] text-center font-bold text-red-500">{item.backlogs}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-500 font-semibold">{item.deadline}</td>
-                <td className="py-4 px-6 text-[13px] text-[#0A6C54] font-bold">{item.package}</td>
-                <td className="py-4 px-6 text-[13px]">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-100`}>
-                    {item.status}
-                  </span>
-                </td>
+        {loading ? (
+          <SkeletonLoader type="table" rows={5} cols={8} />
+        ) : filtered.length === 0 ? (
+          <div className="py-12 text-center text-gray-500 text-[13px]">No job opportunities found.</div>
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Job Title</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Company</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Eligible Courses</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Min CGPA</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Deadline</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Salary Package</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(item => (
+                <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.title}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-700 font-semibold">{item.companyId?.name}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{item.eligibleCourses?.join(', ') || '-'}</td>
+                  <td className="py-4 px-6 text-[13px] text-center font-bold text-gray-900">{item.minCgpa || '-'}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-500 font-semibold">{item.deadline ? new Date(item.deadline).toLocaleDateString() : '-'}</td>
+                  <td className="py-4 px-6 text-[13px] text-[#0A6C54] font-bold">{item.salaryPkg || '-'}</td>
+                  <td className="py-4 px-6 text-[13px]">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-100`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 text-[13px] flex gap-2">
+                    <button className="p-1.5 bg-gray-50 rounded hover:bg-gray-100 text-gray-600"><Edit2 size={14}/></button>
+                    <button onClick={() => handleDelete(item._id)} className="p-1.5 bg-red-50 rounded hover:bg-red-100 text-red-600"><Trash2 size={14}/></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Add Job Modal */}
@@ -140,24 +178,24 @@ const JobOpportunities = () => {
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-600 mb-1">Company</label>
                   <select 
-                    value={newJob.company} 
-                    onChange={(e) => setNewJob({...newJob, company: e.target.value})}
+                    value={newJob.companyId} 
+                    onChange={(e) => setNewJob({...newJob, companyId: e.target.value})}
                     className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                   >
-                    {jobs.map(j => <option key={j.id} value={j.company}>{j.company}</option>)}
+                    {companies.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[12px] font-semibold text-gray-600 mb-1">Eligible Branches</label>
+                  <label className="block text-[12px] font-semibold text-gray-600 mb-1">Eligible Courses</label>
                   <input 
                     type="text" 
                     required
-                    value={newJob.branches}
-                    onChange={(e) => setNewJob({...newJob, branches: e.target.value})}
-                    placeholder="e.g. CSE, IT, ECE"
+                    value={newJob.eligibleCourses}
+                    onChange={(e) => setNewJob({...newJob, eligibleCourses: e.target.value})}
+                    placeholder="e.g. B.Tech, MCA"
                     className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                   />
                 </div>
@@ -165,7 +203,6 @@ const JobOpportunities = () => {
                   <label className="block text-[12px] font-semibold text-gray-600 mb-1">Min CGPA</label>
                   <input 
                     type="text" 
-                    required
                     value={newJob.minCgpa}
                     onChange={(e) => setNewJob({...newJob, minCgpa: e.target.value})}
                     placeholder="e.g. 6.5"
@@ -176,16 +213,6 @@ const JobOpportunities = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[12px] font-semibold text-gray-600 mb-1">Max Backlogs Allowed</label>
-                  <input 
-                    type="number" 
-                    required
-                    value={newJob.backlogs}
-                    onChange={(e) => setNewJob({...newJob, backlogs: e.target.value})}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
-                  />
-                </div>
-                <div>
                   <label className="block text-[12px] font-semibold text-gray-600 mb-1">Application Deadline</label>
                   <input 
                     type="date" 
@@ -195,18 +222,17 @@ const JobOpportunities = () => {
                     className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-[12px] font-semibold text-gray-600 mb-1">Salary Package Range</label>
-                <input 
-                  type="text" 
-                  required
-                  value={newJob.package}
-                  onChange={(e) => setNewJob({...newJob, package: e.target.value})}
-                  placeholder="e.g. ₹4.5 - ₹6.0 LPA"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
-                />
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-600 mb-1">Salary Package</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={newJob.salaryPkg}
+                    onChange={(e) => setNewJob({...newJob, salaryPkg: e.target.value})}
+                    placeholder="e.g. ₹4.5 - ₹6.0 LPA"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -219,9 +245,10 @@ const JobOpportunities = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold"
                 >
-                  Post Opportunity
+                  {isSubmitting ? 'Posting...' : 'Post Opportunity'}
                 </button>
               </div>
             </form>

@@ -1,30 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Save, FileText, CheckCircle, Upload } from 'lucide-react';
+import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
-
-const initialScholarships = [
-  { id: 1, name: 'Post-Matric Scholarship for OBC Students', status: 'Approved', amount: '₹12,000', remarks: 'Funds released on 10-Feb' },
-  { id: 2, name: 'NSP Merit-cum-Means', status: 'Submitted', amount: '₹25,000', remarks: 'Awaiting Coordinator Recommendation' },
-];
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const Scholarships = () => {
-  const [scholarships, setScholarships] = useState(initialScholarships);
+  const [scholarships, setScholarships] = useState([]);
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyScheme, setApplyScheme] = useState('Post-Matric Scholarship for OBC Students');
+  const [loading, setLoading] = useState(true);
 
-  const handleApply = (e) => {
-    e.preventDefault();
-    const itemToAdd = {
-      id: scholarships.length + 1,
-      name: applyScheme,
-      status: 'Submitted',
-      amount: '₹20,000',
-      remarks: 'Application under document verification'
-    };
-    setScholarships([...scholarships, itemToAdd]);
-    setShowApplyModal(false);
-    toast.success('Scholarship application submitted successfully!');
+  useEffect(() => {
+    fetchScholarships();
+  }, []);
+
+  const fetchScholarships = async () => {
+    try {
+      const res = await axiosInstance.get('/student-portal/scholarships');
+      setScholarships(res.data);
+    } catch (error) {
+      toast.error('Failed to fetch scholarships');
+    } finally { setLoading(false); }
   };
+
+  const handleApply = async (e) => {
+    e.preventDefault();
+    try {
+      await axiosInstance.post('/student-portal/scholarships/apply', { scheme: applyScheme });
+      toast.success('Scholarship application submitted successfully! It will be reviewed by the admin.');
+      setShowApplyModal(false);
+      fetchScholarships();
+    } catch (error) {
+      toast.error('Failed to apply for scholarship');
+    } finally { setLoading(false); }
+  };
+
+  
+  if (loading) {
+    return (
+      <div className="p-6">
+        <SkeletonLoader type="table" rows={6} cols={5} />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -39,23 +57,27 @@ const Scholarships = () => {
         </button>
       </div>
 
-      <div className="p-6 space-y-6 flex-1 overflow-y-auto max-w-3xl">
-        {scholarships.map(item => (
-          <div key={item.id} className="p-5 border border-gray-100 rounded-xl space-y-3 bg-gray-50/20 shadow-sm text-[13px]">
+      <div className="p-6 space-y-6 flex-1 overflow-y-auto">
+        {scholarships.length > 0 ? scholarships.map(item => (
+          <div key={item._id} className="p-5 border border-gray-100 rounded-xl space-y-3 bg-gray-50/20 shadow-sm text-[13px]">
             <div className="flex justify-between items-start">
               <div>
-                <h4 className="font-bold text-gray-800">{item.name}</h4>
-                <p className="text-[11px] text-gray-500 mt-0.5">Sanctioned Amount: <strong className="text-[#0A6C54]">{item.amount}</strong></p>
+                <h4 className="font-bold text-gray-800">{item.scheme || item.name}</h4>
+                <p className="text-[11px] text-gray-500 mt-0.5">Sanctioned Amount: <strong className="text-[#0A6C54]">₹{item.amount?.toLocaleString()}</strong></p>
               </div>
               <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                item.status === 'Approved' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-blue-50 text-blue-700 border border-blue-100'
+                item.sanctionStatus === 'Sanctioned' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-blue-50 text-blue-700 border border-blue-100'
               }`}>
-                {item.status}
+                {item.sanctionStatus}
               </span>
             </div>
-            <p className="text-[12px] text-gray-600 bg-white p-3 rounded border border-gray-100 font-medium">Remarks: {item.remarks}</p>
+            <p className="text-[12px] text-gray-600 bg-white p-3 rounded border border-gray-100 font-medium">Remarks: Disbursement received: ₹{item.received || 0} | Pending: ₹{item.pending || 0}</p>
           </div>
-        ))}
+        )) : (
+          <div className="text-gray-500 text-[13px] p-4 bg-gray-50 rounded-xl border border-gray-100">
+            No scholarship applications found.
+          </div>
+        )}
       </div>
 
       {/* Apply Modal */}

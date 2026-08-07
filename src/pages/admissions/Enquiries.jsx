@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Eye, MoreVertical, ChevronDown, Download, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Plus, Edit2, Eye, ChevronDown, Download, X, Trash2 } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
 
 const statusColors = {
   'New': 'bg-blue-100 text-blue-700',
@@ -23,11 +26,17 @@ const sourceColors = {
 };
 
 const Enquiries = () => {
+  if (!checkPermission('View Admissions')) {
+    return <AccessDenied />;
+  }
   const [enquiries, setEnquiries] = useState([]);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterSource, setFilterSource] = useState('All');
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedEnquiry, setSelectedEnquiry] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   
   const [formData, setFormData] = useState({
     studentName: '', mobileNumber: '', email: '', parentName: '', city: '', 
@@ -59,13 +68,59 @@ const Enquiries = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleEdit = (enquiry) => {
+    setEditingId(enquiry._id);
+    setFormData({
+      studentName: enquiry.studentName || '',
+      mobileNumber: enquiry.mobileNumber || '',
+      email: enquiry.email || '',
+      parentName: enquiry.parentName || '',
+      city: enquiry.city || '',
+      previousQualification: enquiry.previousQualification || '',
+      courseInterested: enquiry.courseInterested || 'Diploma in CE',
+      enquirySource: enquiry.enquirySource || 'Website',
+      status: enquiry.status || 'New',
+      remarks: enquiry.remarks || ''
+    });
+    setShowModal(true);
+  };
+
+  const handleView = (enquiry) => {
+    setSelectedEnquiry(enquiry);
+    setShowViewModal(true);
+  };
+
+  const handleDelete = async (id) => {
+    if(!window.confirm('Are you sure you want to delete this enquiry?')) return;
+    try {
+      const token = localStorage.getItem('admin_token');
+      await axios.delete(`${import.meta.env.VITE_API_URL}/enquiries/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Enquiry deleted successfully');
+      fetchEnquiries();
+    } catch(error) {
+      toast.error('Failed to delete enquiry');
+    }
+  }
+
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem('admin_token');
-      await axios.post(`${import.meta.env.VITE_API_URL}/enquiries`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (editingId) {
+        await axios.put(`${import.meta.env.VITE_API_URL}/enquiries/${editingId}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Enquiry updated successfully');
+      } else {
+        await axios.post(`${import.meta.env.VITE_API_URL}/enquiries`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Enquiry added successfully');
+      }
+      
       setShowModal(false);
+      setEditingId(null);
       setFormData({
         studentName: '', mobileNumber: '', email: '', parentName: '', city: '', 
         previousQualification: '', courseInterested: 'Diploma in CE', 
@@ -73,9 +128,19 @@ const Enquiries = () => {
       });
       fetchEnquiries();
     } catch (error) {
-      console.error('Error creating enquiry', error);
-      alert('Error creating enquiry');
+      console.error('Error saving enquiry', error);
+      toast.error('Error saving enquiry');
     }
+  };
+
+  const openAddModal = () => {
+    setEditingId(null);
+    setFormData({
+      studentName: '', mobileNumber: '', email: '', parentName: '', city: '', 
+      previousQualification: '', courseInterested: 'Diploma in CE', 
+      enquirySource: 'Website', status: 'New', remarks: ''
+    });
+    setShowModal(true);
   };
 
   return (
@@ -89,7 +154,7 @@ const Enquiries = () => {
           <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">
             <Download size={15} /> Export
           </button>
-          <button onClick={() => setShowModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2">
+          <button onClick={openAddModal} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2">
             <Plus size={16} /> Add Enquiry
           </button>
         </div>
@@ -147,8 +212,9 @@ const Enquiries = () => {
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex gap-1">
-                    <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Eye size={15} className="text-gray-500" /></button>
-                    <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Edit2 size={15} className="text-gray-500" /></button>
+                    <button onClick={() => handleView(e)} className="p-1.5 hover:bg-gray-100 rounded-lg"><Eye size={15} className="text-gray-500" /></button>
+                    <button onClick={() => handleEdit(e)} className="p-1.5 hover:bg-gray-100 rounded-lg"><Edit2 size={15} className="text-gray-500" /></button>
+                    <button onClick={() => handleDelete(e._id)} className="p-1.5 hover:bg-red-50 rounded-lg"><Trash2 size={15} className="text-red-500" /></button>
                   </div>
                 </td>
               </tr>
@@ -165,11 +231,12 @@ const Enquiries = () => {
         <p className="text-[12px] text-gray-500">Showing {enquiries.length} enquiries</p>
       </div>
 
+      {/* Add / Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-[16px] font-bold text-gray-800">Add New Enquiry</h3>
+              <h3 className="text-[16px] font-bold text-gray-800">{editingId ? 'Edit Enquiry' : 'Add New Enquiry'}</h3>
               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto">
@@ -201,7 +268,7 @@ const Enquiries = () => {
               <div>
                 <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Course Interested</label>
                 <select name="courseInterested" value={formData.courseInterested} onChange={handleChange} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px]">
-                  {['Diploma in CE', 'Diploma in IT', 'Diploma in ME', 'Diploma in EE'].map(o => <option key={o} value={o}>{o}</option>)}
+                  {['Diploma in CE', 'Diploma in IT', 'Diploma in ME', 'Diploma in EE', 'B.Tech CSE', 'B.Tech ECE', 'B.Tech ME', 'MBA'].map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               </div>
               <div>
@@ -210,6 +277,14 @@ const Enquiries = () => {
                   {Object.keys(sourceColors).map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Status</label>
+                <select name="status" value={formData.status} onChange={handleChange} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px]">
+                  {Object.keys(statusColors).map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+
               <div className="md:col-span-2">
                 <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Remarks</label>
                 <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows={3} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px]" />
@@ -217,7 +292,69 @@ const Enquiries = () => {
             </div>
             <div className="p-6 border-t border-gray-100 flex justify-end gap-3 mt-auto">
               <button onClick={() => setShowModal(false)} className="px-5 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button onClick={handleSubmit} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold">Save Enquiry</button>
+              <button onClick={handleSubmit} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold">
+                {editingId ? 'Update Enquiry' : 'Save Enquiry'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {showViewModal && selectedEnquiry && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-[16px] font-bold text-gray-800">Enquiry Details</h3>
+                <p className="text-[12px] text-gray-500 mt-1">{selectedEnquiry.enquiryNo}</p>
+              </div>
+              <button onClick={() => setShowViewModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+            </div>
+            <div className="p-6 space-y-4 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Student Name</p>
+                  <p className="text-[13px] text-gray-800 font-medium">{selectedEnquiry.studentName}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Mobile</p>
+                  <p className="text-[13px] text-gray-800 font-medium">{selectedEnquiry.mobileNumber}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Email</p>
+                  <p className="text-[13px] text-gray-800 font-medium">{selectedEnquiry.email}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Parent Name</p>
+                  <p className="text-[13px] text-gray-800 font-medium">{selectedEnquiry.parentName}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Course</p>
+                  <p className="text-[13px] text-[#0A6C54] font-bold">{selectedEnquiry.courseInterested}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">City</p>
+                  <p className="text-[13px] text-gray-800 font-medium">{selectedEnquiry.city}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Status</p>
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold inline-block ${statusColors[selectedEnquiry.status] || 'bg-gray-100 text-gray-700'}`}>{selectedEnquiry.status}</span>
+                </div>
+                <div>
+                  <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Source</p>
+                  <p className="text-[13px] text-gray-800 font-medium">{selectedEnquiry.enquirySource}</p>
+                </div>
+              </div>
+              <div className="pt-2">
+                <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Remarks</p>
+                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                  <p className="text-[13px] text-gray-700">{selectedEnquiry.remarks || 'No remarks provided.'}</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-100 flex justify-end">
+              <button onClick={() => setShowViewModal(false)} className="px-5 py-2.5 bg-gray-900 text-white rounded-lg text-[13px] font-semibold">Close</button>
             </div>
           </div>
         </div>

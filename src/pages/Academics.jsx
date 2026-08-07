@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, Trash2, ChevronRight, Plus, X, AlertTriangle } from 'lucide-react';
+import { Edit, Trash2, ChevronRight, Plus, X, AlertTriangle, ShieldAlert } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
 
 const Academics = () => {
   const [activeMenu, setActiveMenu] = useState('Departments');
@@ -15,21 +16,65 @@ const Academics = () => {
   const [formData, setFormData] = useState({});
   
   // For dynamic dropdown options
+  
   const [departments, setDepartments] = useState([]);
   const [courses, setCourses] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [hods, setHods] = useState([]);
   const [teachers, setTeachers] = useState([]);
 
-  const sideMenu = [
+  // Permission to menu tab mapping - VIEW permission needed to see the tab
+  const menuPermissionMap = {
+    'Departments': ['View Departments', 'Add Department', 'Edit Department', 'Delete Department'],
+    'Courses': ['View Courses', 'Add Course', 'Edit Course', 'Delete Course'],
+    'Semesters': ['View Courses', 'Add Course'], // semesters tied to courses
+    'Subjects': ['View Subjects', 'Add Subject', 'Edit Subject', 'Delete Subject'],
+    'Sections': ['View Sections', 'Add Section', 'Edit Section', 'Delete Section'],
+    'Designations': ['View Employees', 'Add Employee']
+  };
+
+  const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+  const userRole = adminInfo.role || 'college_admin';
+  const isFullAdmin = userRole === 'college_admin' || userRole === 'Principal';
+
+  const allMenuItems = [
     { name: 'Departments' },
     { name: 'Courses' },
     { name: 'Semesters' },
     { name: 'Subjects' },
     { name: 'Sections' },
-    { name: 'Designations' },
-    { name: 'Roles' }
+    { name: 'Designations' }
   ];
+
+  // Filter tabs by permissions (full admin sees all)
+  const sideMenu = isFullAdmin
+    ? allMenuItems
+    : allMenuItems.filter(item => {
+        const perms = menuPermissionMap[item.name] || [];
+        return perms.some(p => checkPermission(p));
+      });
+
+  // Granular per-action permission check per tab
+  const canAdd = (menuName) => {
+    if (isFullAdmin) return true;
+    const addPerms = { 'Departments': 'Add Department', 'Courses': 'Add Course', 'Semesters': 'Add Course', 'Subjects': 'Add Subject', 'Sections': 'Add Section', 'Designations': 'Add Employee' };
+    return checkPermission(addPerms[menuName] || '');
+  };
+
+  const canEdit = (menuName) => {
+    if (isFullAdmin) return true;
+    const editPerms = { 'Departments': 'Edit Department', 'Courses': 'Edit Course', 'Semesters': 'Edit Course', 'Subjects': 'Edit Subject', 'Sections': 'Edit Section', 'Designations': 'Edit Employee' };
+    return checkPermission(editPerms[menuName] || '');
+  };
+
+  const canDelete = (menuName) => {
+    if (isFullAdmin) return true;
+    const deletePerms = { 'Departments': 'Delete Department', 'Courses': 'Delete Course', 'Semesters': 'Delete Course', 'Subjects': 'Delete Subject', 'Sections': 'Delete Section', 'Designations': 'Delete Employee' };
+    return checkPermission(deletePerms[menuName] || '');
+  };
+
+  // Legacy canManage for backward compat (used for action column visibility)
+  const canManage = (menuName) => canAdd(menuName) || canEdit(menuName) || canDelete(menuName);
 
   const endpoints = {
     Departments: '/academics/departments',
@@ -37,8 +82,7 @@ const Academics = () => {
     Semesters: '/academics/semesters',
     Subjects: '/academics/subjects',
     Sections: '/academics/sections',
-    Designations: '/designations',
-    Roles: '/roles'
+    Designations: '/designations'
   };
 
   const tableColumns = {
@@ -81,12 +125,6 @@ const Academics = () => {
       { key: 'name', label: 'Designation Name' },
       { key: 'description', label: 'Description' },
       { key: 'level', label: 'Level' },
-      { key: 'status', label: 'Status' }
-    ],
-    Roles: [
-      { key: 'name', label: 'Role Name' },
-      { key: 'description', label: 'Description' },
-      { key: 'department', label: 'Department' },
       { key: 'status', label: 'Status' }
     ]
   };
@@ -186,24 +224,19 @@ const Academics = () => {
         { key: 'description', label: 'Description', type: 'text', required: false },
         { key: 'level', label: 'Level', type: 'text', required: false },
         { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Inactive'], required: false }
-      ],
-      Roles: [
-        { key: 'name', label: 'Role Name', type: 'text', required: true },
-        { key: 'description', label: 'Description', type: 'text', required: false },
-        { 
-          key: 'department', 
-          label: 'Department', 
-          type: 'select', 
-          required: false,
-          options: departments.map(d => ({ value: d.name, label: d.name }))
-        },
-        { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Inactive'], required: false }
       ]
     };
     return fields;
   };
 
   const formFields = getFormFields();
+
+  // Auto-select first allowed tab on mount
+  useEffect(() => {
+    if (sideMenu.length > 0 && !sideMenu.find(m => m.name === activeMenu)) {
+      setActiveMenu(sideMenu[0].name);
+    }
+  }, []);
 
   // Fetch data when menu changes
   useEffect(() => {
@@ -357,7 +390,7 @@ const Academics = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col md:flex-row h-full font-['Inter']">
+    <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col md:flex-row h-full font-['Inter'] w-full overflow-hidden">
       
       {/* Inner Sidebar */}
       <div className="w-full md:w-[240px] border-b md:border-b-0 md:border-r border-gray-100 py-2 md:py-4 flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible flex-shrink-0 custom-scrollbar">
@@ -378,17 +411,19 @@ const Academics = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header inside content */}
         <div className="flex items-center justify-between p-6">
           <h2 className="text-[18px] font-bold text-[#0A6C54] font-['Outfit']">{activeMenu}</h2>
-          <button 
-            onClick={handleAddClick}
-            className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm font-['Inter']"
-          >
-            <Plus size={16} strokeWidth={2.5} />
-            Add {activeMenu.slice(0, -1)}
-          </button>
+          {canManage(activeMenu) && (
+            <button 
+              onClick={handleAddClick}
+              className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm font-['Inter']"
+            >
+              <Plus size={16} strokeWidth={2.5} />
+              Add {activeMenu.slice(0, -1)}
+            </button>
+          )}
         </div>
 
         {/* Table */}
@@ -410,7 +445,9 @@ const Academics = () => {
                         {col.label}
                       </th>
                     ))}
-                    <th className="py-4 px-6 text-[13px] font-bold text-gray-800 whitespace-nowrap text-center">Action</th>
+                    {canManage(activeMenu) && (
+                      <th className="py-4 px-6 text-[13px] font-bold text-gray-800 whitespace-nowrap text-center">Action</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -430,22 +467,30 @@ const Academics = () => {
                           )}
                         </td>
                       ))}
-                      <td className="py-4 px-6">
-                        <div className="flex items-center justify-center gap-2 whitespace-nowrap">
-                          <button 
-                            onClick={() => handleEditClick(row)}
-                            className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm flex-shrink-0"
-                          >
-                            <Edit size={14} strokeWidth={2} />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteClick(row)}
-                            className="w-8 h-8 rounded border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm bg-red-50/50 flex-shrink-0"
-                          >
-                            <Trash2 size={14} strokeWidth={2} />
-                          </button>
-                        </div>
-                      </td>
+                      {canManage(activeMenu) && (
+                        <td className="py-4 px-6">
+                          <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+                            {canEdit(activeMenu) && (
+                              <button 
+                                onClick={() => handleEditClick(row)}
+                                className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm flex-shrink-0"
+                                title="Edit"
+                              >
+                                <Edit size={14} strokeWidth={2} />
+                              </button>
+                            )}
+                            {canDelete(activeMenu) && (
+                              <button 
+                                onClick={() => handleDeleteClick(row)}
+                                className="w-8 h-8 rounded border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm bg-red-50/50 flex-shrink-0"
+                                title="Delete"
+                              >
+                                <Trash2 size={14} strokeWidth={2} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

@@ -1,17 +1,14 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Download, Calendar, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit2, Download, Calendar, Save, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-const initialSchemes = [
-  { id: 1, name: 'Post-Matric Scholarship for OBC Students', type: 'Government (State)', eligibility: 'OBC Category, Family Income < ₹2.5 LPA', reward: 'Tuition Fee reimbursement', deadline: '2024-03-15', status: 'Applications Open' },
-  { id: 2, name: 'AICTE Pragati Scholarship for Girls', type: 'AICTE', eligibility: 'Girl Student, CGPA > 8.0, Income < ₹8.0 LPA', reward: '₹50,000 per annum', deadline: '2024-03-31', status: 'Applications Open' },
-  { id: 3, name: 'NSP Merit-cum-Means Scholarship', type: 'NSP (National)', eligibility: 'Minority Category, Marks > 50%, Income < ₹2.5 LPA', reward: '₹20,000 per annum', deadline: '2024-03-10', status: 'Applications Open' },
-  { id: 4, name: 'College Merit-cum-Need Aid', type: 'College', eligibility: 'General/OBC/SC/ST, CGPA > 9.0', reward: '50% Tuition Fee waiver', deadline: '2024-02-28', status: 'Applications Closed' },
-];
+import axiosInstance from '../../utils/axiosInstance';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const Schemes = () => {
-  const [schemes, setSchemes] = useState(initialSchemes);
+  const [schemes, setSchemes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newScheme, setNewScheme] = useState({
     name: '',
     type: 'Government (State)',
@@ -20,27 +17,53 @@ const Schemes = () => {
     deadline: '',
   });
 
-  const handleAddScheme = (e) => {
+  const fetchSchemes = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/scholarships/schemes');
+      setSchemes(res.data);
+    } catch (error) {
+      toast.error('Failed to fetch schemes');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSchemes();
+  }, []);
+
+  const handleAddScheme = async (e) => {
     e.preventDefault();
-    const itemToAdd = {
-      id: schemes.length + 1,
-      name: newScheme.name,
-      type: newScheme.type,
-      eligibility: newScheme.eligibility,
-      reward: newScheme.reward,
-      deadline: newScheme.deadline,
-      status: 'Applications Open'
-    };
-    setSchemes([...schemes, itemToAdd]);
-    setShowAddModal(false);
-    toast.success(`Scholarship Scheme ${newScheme.name} configured successfully!`);
-    setNewScheme({
-      name: '',
-      type: 'Government (State)',
-      eligibility: '',
-      reward: '',
-      deadline: '',
-    });
+    try {
+      setIsSubmitting(true);
+      await axiosInstance.post('/scholarships/schemes', newScheme);
+      toast.success(`Scholarship Scheme ${newScheme.name} configured successfully!`);
+      setShowAddModal(false);
+      setNewScheme({
+        name: '',
+        type: 'Government (State)',
+        eligibility: '',
+        reward: '',
+        deadline: '',
+      });
+      fetchSchemes();
+    } catch (error) {
+      toast.error('Failed to configure scheme');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this scheme?')) return;
+    try {
+      await axiosInstance.delete(`/scholarships/schemes/${id}`);
+      toast.success('Scheme deleted');
+      fetchSchemes();
+    } catch (error) {
+      toast.error('Failed to delete scheme');
+    }
   };
 
   return (
@@ -58,36 +81,46 @@ const Schemes = () => {
 
       {/* Table */}
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[1000px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Scheme Name</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Funding / Agency</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Eligibility Criteria</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Award Description</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Last Date</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {schemes.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.name}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{item.type}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.eligibility}</td>
-                <td className="py-4 px-6 text-[13px] text-[#0A6C54] font-bold">{item.reward}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-500 font-semibold">{item.deadline}</td>
-                <td className="py-4 px-6 text-[13px]">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                    item.status === 'Applications Open' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
+        {loading ? (
+          <SkeletonLoader type="table" rows={5} cols={7} />
+        ) : schemes.length === 0 ? (
+          <div className="py-12 text-center text-gray-500 text-[13px]">No scholarship schemes configured.</div>
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Scheme Name</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Funding / Agency</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Eligibility Criteria</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Award Description</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Last Date</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {schemes.map(item => (
+                <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.name}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{item.type}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.eligibility}</td>
+                  <td className="py-4 px-6 text-[13px] text-[#0A6C54] font-bold">{item.reward}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-500 font-semibold">{new Date(item.deadline).toLocaleDateString()}</td>
+                  <td className="py-4 px-6 text-[13px]">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                      item.status === 'Applications Open' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 flex gap-2">
+                    <button onClick={() => handleDelete(item._id)} className="p-1.5 hover:bg-red-50 rounded-lg text-red-600 transition-colors"><Trash2 size={15} /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Add Scheme Modal */}
@@ -170,9 +203,10 @@ const Schemes = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white disabled:opacity-50 rounded-lg text-[13px] font-semibold"
                 >
-                  Save Scheme
+                  {isSubmitting ? 'Saving...' : 'Save Scheme'}
                 </button>
               </div>
             </form>

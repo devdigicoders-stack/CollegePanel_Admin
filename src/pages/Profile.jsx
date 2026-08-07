@@ -1,10 +1,84 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Camera } from 'lucide-react';
+import toast from 'react-hot-toast';
+import axiosInstance from '../utils/axiosInstance';
 
 const Profile = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handlePasswordUpdate = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error('Please fill in all password fields');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      await axiosInstance.put('/college-admin/profile', {
+        currentPassword,
+        newPassword
+      });
+      toast.success('Password updated successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update password');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+  const roleName = adminInfo.role === 'college_admin' ? 'College Admin' : (adminInfo.role || 'Staff Member');
+  
+  const [userName, setUserName] = useState(adminInfo.name || 'Admin User');
+  const [userEmail, setUserEmail] = useState(adminInfo.email || adminInfo.adminEmail || 'admin@pccollege.edu.in');
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+  const handleProfileUpdate = async () => {
+    if (!userName || !userEmail) {
+      toast.error('Name and Email are required');
+      return;
+    }
+    try {
+      setIsUpdatingProfile(true);
+      const res = await axiosInstance.put('/college-admin/profile', {
+        name: userName,
+        email: userEmail
+      });
+      
+      // Update localStorage
+      const updatedInfo = { ...adminInfo };
+      if (updatedInfo.role === 'college_admin') {
+        updatedInfo.name = res.data.user.name;
+        updatedInfo.adminEmail = res.data.user.email;
+      } else {
+        updatedInfo.name = res.data.user.name;
+        updatedInfo.email = res.data.user.email;
+      }
+      localStorage.setItem('admin_info', JSON.stringify(updatedInfo));
+      
+      toast.success('Profile details updated successfully!');
+      // Dispatch event to notify other components (like Header/Sidebar) if they are listening
+      window.dispatchEvent(new Event('storage'));
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row gap-6 font-['Inter']">
@@ -16,7 +90,7 @@ const Profile = () => {
           <div className="relative mb-6">
             <div className="w-28 h-28 rounded-full border-4 border-gray-50 overflow-hidden bg-gray-100">
               <img 
-                src="https://ui-avatars.com/api/?name=Rajesh+Kumar&background=022A36&color=fff&size=200" 
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=022A36&color=fff&size=200`} 
                 alt="Profile" 
                 className="w-full h-full object-cover"
               />
@@ -26,18 +100,20 @@ const Profile = () => {
             </button>
           </div>
 
-          <h2 className="text-[20px] font-bold text-[#022A36] font-['Outfit'] mb-1">Dr. Rajesh Kumar</h2>
-          <p className="text-[13px] text-gray-500 font-medium mb-8">Principal</p>
+          <h2 className="text-[20px] font-bold text-[#022A36] font-['Outfit'] mb-1">{userName}</h2>
+          <p className="text-[13px] text-gray-500 font-medium mb-8">{roleName}</p>
 
           <div className="w-full space-y-5 text-left border-t border-gray-100 pt-6">
             <div>
               <p className="text-[12px] text-gray-400 font-semibold mb-1">Email</p>
-              <p className="text-[14px] text-gray-800 font-medium truncate">principal@pccollege.edu.in</p>
+              <p className="text-[14px] text-gray-800 font-medium truncate">{userEmail}</p>
             </div>
-            <div>
-              <p className="text-[12px] text-gray-400 font-semibold mb-1">Mobile</p>
-              <p className="text-[14px] text-gray-800 font-medium truncate">9876543210</p>
-            </div>
+            {adminInfo.department && (
+              <div>
+                <p className="text-[12px] text-gray-400 font-semibold mb-1">Department</p>
+                <p className="text-[14px] text-gray-800 font-medium truncate">{adminInfo.department}</p>
+              </div>
+            )}
           </div>
 
         </div>
@@ -54,26 +130,37 @@ const Profile = () => {
             <label className="text-[13px] font-semibold text-gray-600">Full Name</label>
             <input 
               type="text" 
-              defaultValue="Dr. Rajesh Kumar"
-              readOnly
-              className="w-full bg-gray-50 border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none cursor-not-allowed"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
             />
 
             <label className="text-[13px] font-semibold text-gray-600">Email</label>
             <input 
               type="email" 
-              defaultValue="principal@pccollege.edu.in"
-              readOnly
-              className="w-full bg-gray-50 border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none cursor-not-allowed"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
             />
 
-            <label className="text-[13px] font-semibold text-gray-600">Mobile</label>
+            <label className="text-[13px] font-semibold text-gray-600">Role & Access</label>
             <input 
               type="text" 
-              defaultValue="9876543210"
+              value={roleName}
               readOnly
               className="w-full bg-gray-50 border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none cursor-not-allowed"
             />
+            
+            <div className="sm:col-start-2 mt-2">
+              <button 
+                type="button"
+                onClick={handleProfileUpdate}
+                disabled={isUpdatingProfile}
+                className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-colors shadow-sm disabled:opacity-50"
+              >
+                {isUpdatingProfile ? 'Saving...' : 'Save Profile'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -88,6 +175,8 @@ const Profile = () => {
               <input 
                 type={showCurrentPassword ? "text" : "password"} 
                 placeholder="Enter current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
                 className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm pr-10"
               />
               <button 
@@ -104,6 +193,8 @@ const Profile = () => {
               <input 
                 type={showNewPassword ? "text" : "password"} 
                 placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm pr-10"
               />
               <button 
@@ -120,6 +211,8 @@ const Profile = () => {
               <input 
                 type={showConfirmPassword ? "text" : "password"} 
                 placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm pr-10"
               />
               <button 
@@ -132,8 +225,13 @@ const Profile = () => {
             </div>
             
             <div className="sm:col-start-2 mt-2">
-              <button className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-colors shadow-sm">
-                Update Password
+              <button 
+                type="button"
+                onClick={handlePasswordUpdate}
+                disabled={isUpdating}
+                className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-colors shadow-sm disabled:opacity-50"
+              >
+                {isUpdating ? 'Updating...' : 'Update Password'}
               </button>
             </div>
 

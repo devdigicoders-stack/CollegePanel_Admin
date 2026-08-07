@@ -1,19 +1,26 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Search, ChevronDown, Eye, Plus, Edit2, Trash2, X as XIcon,
-  ChevronLeft, ChevronRight, Calendar, BookOpen, Users, Save, X
-} from 'lucide-react';
+  ChevronLeft, ChevronRight, CheckCircle, Download, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
 import axiosInstance from '../utils/axiosInstance';
+import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
 
 const Assignments = () => {
+  if (!checkPermission('View Courses') && !checkPermission('Submit Course Assignments')) {
+    return <AccessDenied />;
+  }
   const [activeTab, setActiveTab] = useState('Pending');
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showSubmissionsModal, setShowSubmissionsModal] = useState(false);
+  const [submissions, setSubmissions] = useState([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 1 });
   const [tabCounts, setTabCounts] = useState({ Pending: 0, Submitted: 0, Graded: 0, Overdue: 0, All: 0 });
@@ -41,6 +48,8 @@ const Assignments = () => {
   const [teachers, setTeachers] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [sections, setSections] = useState([]);
   const [formLoading, setFormLoading] = useState(false);
   const [editId, setEditId] = useState(null);
   const searchTimeout = useRef(null);
@@ -58,6 +67,8 @@ const Assignments = () => {
     fetchSubjects();
     fetchTeachers();
     fetchTabCounts();
+    fetchSemesters();
+    fetchSections();
   }, []);
 
   useEffect(() => {
@@ -67,7 +78,7 @@ const Assignments = () => {
   const fetchDepartments = async () => {
     try {
       const res = await axiosInstance.get('/academics/departments');
-      setDepartments(res.data.data || []);
+      setDepartments(res.data.data || res.data || []);
     } catch (error) {
       console.error('Failed to fetch departments', error);
     }
@@ -76,7 +87,7 @@ const Assignments = () => {
   const fetchSubjects = async () => {
     try {
       const res = await axiosInstance.get('/academics/subjects');
-      setSubjects(res.data.data || []);
+      setSubjects(res.data.data || res.data || []);
     } catch (error) {
       console.error('Failed to fetch subjects', error);
     }
@@ -85,7 +96,7 @@ const Assignments = () => {
   const fetchTeachers = async () => {
     try {
       const res = await axiosInstance.get('/assignments/teachers');
-      setTeachers(res.data || []);
+      setTeachers(res.data.data || res.data || []);
     } catch (error) {
       console.error('Failed to fetch teachers', error);
     }
@@ -104,6 +115,24 @@ const Assignments = () => {
       });
     } catch (error) {
       console.error('Failed to fetch stats', error);
+    }
+  };
+
+  const fetchSemesters = async () => {
+    try {
+      const res = await axiosInstance.get('/academics/semesters');
+      setSemesters(res.data.data || res.data || []);
+    } catch (error) {
+      console.error('Failed to fetch semesters', error);
+    }
+  };
+
+  const fetchSections = async () => {
+    try {
+      const res = await axiosInstance.get('/academics/sections');
+      setSections(res.data.data || res.data || []);
+    } catch (error) {
+      console.error('Failed to fetch sections', error);
     }
   };
 
@@ -205,6 +234,7 @@ const Assignments = () => {
     try {
       const payload = {
         ...formData,
+        course: formData.department,
         assignedDate: new Date().toISOString().split('T')[0],
         totalStudents: 0,
         submittedCount: 0,
@@ -241,6 +271,38 @@ const Assignments = () => {
     }
   };
 
+  const fetchSubmissions = async (assignmentId) => {
+    try {
+      setSubmissionsLoading(true);
+      const res = await axiosInstance.get(`/assignments/${assignmentId}/submissions`);
+      setSubmissions(res.data.data || res.data || []);
+    } catch (error) {
+      toast.error('Failed to fetch submissions');
+    } finally {
+      setSubmissionsLoading(false);
+    }
+  };
+
+  const handleEvaluate = (assignment) => {
+    setSelectedAssignment(assignment);
+    setShowSubmissionsModal(true);
+    fetchSubmissions(assignment._id);
+  };
+
+  const handleSaveGrade = async (submissionId, grade, remarks) => {
+    try {
+      await axiosInstance.put(`/assignments/submissions/${submissionId}`, { 
+        status: 'Graded', 
+        grade, 
+        remarks 
+      });
+      toast.success('Grade saved successfully');
+      fetchSubmissions(selectedAssignment._id);
+    } catch (error) {
+      toast.error('Failed to save grade');
+    }
+  };
+
   const handleViewAssignment = (assignment) => {
     setSelectedAssignment(assignment);
     setShowViewModal(true);
@@ -256,6 +318,10 @@ const Assignments = () => {
     return Math.round((submitted / total) * 100);
   };
 
+  const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+  const userRole = adminInfo.role || 'college_admin';
+  const canEdit = userRole === 'college_admin' || userRole === 'Teacher' || userRole === 'Principal' || userRole === 'HOD';
+
   return (
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
 
@@ -265,13 +331,15 @@ const Assignments = () => {
           <h2 className="text-lg font-bold text-gray-800">Assignments</h2>
           <p className="text-[13px] text-gray-500 mt-1">Manage and track student assignments</p>
         </div>
-        <button
-          onClick={handleAddAssignment}
-          className="flex items-center gap-2 bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#085a46] transition-colors"
-        >
-          <Plus size={16} />
-          Create Assignment
-        </button>
+        {canEdit && (
+          <button
+            onClick={handleAddAssignment}
+            className="flex items-center gap-2 bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#085a46] transition-colors"
+          >
+            <Plus size={16} />
+            Create Assignment
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
@@ -397,19 +465,30 @@ const Assignments = () => {
                         <Eye size={14} />
                       </button>
                       <button
-                        onClick={() => handleEditAssignment(assignment)}
-                        className="w-8 h-8 rounded-full border border-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
-                        title="Edit"
+                        onClick={() => handleEvaluate(assignment)}
+                        className="w-8 h-8 rounded-full border border-orange-100 flex items-center justify-center text-orange-500 hover:bg-orange-50 transition-colors"
+                        title="Evaluate Submissions"
                       >
-                        <Edit2 size={14} />
+                        <CheckCircle size={14} />
                       </button>
-                      <button
-                        onClick={() => handleDeleteAssignment(assignment)}
-                        className="w-8 h-8 rounded-full border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      {canEdit && (
+                        <>
+                          <button
+                            onClick={() => handleEditAssignment(assignment)}
+                            className="w-8 h-8 rounded-full border border-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
+                            title="Edit"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAssignment(assignment)}
+                            className="w-8 h-8 rounded-full border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -515,11 +594,12 @@ const Assignments = () => {
                   <select
                     value={formData.semester}
                     onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
                   >
-                    <option value="">Select</option>
-                    <option>1st</option><option>2nd</option><option>3rd</option>
-                    <option>4th</option><option>5th</option><option>6th</option>
+                    <option value="">Select Semester</option>
+                    {semesters.map(s => (
+                      <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -527,10 +607,12 @@ const Assignments = () => {
                   <select
                     value={formData.section}
                     onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
                   >
-                    <option value="">Select</option>
-                    <option>A</option><option>B</option><option>C</option>
+                    <option value="">Select Section</option>
+                    {sections.map(s => (
+                      <option key={s._id} value={s.name}>{s.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -676,11 +758,12 @@ const Assignments = () => {
                   <select
                     value={formData.semester}
                     onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
                   >
-                    <option value="">Select</option>
-                    <option>1st</option><option>2nd</option><option>3rd</option>
-                    <option>4th</option><option>5th</option><option>6th</option>
+                    <option value="">Select Semester</option>
+                    {semesters.map(s => (
+                      <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -688,10 +771,12 @@ const Assignments = () => {
                   <select
                     value={formData.section}
                     onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
                   >
-                    <option value="">Select</option>
-                    <option>A</option><option>B</option><option>C</option>
+                    <option value="">Select Section</option>
+                    {sections.map(s => (
+                      <option key={s._id} value={s.name}>{s.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -833,6 +918,104 @@ const Assignments = () => {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Submissions Modal */}
+      {showSubmissionsModal && selectedAssignment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm font-['Inter']">
+          <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">Evaluate Submissions</h2>
+                <p className="text-[13px] text-gray-500 mt-1 font-medium">{selectedAssignment.title} ({selectedAssignment.subject})</p>
+              </div>
+              <button 
+                onClick={() => setShowSubmissionsModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
+              >
+                <XIcon size={18} className="text-gray-500" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 overflow-y-auto flex-1 bg-gray-50/20">
+              {submissionsLoading ? (
+                <div className="py-8"><SkeletonLoader type="table" rows={4} cols={5} /></div>
+              ) : submissions.length === 0 ? (
+                <div className="text-center py-10 text-gray-500">No submissions yet for this assignment.</div>
+              ) : (
+                <div className="space-y-4">
+                  {submissions.map(sub => (
+                    <div key={sub._id} className="bg-white border border-gray-100 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-800">{sub.studentId?.studentName || 'Unknown Student'}</h4>
+                          <div className="flex gap-4 mt-1 text-[12px] text-gray-500 font-medium">
+                            <span>Roll No: {sub.studentId?.studentId || 'N/A'}</span>
+                            <span>Submitted: {new Date(sub.submissionDate).toLocaleString()}</span>
+                            <span className={`px-2 py-0.5 rounded-full ${sub.status === 'Graded' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
+                              {sub.status}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => {
+                              if(sub.fileUrl) {
+                                window.open(sub.fileUrl, '_blank');
+                              } else {
+                                toast.error('No file uploaded by student');
+                              }
+                            }}
+                            className="px-3 py-2 bg-[#0A6C54]/10 text-[#0A6C54] hover:bg-[#0A6C54] hover:text-white rounded-lg flex items-center gap-2 text-[13px] font-bold transition-colors"
+                          >
+                            <FileText size={14} /> View File
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t border-gray-50 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="md:col-span-1">
+                          <label className="block text-[11px] font-bold text-gray-500 mb-1 uppercase tracking-wider">Marks (out of {selectedAssignment.totalMarks})</label>
+                          <input 
+                            type="text" 
+                            defaultValue={sub.grade || ''}
+                            id={`grade-${sub._id}`}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]"
+                            placeholder={`e.g. ${selectedAssignment.totalMarks}`}
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-[11px] font-bold text-gray-500 mb-1 uppercase tracking-wider">Feedback / Remarks</label>
+                          <input 
+                            type="text" 
+                            defaultValue={sub.remarks || ''}
+                            id={`remarks-${sub._id}`}
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]"
+                            placeholder="Add your feedback..."
+                          />
+                        </div>
+                        <div className="md:col-span-1 flex items-end">
+                          <button
+                            onClick={() => {
+                              const grade = document.getElementById(`grade-${sub._id}`).value;
+                              const remarks = document.getElementById(`remarks-${sub._id}`).value;
+                              handleSaveGrade(sub._id, grade, remarks);
+                            }}
+                            className="w-full bg-[#0A6C54] hover:bg-[#085a46] text-white py-2 rounded-lg text-[13px] font-bold transition-colors"
+                          >
+                            Save Grade
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

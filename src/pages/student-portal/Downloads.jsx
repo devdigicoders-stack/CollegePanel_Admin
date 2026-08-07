@@ -1,14 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, FileText, BadgeCheck, FileImage } from 'lucide-react';
+import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const Downloads = () => {
-  const documents = [
-    { id: 1, name: 'Admit Card - Sem 4 Theory Exams', type: 'Admit Card', date: 'Available Now' },
-    { id: 2, name: 'Fee Receipt - Installment 1 (Sem 4)', type: 'Fee Receipt', date: 'Paid 15-Jan' },
-    { id: 3, name: 'Bonafide Certificate Request copy', type: 'Bonafide', date: 'Generated 10-Feb' },
-    { id: 4, name: 'Student Identity Card (Digital Copy)', type: 'ID Card', date: 'Valid' },
-  ];
+  const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDownloads();
+  }, []);
+
+  const fetchDownloads = async () => {
+    try {
+      const res = await axiosInstance.get('/student-portal/downloads');
+      setDocuments(res.data);
+    } catch (error) {
+      toast.error('Failed to fetch downloads');
+    } finally { setLoading(false); }
+  };
+
+  
+  if (loading) {
+    return (
+      <div className="p-6">
+        <SkeletonLoader type="table" rows={6} cols={5} />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -17,9 +37,9 @@ const Downloads = () => {
         <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Download digital copies of your admit card, paid receipts, ID cards, and semester marksheets</p>
       </div>
 
-      <div className="p-6 space-y-6 flex-1 overflow-y-auto max-w-3xl">
-        {documents.map(item => (
-          <div key={item.id} className="p-4 border border-gray-100 rounded-xl flex items-center justify-between hover:bg-gray-50/50 transition-colors shadow-sm bg-gray-50/20 text-[13px]">
+      <div className="p-6 space-y-6 flex-1 overflow-y-auto">
+        {documents.length > 0 ? documents.map(item => (
+          <div key={item._id} className="p-4 border border-gray-100 rounded-xl flex items-center justify-between hover:bg-gray-50/50 transition-colors shadow-sm bg-gray-50/20 text-[13px]">
             <div className="flex items-center gap-3">
               <div className="bg-[#0A6C54]/10 p-2.5 rounded-lg text-[#0A6C54]">
                 {item.type === 'ID Card' ? <FileImage size={18} /> : <FileText size={18} />}
@@ -32,14 +52,21 @@ const Downloads = () => {
             </div>
 
             <button 
-              onClick={() => toast.success('Document download initiated successfully!')} 
+              onClick={() => {
+                if(item.fileUrl) window.open(item.fileUrl, '_blank');
+                else toast.error('File link not available');
+              }} 
               className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors"
               title="Download Document"
             >
               <Download size={15} />
             </button>
           </div>
-        ))}
+        )) : (
+          <div className="text-gray-500 text-[13px] p-4 bg-gray-50 rounded-xl border border-gray-100">
+            No downloadable documents found.
+          </div>
+        )}
       </div>
     </div>
   );

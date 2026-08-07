@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
-import { Search, Plus, Edit2, Eye, MoreVertical, ChevronDown, Download, Filter, Phone, MessageSquare, Calendar, FileText, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, Edit2, Eye } from 'lucide-react';
+import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
 
 const Admissions = () => {
+  if (!checkPermission('View Admissions')) {
+    return <AccessDenied />;
+  }
   const [activeTab, setActiveTab] = useState('Dashboard');
 
   // Dashboard Stats
@@ -137,7 +142,7 @@ const Admissions = () => {
                     </td>
                     <td className="py-3 px-4 flex gap-2">
                       <button className="p-2 hover:bg-gray-100 rounded-lg"><Eye size={16} className="text-gray-600" /></button>
-                      <button className="p-2 hover:bg-gray-100 rounded-lg"><Edit2 size={16} className="text-gray-600" /></button>
+                      {checkPermission('Edit Admission') && <button className="p-2 hover:bg-gray-100 rounded-lg"><Edit2 size={16} className="text-gray-600" /></button>}
                     </td>
                   </tr>
                 ))}
@@ -184,7 +189,7 @@ const Admissions = () => {
                     <td className="py-3 px-4 text-[13px] text-gray-600">{followUp.nextFollowUp}</td>
                     <td className="py-3 px-4 flex gap-2">
                       <button className="p-2 hover:bg-gray-100 rounded-lg"><Eye size={16} className="text-gray-600" /></button>
-                      <button className="p-2 hover:bg-gray-100 rounded-lg"><Edit2 size={16} className="text-gray-600" /></button>
+                      {checkPermission('Edit Admission') && <button className="p-2 hover:bg-gray-100 rounded-lg"><Edit2 size={16} className="text-gray-600" /></button>}
                     </td>
                   </tr>
                 ))}
@@ -231,7 +236,7 @@ const Admissions = () => {
                     </td>
                     <td className="py-3 px-4 flex gap-2">
                       <button className="p-2 hover:bg-gray-100 rounded-lg"><Eye size={16} className="text-gray-600" /></button>
-                      <button className="p-2 hover:bg-gray-100 rounded-lg"><Edit2 size={16} className="text-gray-600" /></button>
+                      {checkPermission('Edit Admission') && <button className="p-2 hover:bg-gray-100 rounded-lg"><Edit2 size={16} className="text-gray-600" /></button>}
                     </td>
                   </tr>
                 ))}

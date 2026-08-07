@@ -1,20 +1,42 @@
-import React from 'react';
-import { Users, FileText, CheckCircle, XCircle, Clock, DollarSign, RefreshCw, Award } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileText, CheckCircle, Clock, DollarSign, Award } from 'lucide-react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import axiosInstance from '../../utils/axiosInstance';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const HCReact = HighchartsReact.default || HighchartsReact;
 
 const ScholarshipDashboard = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/scholarships/dashboard/stats');
+      setData(res.data);
+    } catch (error) {
+      console.error('Error fetching scholarship stats', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="p-6"><SkeletonLoader type="dashboard" /></div>;
+  }
+
   const stats = [
-    { label: 'Total Applications', value: '450', icon: FileText, color: 'bg-blue-50', iconColor: 'text-blue-500' },
-    { label: 'Pending Verification', value: '82', icon: Clock, color: 'bg-yellow-50', iconColor: 'text-yellow-600' },
-    { label: 'Approved Applications', value: '310', icon: CheckCircle, color: 'bg-green-50', iconColor: 'text-green-500' },
-    { label: 'Rejected Applications', value: '58', icon: XCircle, color: 'bg-red-50', iconColor: 'text-red-500' },
-    { label: 'Renewal Pending', value: '45', icon: RefreshCw, color: 'bg-orange-50', iconColor: 'text-orange-500' },
-    { label: 'Approved Amount', value: '₹45,50,000', icon: DollarSign, color: 'bg-emerald-50', iconColor: 'text-emerald-500' },
-    { label: 'Amount Disbursed', value: '₹32,00,000', icon: DollarSign, color: 'bg-teal-50', iconColor: 'text-teal-500' },
-    { label: 'Active Schemes', value: '12 Schemes', icon: Award, color: 'bg-indigo-50', iconColor: 'text-indigo-500' },
+    { label: 'Total Applications', value: data?.totalApplications || 0, icon: FileText, color: 'bg-blue-50', iconColor: 'text-blue-500' },
+    { label: 'Pending Verification', value: data?.pendingVerification || 0, icon: Clock, color: 'bg-yellow-50', iconColor: 'text-yellow-600' },
+    { label: 'Approved Applications', value: data?.approvedApplications || 0, icon: CheckCircle, color: 'bg-green-50', iconColor: 'text-green-500' },
+    { label: 'Amount Disbursed', value: `₹${(data?.totalDisbursed || 0).toLocaleString()}`, icon: DollarSign, color: 'bg-teal-50', iconColor: 'text-teal-500' },
+    { label: 'Active Schemes', value: `${data?.totalSchemes || 0} Schemes`, icon: Award, color: 'bg-indigo-50', iconColor: 'text-indigo-500' },
   ];
 
   const categoryOptions = {
@@ -61,25 +83,11 @@ const ScholarshipDashboard = () => {
         </div>
 
         <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-          <h3 className="text-[14px] font-bold text-gray-800 font-semibold uppercase tracking-wider">Recent Scholarship Applications</h3>
+          <h3 className="text-[14px] font-bold text-gray-800 font-semibold uppercase tracking-wider">Recent Information</h3>
           <div className="space-y-3">
-            {[
-              { student: 'Amit Sharma', scheme: 'Post-Matric Scholarship for OBC', amount: '₹12,000', status: 'Under Verification' },
-              { student: 'Neha Verma', scheme: 'NSP Merit-cum-Means', amount: '₹25,000', status: 'Pending Upload' },
-              { student: 'Vikram Patel', scheme: 'AICTE Pragati Scholarship', amount: '₹50,000', status: 'Approved' },
-            ].map((app, idx) => (
-              <div key={idx} className="p-3 bg-gray-50 rounded-lg text-[13px] border border-gray-100 flex justify-between items-center">
-                <div>
-                  <h4 className="font-bold text-gray-800">{app.student}</h4>
-                  <p className="text-[12px] text-gray-500 mt-0.5">{app.scheme} | <strong className="text-[#0A6C54]">{app.amount}</strong></p>
-                </div>
-                <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                  app.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                  app.status === 'Under Verification' ? 'bg-blue-100 text-blue-700' :
-                  'bg-yellow-100 text-yellow-700'
-                }`}>{app.status}</span>
-              </div>
-            ))}
+             <div className="p-3 bg-gray-50 rounded-lg text-[13px] border border-gray-100 text-gray-500">
+               Please navigate to Applications tab to view and verify recent student scholarship applications.
+             </div>
           </div>
         </div>
       </div>

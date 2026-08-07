@@ -1,109 +1,306 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Search, ChevronDown, Save, Edit2, Check, X as XIcon,
   ChevronLeft, ChevronRight, BookOpen, AlertTriangle
 } from 'lucide-react';
+import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
 
 const InternalMarks = () => {
+  if (!checkPermission('Enter Marks') && !checkPermission('View Results')) {
+    return <AccessDenied />;
+  }
   const [activeTab, setActiveTab] = useState('Pending');
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
-  const [marks, setMarks] = useState({});
+  const [marks, setMarks] = useState({}); // { studentId: marksValue }
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+
+  // Dropdown options
+  const [departments, setDepartments] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [sections, setSections] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   
   // Filters
   const [filters, setFilters] = useState({
-    department: 'Computer Science',
-    semester: '3rd',
-    section: 'A',
-    subject: 'Data Structures',
+    department: '',
+    semester: '',
+    section: '',
+    subject: '',
     examType: 'Internal 1'
   });
 
-  const tabs = [
-    { name: 'Pending', count: 28 },
-    { name: 'Submitted', count: 85 },
-    { name: 'Approved', count: 72 }
-  ];
+  const [examId, setExamId] = useState(null);
+  const [maxMarks] = useState(30);
 
-  const [pagination, setPagination] = useState({ page: 1, limit: 15, total: 0, pages: 1 });
+  // 1. Fetch dropdown options on mount
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const [deptRes, semRes, secRes, subRes] = await Promise.all([
+          axiosInstance.get('/academics/departments'),
+          axiosInstance.get('/academics/semesters'),
+          axiosInstance.get('/academics/sections'),
+          axiosInstance.get('/academics/subjects')
+        ]);
 
-  // Static student data
-  const staticStudents = [
-    {
-      _id: '1',
-      rollNo: '2024CS001',
-      studentName: 'Rahul Sharma',
-      department: 'Computer Science',
-      semester: '3rd',
-      section: 'A',
-      marks: null,
-      maxMarks: 30,
-      status: 'Pending'
-    },
-    {
-      _id: '2',
-      rollNo: '2024CS002',
-      studentName: 'Priya Patel',
-      department: 'Computer Science',
-      semester: '3rd',
-      section: 'A',
-      marks: null,
-      maxMarks: 30,
-      status: 'Pending'
-    },
-    {
-      _id: '3',
-      rollNo: '2024CS003',
-      studentName: 'Amit Kumar',
-      department: 'Computer Science',
-      semester: '3rd',
-      section: 'A',
-      marks: null,
-      maxMarks: 30,
-      status: 'Pending'
-    },
-    {
-      _id: '4',
-      rollNo: '2024CS004',
-      studentName: 'Sneha Verma',
-      department: 'Computer Science',
-      semester: '3rd',
-      section: 'A',
-      marks: 28,
-      maxMarks: 30,
-      status: 'Submitted'
-    },
-    {
-      _id: '5',
-      rollNo: '2024CS005',
-      studentName: 'Rohan Joshi',
-      department: 'Computer Science',
-      semester: '3rd',
-      section: 'A',
-      marks: 25,
-      maxMarks: 30,
-      status: 'Approved'
+        const depts = Array.isArray(deptRes.data) ? deptRes.data : (deptRes.data?.data || []);
+        const sems = Array.isArray(semRes.data) ? semRes.data : (semRes.data?.data || []);
+        const secs = Array.isArray(secRes.data) ? secRes.data : (secRes.data?.data || []);
+        const subs = Array.isArray(subRes.data) ? subRes.data : (subRes.data?.data || []);
+
+        setDepartments(depts);
+        setSemesters(sems);
+        setSections(secs);
+        setSubjects(subs);
+
+        // Set default filter values if we have data
+        setFilters({
+          department: depts[0]?.name || '',
+          semester: sems[0]?.semesterNumber?.toString() || '1',
+          section: secs[0]?.name || 'A',
+          subject: subs[0]?.name || '',
+          examType: 'Internal 1'
+        });
+      } catch (err) {
+        console.error('Failed to fetch academic options', err);
+      }
+    };
+    fetchOptions();
+  }, []);
+
+  // 2. Fetch or create Examination & fetch Student list with Marks
+  const fetchExamAndResults = useCallback(async () => {
+    if (!filters.department || !filters.subject || !filters.semester) return;
+    setLoading(true);
+    try {
+      // Step A: Find or create the Examination for this filter combination
+      const examName = `${filters.examType} - ${filters.subject}`;
+      const examSearchQuery = filters.examType;
+      
+      const examsRes = await axiosInstance.get('/exams', {
+        params: {
+          course: filters.department,
+          search: examSearchQuery
+        }
+      });
+      const examsList = examsRes.data?.data || [];
+      // Look for exam with exact subject & name
+      let exam = examsList.find(e => e.subject === filters.subject && e.examName === filters.examType && e.semester === filters.semester);
+
+      if (!exam) {
+        // Create a new Examination automatically for this combination
+        const createRes = await axiosInstance.post('/exams', {
+          examName: filters.examType,
+          course: filters.department,
+          subject: filters.subject,
+          semester: filters.semester,
+          date: new Date(),
+          status: 'Ongoing',
+          totalMarks: 30,
+          passingMarks: 12
+        });
+        exam = createRes.data;
+      }
+
+      const currentExamId = exam._id;
+      setExamId(currentExamId);
+
+      // Step B: Fetch all students of this department (branch) and mapped year
+      let yearVal = '1st Year';
+      const semNo = parseInt(filters.semester);
+      if (semNo === 3 || semNo === 4) yearVal = '2nd Year';
+      else if (semNo === 5 || semNo === 6) yearVal = '3rd Year';
+      else if (semNo === 7 || semNo === 8) yearVal = '4th Year';
+
+      const studentsRes = await axiosInstance.get('/students', {
+        params: {
+          limit: 1000,
+          branch: filters.department,
+          year: yearVal
+        }
+      });
+      const studentsList = studentsRes.data?.data || studentsRes.data || [];
+
+      // Step C: Fetch existing exam results for this examId
+      const resultsRes = await axiosInstance.get(`/exams/${currentExamId}/results`, {
+        params: { limit: 1000 }
+      });
+      const resultsList = resultsRes.data?.data || [];
+
+      // Step D: Merge students with existing results
+      const mergedStudents = studentsList.map(s => {
+        const result = resultsList.find(r => r.studentId === s._id || r.rollNo === s.studentId);
+        return {
+          _id: s._id,
+          rollNo: s.studentId,
+          studentName: s.studentName,
+          semester: filters.semester,
+          section: filters.section,
+          marks: result ? result.theoryMarks : null,
+          maxMarks: maxMarks,
+          status: result ? result.status : 'Pending',
+          resultId: result ? result._id : null
+        };
+      });
+
+      // Filter based on active status tab: 'Pending' vs 'Submitted' vs 'Approved'
+      // Note: mapping 'Submitted' -> matches Submitted status, 'Approved' -> Approved, 'Pending' -> Pending or null marks
+      const filteredStudents = mergedStudents.filter(s => {
+        if (activeTab === 'Pending') {
+          return s.status === 'Pending' || s.marks === null;
+        }
+        return s.status === activeTab;
+      });
+
+      setStudents(filteredStudents);
+
+      // Pre-fill input marks
+      const initialMarks = {};
+      mergedStudents.forEach(s => {
+        if (s.marks !== null) {
+          initialMarks[s._id] = s.marks;
+        }
+      });
+      setMarks(initialMarks);
+
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load marks and student list');
+    } finally {
+      setLoading(false);
     }
-  ];
+  }, [filters, activeTab]);
 
   useEffect(() => {
-    fetchStudents();
-  }, [activeTab, filters]);
+    fetchExamAndResults();
+  }, [fetchExamAndResults]);
 
-  const fetchStudents = async () => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 300));
-    let filtered = staticStudents;
-    if (activeTab !== 'All') {
-      filtered = staticStudents.filter(s => s.status === activeTab);
+  const handleEdit = (student) => {
+    setEditingRow(student._id);
+    setMarks(prev => ({ ...prev, [student._id]: student.marks !== null ? student.marks : '' }));
+  };
+
+  const handleSave = async (student) => {
+    const enteredMarks = Number(marks[student._id]);
+    if (isNaN(enteredMarks) || enteredMarks < 0 || enteredMarks > student.maxMarks) {
+      toast.error(`Marks should be between 0 and ${student.maxMarks}`);
+      return;
     }
-    setStudents(filtered);
-    setPagination(prev => ({ ...prev, total: filtered.length, pages: Math.ceil(filtered.length / prev.limit) }));
-    setLoading(false);
+
+    try {
+      // Prepare results payload for this single student and keep the others' existing results
+      // To perform a save, we can call bulkCreateResults with the updated list of students who have entered marks
+      const allResultsPayload = [
+        {
+          studentId: student._id,
+          rollNo: student.rollNo,
+          studentName: student.studentName,
+          course: filters.department,
+          theoryMarks: enteredMarks,
+          practicalMarks: 0,
+          status: 'Pending'
+        }
+      ];
+
+      // Fetch other students who already have marks in the current state to preserve them
+      students.forEach(s => {
+        if (s._id !== student._id && s.marks !== null) {
+          allResultsPayload.push({
+            studentId: s._id,
+            rollNo: s.rollNo,
+            studentName: s.studentName,
+            course: filters.department,
+            theoryMarks: s.marks,
+            practicalMarks: 0,
+            status: s.status
+          });
+        }
+      });
+
+      await axiosInstance.post(`/exams/${examId}/results`, {
+        examId,
+        results: allResultsPayload
+      });
+
+      toast.success(`Marks saved for ${student.studentName}`);
+      setEditingRow(null);
+      fetchExamAndResults();
+    } catch (err) {
+      toast.error('Failed to save student marks');
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingRow(null);
+  };
+
+  const handleMarksChange = (studentId, value) => {
+    setMarks(prev => ({ ...prev, [studentId]: value }));
+  };
+
+  const handleBulkSubmit = () => {
+    const enteredStudentsCount = students.filter(s => marks[s._id] !== undefined && marks[s._id] !== '').length;
+    if (enteredStudentsCount === 0) {
+      toast.error('No marks entered to submit');
+      return;
+    }
+    setShowSubmitModal(true);
+  };
+
+  const handleSubmitConfirm = async () => {
+    try {
+      // Gather all students and update their status to 'Submitted'
+      const allResultsPayload = students.map(s => ({
+        studentId: s._id,
+        rollNo: s.rollNo,
+        studentName: s.studentName,
+        course: filters.department,
+        theoryMarks: marks[s._id] !== undefined && marks[s._id] !== '' ? Number(marks[s._id]) : (s.marks || 0),
+        practicalMarks: 0,
+        status: 'Submitted'
+      }));
+
+      await axiosInstance.post(`/exams/${examId}/results`, {
+        examId,
+        results: allResultsPayload
+      });
+
+      toast.success('Marks submitted successfully');
+      setShowSubmitModal(false);
+      fetchExamAndResults();
+    } catch (error) {
+      toast.error('Failed to submit marks');
+    }
+  };
+
+  const handleApproveAll = async () => {
+    try {
+      const allResultsPayload = students.map(s => ({
+        studentId: s._id,
+        rollNo: s.rollNo,
+        studentName: s.studentName,
+        course: filters.department,
+        theoryMarks: s.marks || 0,
+        practicalMarks: 0,
+        status: 'Approved'
+      }));
+
+      await axiosInstance.post(`/exams/${examId}/results`, {
+        examId,
+        results: allResultsPayload
+      });
+
+      toast.success('Marks approved successfully');
+      fetchExamAndResults();
+    } catch (error) {
+      toast.error('Failed to approve marks');
+    }
   };
 
   const getStatusColor = (status) => {
@@ -115,57 +312,11 @@ const InternalMarks = () => {
     }
   };
 
-  const handleEdit = (student) => {
-    setEditingRow(student._id);
-    setMarks({ ...marks, [student._id]: student.marks || '' });
-  };
-
-  const handleSave = (student) => {
-    const enteredMarks = Number(marks[student._id]);
-    if (isNaN(enteredMarks) || enteredMarks < 0 || enteredMarks > student.maxMarks) {
-      toast.error(`Marks should be between 0 and ${student.maxMarks}`);
-      return;
-    }
-    // TODO: API call to save marks
-    toast.success(`Marks saved for ${student.studentName}`);
-    setEditingRow(null);
-    fetchStudents();
-  };
-
-  const handleCancel = () => {
-    setEditingRow(null);
-    setMarks({});
-  };
-
-  const handleMarksChange = (studentId, value) => {
-    setMarks({ ...marks, [studentId]: value });
-  };
-
-  const handleBulkSubmit = () => {
-    const pendingWithMarks = students.filter(s => s.status === 'Pending' && marks[s._id]);
-    if (pendingWithMarks.length === 0) {
-      toast.error('No marks entered to submit');
-      return;
-    }
-    setShowSubmitModal(true);
-  };
-
-  const handleSubmitConfirm = async () => {
-    try {
-      // TODO: API call to submit all marks
-      toast.success('Marks submitted successfully');
-      setShowSubmitModal(false);
-      fetchStudents();
-    } catch (error) {
-      toast.error('Failed to submit marks');
-    }
-  };
-
   return (
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-6 pt-4 pb-2 gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-6 pt-5 pb-2 gap-3">
         <div>
           <h2 className="text-lg font-bold text-gray-800">Internal Marks Entry</h2>
           <p className="text-[13px] text-gray-500 mt-1">Enter and manage internal examination marks</p>
@@ -173,29 +324,37 @@ const InternalMarks = () => {
         {activeTab === 'Pending' && (
           <button 
             onClick={handleBulkSubmit}
-            className="flex items-center gap-2 bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#085a46] transition-colors"
+            disabled={students.length === 0}
+            className="flex items-center gap-2 bg-[#0A6C54] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#085a46] disabled:opacity-50 transition-colors shadow-sm"
           >
             <Save size={16} />
             Submit All Marks
+          </button>
+        )}
+        {activeTab === 'Submitted' && (
+          <button 
+            onClick={handleApproveAll}
+            disabled={students.length === 0}
+            className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+          >
+            <Check size={16} />
+            Approve All Marks
           </button>
         )}
       </div>
 
       {/* Tabs */}
       <div className="flex px-6 pt-2 border-b border-gray-100 overflow-x-auto">
-        {tabs.map((tab) => (
+        {['Pending', 'Submitted', 'Approved'].map((tabName) => (
           <button
-            key={tab.name}
-            onClick={() => setActiveTab(tab.name)}
-            className={`whitespace-nowrap px-4 py-4 text-[14px] font-semibold transition-all relative flex items-center gap-2 ${
-              activeTab === tab.name ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'
+            key={tabName}
+            onClick={() => setActiveTab(tabName)}
+            className={`whitespace-nowrap px-5 py-4 text-[14px] font-semibold transition-all relative flex items-center gap-2 ${
+              activeTab === tabName ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            {tab.name}
-            <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-              activeTab === tab.name ? 'bg-[#0A6C54] text-white' : 'bg-gray-100 text-gray-600'
-            }`}>{tab.count}</span>
-            {activeTab === tab.name && (
+            {tabName}
+            {activeTab === tabName && (
               <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-full"></div>
             )}
           </button>
@@ -208,11 +367,10 @@ const InternalMarks = () => {
           <select 
             value={filters.department}
             onChange={(e) => setFilters({...filters, department: e.target.value})}
-            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer"
+            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer shadow-sm"
           >
-            <option>Computer Science</option>
-            <option>Electronics</option>
-            <option>Mechanical</option>
+            <option value="">Select Branch</option>
+            {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
         </div>
@@ -221,14 +379,10 @@ const InternalMarks = () => {
           <select 
             value={filters.semester}
             onChange={(e) => setFilters({...filters, semester: e.target.value})}
-            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer"
+            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer shadow-sm"
           >
-            <option>1st</option>
-            <option>2nd</option>
-            <option>3rd</option>
-            <option>4th</option>
-            <option>5th</option>
-            <option>6th</option>
+            <option value="">Select Semester</option>
+            {semesters.map(s => <option key={s._id} value={s.semesterNumber}>{s.semesterNumber}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
         </div>
@@ -237,11 +391,10 @@ const InternalMarks = () => {
           <select 
             value={filters.section}
             onChange={(e) => setFilters({...filters, section: e.target.value})}
-            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer"
+            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer shadow-sm"
           >
-            <option>A</option>
-            <option>B</option>
-            <option>C</option>
+            <option value="">Select Section</option>
+            {sections.map(s => <option key={s._id} value={s.name}>{s.name}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
         </div>
@@ -250,12 +403,10 @@ const InternalMarks = () => {
           <select 
             value={filters.subject}
             onChange={(e) => setFilters({...filters, subject: e.target.value})}
-            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer"
+            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer shadow-sm"
           >
-            <option>Data Structures</option>
-            <option>Algorithms</option>
-            <option>Database Management</option>
-            <option>Operating Systems</option>
+            <option value="">Select Subject</option>
+            {subjects.map(s => <option key={s._id} value={s.name}>{s.name}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
         </div>
@@ -264,7 +415,7 @@ const InternalMarks = () => {
           <select 
             value={filters.examType}
             onChange={(e) => setFilters({...filters, examType: e.target.value})}
-            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer"
+            className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer shadow-sm"
           >
             <option>Internal 1</option>
             <option>Internal 2</option>
@@ -279,36 +430,39 @@ const InternalMarks = () => {
         <BookOpen size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
         <div>
           <p className="text-[13px] text-blue-800 font-semibold">
-            {filters.subject} - {filters.examType} | {filters.department} | Semester {filters.semester} - Section {filters.section}
+            {filters.subject || 'Select Subject'} - {filters.examType} | {filters.department || 'Select Branch'} | Semester {filters.semester || 'Select Sem'} - Section {filters.section || 'Select Sec'}
           </p>
-          <p className="text-[12px] text-blue-600 mt-0.5">Maximum Marks: 30 | Total Students: {students.length}</p>
+          <p className="text-[12px] text-blue-600 mt-0.5">Maximum Marks: {maxMarks} | Total Students: {students.length}</p>
         </div>
       </div>
 
       {/* Table */}
       <div className="flex-1 overflow-x-auto mt-4">
-        <table className="w-full text-left border-collapse min-w-[900px]">
-          <thead>
-            <tr className="bg-[#F9FAFB] border-y border-gray-100">
-              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[10%]">Roll No</th>
-              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[25%]">Student Name</th>
-              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Semester</th>
-              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Marks Obtained</th>
-              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[12%]">Status</th>
-              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[13%] text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan="6" className="py-8"><SkeletonLoader type="table" rows={3} cols={6} /></td></tr>
-            ) : students.length === 0 ? (
-              <tr><td colSpan="6" className="py-8 text-center text-gray-500">No students found</td></tr>
-            ) : (
-              students.map((student) => (
+        {loading ? (
+          <div className="p-6"><SkeletonLoader type="table" rows={5} cols={6} /></div>
+        ) : students.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <Search size={40} className="mb-3 opacity-30" />
+            <p className="text-[13px] font-medium">No students found matching filters and active status</p>
+          </div>
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-[#F9FAFB] border-y border-gray-100">
+                <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Roll No</th>
+                <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[30%]">Student Name</th>
+                <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Semester</th>
+                <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Marks Obtained</th>
+                <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[12%]">Status</th>
+                <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[13%] text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((student) => (
                 <tr key={student._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                   <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{student.rollNo}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{student.studentName}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-600">{student.semester} - Sec {student.section}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-semibold">{student.studentName}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">Semester {student.semester} - Sec {student.section}</td>
                   <td className="py-4 px-6">
                     {editingRow === student._id ? (
                       <div className="flex items-center gap-2">
@@ -316,21 +470,21 @@ const InternalMarks = () => {
                           type="number"
                           min="0"
                           max={student.maxMarks}
-                          value={marks[student._id] || ''}
+                          value={marks[student._id] !== undefined ? marks[student._id] : ''}
                           onChange={(e) => handleMarksChange(student._id, e.target.value)}
-                          className="w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
-                          placeholder="0-30"
+                          className="w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] font-semibold"
+                          placeholder={`0-${student.maxMarks}`}
                         />
                         <span className="text-[13px] text-gray-500">/ {student.maxMarks}</span>
                       </div>
                     ) : (
-                      <span className="text-[13px] text-gray-800 font-bold">
+                      <span className="text-[13px] text-gray-800 font-black">
                         {student.marks !== null ? `${student.marks} / ${student.maxMarks}` : '-'}
                       </span>
                     )}
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`px-3 py-1.5 rounded-full text-[12px] font-bold ${getStatusColor(student.status)}`}>
+                    <span className={`px-3 py-1.5 rounded-full text-[11px] font-bold tracking-wide inline-block ${getStatusColor(student.status)}`}>
                       {student.status}
                     </span>
                   </td>
@@ -341,7 +495,7 @@ const InternalMarks = () => {
                           <>
                             <button 
                               onClick={() => handleSave(student)}
-                              className="w-8 h-8 rounded-full border border-green-100 flex items-center justify-center text-green-600 hover:bg-green-50 transition-colors"
+                              className="w-8 h-8 rounded-full border border-green-200 flex items-center justify-center text-green-600 hover:bg-green-50 transition-colors"
                               title="Save"
                             >
                               <Check size={14} />
@@ -365,68 +519,42 @@ const InternalMarks = () => {
                         )
                       )}
                       {student.status !== 'Pending' && (
-                        <span className="text-[12px] text-gray-400">View Only</span>
+                        <span className="text-[12px] text-gray-400 font-medium">View Only</span>
                       )}
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="flex flex-col sm:flex-row justify-between items-center p-6 border-t border-gray-100 gap-4">
-        <div className="text-[13px] text-gray-500 font-medium">
-          Showing {students.length} of {pagination.total} entries | Page {pagination.page} of {pagination.pages}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <button 
-            onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
-            disabled={pagination.page === 1}
-            className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0A6C54] text-white text-[13px] font-medium">
-            {pagination.page}
-          </button>
-          <button 
-            onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.pages, prev.page + 1) }))}
-            disabled={pagination.page === pagination.pages}
-            className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* SUBMIT CONFIRMATION MODAL */}
       {showSubmitModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <AlertTriangle size={24} className="text-blue-600" />
+              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                <AlertTriangle size={20} className="text-amber-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-800">Submit Marks</h3>
+              <h3 className="text-[16px] font-bold text-gray-800">Submit Marks</h3>
             </div>
             
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-6 text-[13px] leading-relaxed">
               Are you sure you want to submit all entered marks? This action cannot be undone and marks will be locked for approval.
             </p>
 
             <div className="flex gap-3">
               <button 
                 onClick={handleSubmitConfirm}
-                className="flex-1 bg-[#0A6C54] text-white py-2 rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm"
+                className="flex-1 bg-[#0A6C54] hover:bg-[#085a46] text-white py-2.5 rounded-lg transition-colors font-semibold text-sm shadow-sm"
               >
                 Submit Marks
               </button>
               <button 
                 onClick={() => setShowSubmitModal(false)}
-                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+                className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
               >
                 Cancel
               </button>

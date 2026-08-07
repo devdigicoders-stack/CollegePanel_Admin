@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
+import { Search, FileText, Eye, Lock, Unlock } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const Members = () => {
+  if (!checkPermission('View Books') && !checkPermission('Issue Book')) {
+    return <AccessDenied />;
+  }
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -66,8 +74,29 @@ const Members = () => {
 
   const openHistoryModal = async (member) => {
     setSelectedMember(member);
-    await fetchMemberHistory(member.id);
+    await fetchMemberHistory(member._id);
     setShowHistoryModal(true);
+  };
+
+  const handleExport = () => {
+    if (members.length === 0) {
+      toast.error('No members to export');
+      return;
+    }
+    const exportData = members.map(m => ({
+      'Member ID': m.memberId,
+      'Name': m.name,
+      'Role': m.type,
+      'Department/Course': m.department + (m.course !== 'N/A' ? ` (${m.course})` : ''),
+      'Books Issued': m.issuedCount,
+      'Pending Fine (₹)': m.fine,
+      'Status': m.status
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Members');
+    XLSX.writeFile(workbook, 'Library_Members_List.xlsx');
   };
 
   return (
@@ -77,14 +106,14 @@ const Members = () => {
           <h2 className="text-[16px] font-bold text-gray-800">Library Membership Management</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Activate, suspend, and view issue card limits for college members</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-          <span>📄</span> Export Card List
+        <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <FileText size={15} className="text-gray-500" /> Export Card List
         </button>
       </div>
 
       <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row gap-4 flex-wrap">
         <div className="flex-1 min-w-[250px] relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input 
             type="text" 
             placeholder="Search by student name or member ID..." 
@@ -121,7 +150,7 @@ const Members = () => {
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="text-gray-400">Loading members...</div>
+          <SkeletonLoader type="table" rows={5} cols={5} />
         </div>
       ) : (
         <div className="overflow-x-auto flex-1">
@@ -152,8 +181,8 @@ const Members = () => {
                     </span>
                   </td>
                   <td className="py-4 px-6 flex gap-2">
-                    <button onClick={() => openHistoryModal(item)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors" title="Circulation History">👁️</button>
-                    <button onClick={() => toggleMemberStatus(item._id)} className={`p-1.5 rounded-lg transition-colors ${item.status === 'Active' ? 'hover:bg-red-50 text-red-600' : 'hover:bg-green-50 text-green-600'}`} title={item.status === 'Active' ? 'Deactivate Card' : 'Activate Card'}>                      {item.status === 'Active' ? '🔒' : '🔑'}
+                    <button onClick={() => openHistoryModal(item)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors" title="Circulation History"><Eye size={15} /></button>
+                    <button onClick={() => toggleMemberStatus(item._id)} className={`p-1.5 rounded-lg transition-colors ${item.status === 'Active' ? 'hover:bg-red-50 text-red-600' : 'hover:bg-green-50 text-green-600'}`} title={item.status === 'Active' ? 'Deactivate Card' : 'Activate Card'}>                      {item.status === 'Active' ? <Lock size={15} /> : <Unlock size={15} />}
                     </button>
                   </td>
                 </tr>
@@ -212,7 +241,7 @@ const Members = () => {
               <div>
                 <h4 className="font-bold text-gray-800 text-[13px] mb-3">Currently Borrowed Books</h4>
                 {historyLoading ? (
-                  <div className="text-center py-4">Loading history...</div>
+                  <SkeletonLoader type="table" rows={5} cols={5} />
                 ) : memberHistory.filter(t => t.status === 'Issued' || t.status === 'Overdue').length > 0 ? (
                   <div className="space-y-2">
                     {memberHistory.filter(t => t.status === 'Issued' || t.status === 'Overdue').slice(0, selectedMember.issuedCount).map((trans, idx) => (
@@ -233,7 +262,7 @@ const Members = () => {
               <div>
                 <h4 className="font-bold text-gray-800 text-[13px] mb-2">Recent Transactions</h4>
                 {historyLoading ? (
-                  <div className="text-center py-4">Loading history...</div>
+                  <SkeletonLoader type="table" rows={5} cols={5} />
                 ) : memberHistory.length > 0 ? (
                   <div className="space-y-2 max-h-40 overflow-y-auto">
                     {memberHistory.slice(0, 5).map((trans, idx) => (

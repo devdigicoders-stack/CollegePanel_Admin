@@ -5,12 +5,17 @@ import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
 
 const HCReact = HighchartsReact.default || HighchartsReact;
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const FinancialReports = () => {
+  if (!checkPermission('View Fee Reports')) {
+    return <AccessDenied />;
+  }
   const [reportType, setReportType] = useState('Income vs Expense');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [loading, setLoading] = useState(true);

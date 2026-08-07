@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, Eye, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, ChevronDown, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
 
 const statusColors = {
   'Paid': 'bg-green-100 text-green-700',
@@ -18,11 +21,30 @@ const StatusIcon = ({ status }) => {
 };
 
 const Installments = () => {
+  if (!checkPermission('View Fees') && !checkPermission('Collect Fees')) {
+    return <AccessDenied />;
+  }
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [filterCourse, setFilterCourse] = useState('All');
   const [showExtModal, setShowExtModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [extForm, setExtForm] = useState({ enrollNo: '', installmentNo: '', newDueDate: '', reason: '' });
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await axiosInstance.get('/academics/courses');
+        const courseList = res.data?.data || res.data || [];
+        setCourses(courseList.map(c => c.name || c.courseName).filter(Boolean));
+      } catch (error) {
+        console.error('Failed to fetch courses', error);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -43,6 +65,10 @@ const Installments = () => {
     fetchData();
   }, [filterCourse, search]);
 
+  const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+  const userRole = adminInfo.role || 'college_admin';
+  const canEdit = userRole === 'college_admin' || userRole === 'Accountant' || userRole === 'Principal';
+
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
       <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -50,9 +76,11 @@ const Installments = () => {
           <h2 className="text-[18px] font-bold text-gray-800">Installments</h2>
           <p className="text-[12px] text-gray-500 mt-0.5">Track student installment plans and payment status</p>
         </div>
-        <button onClick={() => setShowExtModal(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold">
-          Extension Request
-        </button>
+        {canEdit && (
+          <button onClick={() => setShowExtModal(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold">
+            Extension Request
+          </button>
+        )}
       </div>
 
       <div className="px-6 py-4 border-b border-gray-100 flex flex-wrap gap-3">
@@ -65,7 +93,7 @@ const Installments = () => {
           <select value={filterCourse} onChange={e => setFilterCourse(e.target.value)}
             className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
             <option>All</option>
-            {['Diploma in CE', 'Diploma in IT', 'Diploma in ME', 'Diploma in EE'].map(c => <option key={c}>{c}</option>)}
+            {courses.length > 0 ? courses.map(c => <option key={c}>{c}</option>) : ['Diploma in CE', 'Diploma in IT', 'Diploma in ME', 'Diploma in EE'].map(c => <option key={c}>{c}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
         </div>
@@ -104,16 +132,16 @@ const Installments = () => {
                           <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.no}</td>
                           <td className="py-2.5 px-4 text-[13px] text-gray-700">{inst.head}</td>
                           <td className="py-2.5 px-4 text-[13px] font-semibold text-gray-800">₹{(inst.amount || 0).toLocaleString()}</td>
-                          <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.dueDate}</td>
-                          <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.paidDate || <span className="text-gray-400">-</span>}</td>
+                          <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.dueDate ? new Date(inst.dueDate).toLocaleDateString('en-GB') : '-'}</td>
+                          <td className="py-2.5 px-4 text-[13px] text-gray-600">{inst.paidDate ? new Date(inst.paidDate).toLocaleDateString('en-GB') : <span className="text-gray-400">-</span>}</td>
                           <td className="py-2.5 px-4">
                             <span className={`flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusColors[inst.status]}`}>
                               <StatusIcon status={inst.status} />{inst.status}
                             </span>
                           </td>
                           <td className="py-2.5 px-4">
-                            {inst.status !== 'Paid' && (
-                              <button onClick={() => toast.success('Collection form opened')} className="text-[12px] font-semibold text-[#0A6C54] hover:underline">Collect</button>
+                            {canEdit && inst.status !== 'Paid' && (
+                              <button onClick={() => navigate('/financial/fee-collection', { state: { student, amount: inst.amount, feeHead: inst.head } })} className="text-[12px] font-semibold text-[#0A6C54] hover:underline">Collect</button>
                             )}
                           </td>
                         </tr>
@@ -138,27 +166,37 @@ const Installments = () => {
               <button onClick={() => setShowExtModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
             </div>
             <div className="p-6 space-y-4">
-              {[
-                { label: 'Student Enrollment No.', placeholder: 'e.g. OP/24/CE/001' },
-                { label: 'Installment No.', placeholder: 'e.g. 2' },
-              ].map(f => (
-                <div key={f.label}>
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">{f.label}</label>
-                  <input type="text" placeholder={f.placeholder} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
-                </div>
-              ))}
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Student Enrollment No.</label>
+                <input type="text" placeholder="e.g. OP/24/CE/001" value={extForm.enrollNo} onChange={e => setExtForm({ ...extForm, enrollNo: e.target.value })} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Installment No.</label>
+                <input type="text" placeholder="e.g. 2" value={extForm.installmentNo} onChange={e => setExtForm({ ...extForm, installmentNo: e.target.value })} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+              </div>
               <div>
                 <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Requested New Due Date</label>
-                <input type="date" className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+                <input type="date" value={extForm.newDueDate} onChange={e => setExtForm({ ...extForm, newDueDate: e.target.value })} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Reason for Extension</label>
-                <textarea rows={3} placeholder="Explain reason..." className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+                <textarea rows={3} placeholder="Explain reason..." value={extForm.reason} onChange={e => setExtForm({ ...extForm, reason: e.target.value })} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
               </div>
             </div>
             <div className="p-6 border-t border-gray-100 flex justify-end gap-3">
-              <button onClick={() => setShowExtModal(false)} className="px-5 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button onClick={() => { toast.success('Extension request submitted'); setShowExtModal(false); }} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold">Submit Request</button>
+              <button onClick={() => { setShowExtModal(false); setExtForm({ enrollNo: '', installmentNo: '', newDueDate: '', reason: '' }); }} className="px-5 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+              <button onClick={async () => { 
+                if(!extForm.enrollNo || !extForm.installmentNo || !extForm.newDueDate) return toast.error('Please fill required fields');
+                try {
+                  await axiosInstance.post('/fees/installments/extension', extForm);
+                  toast.success('Extension applied successfully'); 
+                  setShowExtModal(false); 
+                  setExtForm({ enrollNo: '', installmentNo: '', newDueDate: '', reason: '' });
+                  fetchData(); // refresh data
+                } catch(e) {
+                  toast.error(e.response?.data?.message || 'Failed to apply extension');
+                }
+              }} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold">Submit Request</button>
             </div>
           </div>
         </div>

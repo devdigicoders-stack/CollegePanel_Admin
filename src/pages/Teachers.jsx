@@ -3,6 +3,8 @@ import { Copy, Plus, Search, ChevronDown, ChevronLeft, ChevronRight, MoreHorizon
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
+import Swal from 'sweetalert2';
 
 const Teachers = () => {
   const [isCreating, setIsCreating] = useState(false);
@@ -185,12 +187,38 @@ const Teachers = () => {
         });
         toast.success('Teacher updated successfully');
       } else {
-        await axiosInstance.post('/teachers', formDataToSend, {
+        const res = await axiosInstance.post('/teachers', formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
-        toast.success('Teacher created successfully');
+        const newTeacher = res.data.data;
+        
+        // Show credentials popup for new teacher
+        Swal.fire({
+          title: 'Teacher Created!',
+          html: `
+            <div style="text-align: left; margin-top: 15px;">
+              <p style="margin-bottom: 8px;"><strong>Name:</strong> ${newTeacher.name}</p>
+              <p style="margin-bottom: 8px;"><strong>Department:</strong> ${newTeacher.department}</p>
+              <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 15px;">
+                <p style="margin-bottom: 8px;"><strong>Username:</strong> <span style="color: #0A6C54; font-weight: 600;">${newTeacher.username}</span></p>
+                <p style="margin-bottom: 0;"><strong>Password:</strong> <span style="color: #0A6C54; font-weight: 600;">${newTeacher.password}</span></p>
+              </div>
+              <p style="font-size: 12px; color: #64748b; margin-top: 10px;">Please copy and share these credentials securely.</p>
+            </div>
+          `,
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonText: 'Copy Credentials',
+          cancelButtonText: 'Close',
+          confirmButtonColor: '#0A6C54'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigator.clipboard.writeText(`Login Details for ${newTeacher.name}\nUsername: ${newTeacher.username}\nPassword: ${newTeacher.password}\nPortal URL: ${window.location.origin}`);
+            toast.success('Credentials copied to clipboard!');
+          }
+        });
       }
       setIsCreating(false);
       setSelectedImage(null);
@@ -642,13 +670,15 @@ const Teachers = () => {
           </div>
         </div>
 
-        <button 
-          onClick={handleAddClick}
-          className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
-        >
-          <Plus size={16} strokeWidth={2.5} />
-          Add Teacher
-        </button>
+        {checkPermission('Add Teacher') && (
+          <button 
+            onClick={handleAddClick}
+            className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
+          >
+            <Plus size={16} strokeWidth={2.5} />
+            Add Teacher
+          </button>
+        )}
       </div>
 
       {/* Filters Bottom Row */}
@@ -711,20 +741,24 @@ const Teachers = () => {
                         >
                           <Eye size={14} strokeWidth={2} />
                         </button>
-                        <button 
-                          onClick={() => handleEditClick(row)}
-                          className="w-7 h-7 rounded border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors flex-shrink-0"
-                          title="Edit"
-                        >
-                          <Edit size={14} strokeWidth={2} />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteClick(row)}
-                          className="w-7 h-7 rounded border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors bg-red-50/50 flex-shrink-0"
-                          title="Delete"
-                        >
-                          <Trash2 size={14} strokeWidth={2} />
-                        </button>
+                        {checkPermission('Edit Teacher') && (
+                          <button 
+                            onClick={() => handleEditClick(row)}
+                            className="w-7 h-7 rounded border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors flex-shrink-0"
+                            title="Edit"
+                          >
+                            <Edit size={14} strokeWidth={2} />
+                          </button>
+                        )}
+                        {checkPermission('Delete Teacher') && (
+                          <button 
+                            onClick={() => handleDeleteClick(row)}
+                            className="w-7 h-7 rounded border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors bg-red-50/50 flex-shrink-0"
+                            title="Delete"
+                          >
+                            <Trash2 size={14} strokeWidth={2} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

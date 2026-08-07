@@ -16,10 +16,21 @@ export const Header = ({ onMenuClick }) => {
   };
 
   const getHeaderContent = () => {
+    const roleStr = localStorage.getItem('role') || 'Admin';
+    const formattedRole = roleStr.charAt(0).toUpperCase() + roleStr.slice(1);
+    const userStr = localStorage.getItem('user');
+    let userName = formattedRole;
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        userName = user.name || user.studentName || formattedRole;
+      } catch (e) {}
+    }
+
     switch (location.pathname) {
       case '/dashboard':
       case '/':
-        return { title: 'Good Morning, Admin!', subtitle: "Here's what's happening in your college today." };
+        return { title: `Good Morning, ${userName.split(' ')[0]}!`, subtitle: "Here's your latest overview." };
       case '/admissions':
         return { title: 'Admissions', subtitle: 'Home > Admissions', isBreadcrumb: true };
       case '/students':
@@ -51,9 +62,11 @@ export const Header = ({ onMenuClick }) => {
       case '/complaints':
         return { title: '', subtitle: '', isBreadcrumb: false };
       case '/profile':
-        return { title: 'Admin Profile', subtitle: 'Home > Profile', isBreadcrumb: true };
+        return { title: `${formattedRole} Profile`, subtitle: 'Home > Profile', isBreadcrumb: true };
       case '/notifications':
         return { title: 'Notifications', subtitle: 'Home > Notifications', isBreadcrumb: true };
+      case '/student-portal':
+        return { title: `Welcome, ${userName}`, subtitle: 'Student Portal Dashboard', isBreadcrumb: true };
       default:
         return { title: 'Dashboard', subtitle: 'Welcome to the panel' };
     }
@@ -106,7 +119,7 @@ export const Header = ({ onMenuClick }) => {
             const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
             const userName = adminInfo.name || 'Admin User';
             const userRole = adminInfo.role || 'college_admin';
-            const displayRole = userRole === 'college_admin' ? 'Super Admin' : userRole;
+            const displayRole = userRole === 'college_admin' ? 'College Admin' : userRole;
             const initial = userName.charAt(0).toUpperCase();
             return (
               <>

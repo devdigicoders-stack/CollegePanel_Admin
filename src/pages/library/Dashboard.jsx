@@ -3,10 +3,15 @@ import axiosInstance from '../../utils/axiosInstance';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { Book, AlertTriangle, CheckCircle, RotateCcw, Bookmark } from 'lucide-react';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
 
 const HCReact = HighchartsReact.default || HighchartsReact;
 
 const LibraryDashboard = () => {
+  if (!checkPermission('View Books')) {
+    return <AccessDenied />;
+  }
   const [stats, setStats] = useState({
     totalBooks: 0,
     issuedBooks: 0,

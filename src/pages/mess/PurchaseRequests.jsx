@@ -1,51 +1,73 @@
-import React, { useState } from 'react';
-import { Search, Download, Plus, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Download, Plus, CheckCircle, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-const initialRequests = [
-  { id: 1, reqNo: 'REQ-M-045', itemName: 'Mustard Oil', qty: 100, unit: 'Liters', cost: 12000, vendor: 'Shree Grocery Distributors', status: 'Pending Approval' },
-  { id: 2, reqNo: 'REQ-M-046', itemName: 'Fresh Potatoes & Onions', qty: 250, unit: 'kg', cost: 6500, vendor: 'Local Farmer Mandi', status: 'Approved' },
-  { id: 3, reqNo: 'REQ-M-047', itemName: 'LPG Gas Cylinder refill', qty: 10, unit: 'Bags', cost: 11000, vendor: 'HP Gas Agencies', status: 'Approved' },
-];
+import axiosInstance from '../../utils/axiosInstance';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const PurchaseRequests = () => {
   const [search, setSearch] = useState('');
-  const [requests, setRequests] = useState(initialRequests);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newRequest, setNewRequest] = useState({
-    itemName: '',
-    qty: '',
+    item: '',
+    quantity: '',
     unit: 'kg',
-    cost: '',
-    vendor: 'Shree Grocery Distributors'
+    estimatedCost: '',
+    vendor: 'Shree Grocery Distributors' // we'll just keep this hardcoded in UI for now, no vendor schema
   });
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/mess/purchase-requests');
+      setRequests(res.data);
+    } catch (error) {
+      toast.error('Failed to load purchase requests');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
 
   const filtered = requests.filter(r => {
-    return r.itemName.toLowerCase().includes(search.toLowerCase());
+    return r.item.toLowerCase().includes(search.toLowerCase());
   });
 
-  const handleAddRequest = (e) => {
+  const handleAddRequest = async (e) => {
     e.preventDefault();
-    const reqToAdd = {
-      id: requests.length + 1,
-      reqNo: `REQ-M-${Math.floor(100 + Math.random() * 900)}`,
-      itemName: newRequest.itemName,
-      qty: parseFloat(newRequest.qty) || 0,
-      unit: newRequest.unit,
-      cost: parseFloat(newRequest.cost) || 0,
-      vendor: newRequest.vendor,
-      status: 'Pending Approval'
-    };
-    setRequests([reqToAdd, ...requests]);
-    setShowAddModal(false);
-    toast.success(`Purchase requisition submitted for ${newRequest.itemName}!`);
-    setNewRequest({
-      itemName: '',
-      qty: '',
-      unit: 'kg',
-      cost: '',
-      vendor: 'Shree Grocery Distributors'
-    });
+    try {
+      setIsSubmitting(true);
+      await axiosInstance.post('/mess/purchase-requests', {
+        item: newRequest.item,
+        quantity: parseFloat(newRequest.quantity),
+        unit: newRequest.unit,
+        estimatedCost: parseFloat(newRequest.estimatedCost),
+        // we can store vendor in a custom field or skip it, since schema only requires item, qty, unit, cost
+      });
+      toast.success(`Purchase requisition submitted for ${newRequest.item}!`);
+      setShowAddModal(false);
+      setNewRequest({ item: '', quantity: '', unit: 'kg', estimatedCost: '', vendor: 'Shree Grocery Distributors' });
+      fetchRequests();
+    } catch (error) {
+      toast.error('Failed to submit request');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const updateStatus = async (id, status) => {
+    try {
+      await axiosInstance.put(`/mess/purchase-requests/${id}/status`, { status });
+      toast.success(`Request status updated to ${status}`);
+      fetchRequests();
+    } catch (error) {
+      toast.error('Failed to update status');
+    }
   };
 
   return (
@@ -82,36 +104,44 @@ const PurchaseRequests = () => {
 
       {/* Table */}
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[900px]">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Request No</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Raw Item Name</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Required Qty</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-right">Est. Billing Cost</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Select Vendor</th>
-              <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Approval Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(item => (
-              <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.reqNo}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.itemName}</td>
-                <td className="py-4 px-6 text-[13px] text-center font-semibold text-gray-700">{item.qty} {item.unit}</td>
-                <td className="py-4 px-6 text-[13px] text-right font-bold text-gray-900">₹{item.cost.toLocaleString()}</td>
-                <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.vendor}</td>
-                <td className="py-4 px-6 text-[13px]">
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                    item.status === 'Approved' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-yellow-50 text-yellow-700 border border-yellow-100'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
+        {loading ? (
+          <SkeletonLoader type="table" rows={5} cols={6} />
+        ) : filtered.length === 0 ? (
+          <div className="py-12 text-center text-gray-500 text-[13px]">No purchase requests found.</div>
+        ) : (
+          <table className="w-full text-left border-collapse min-w-[900px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Raw Item Name</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-center">Required Qty</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800 text-right">Est. Billing Cost</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Approval Status</th>
+                <th className="py-4 px-6 text-[12px] font-bold text-gray-800">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(item => (
+                <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.item}</td>
+                  <td className="py-4 px-6 text-[13px] text-center font-semibold text-gray-700">{item.quantity} {item.unit}</td>
+                  <td className="py-4 px-6 text-[13px] text-right font-bold text-gray-900">₹{item.estimatedCost.toLocaleString()}</td>
+                  <td className="py-4 px-6 text-[13px]">
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                      item.status === 'Approved' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-yellow-50 text-yellow-700 border border-yellow-100'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 flex gap-2">
+                    {item.status === 'Pending' && (
+                      <button onClick={() => updateStatus(item._id, 'Approved')} className="p-1.5 hover:bg-green-50 rounded-lg text-green-600 transition-colors" title="Approve"><CheckCircle size={15} /></button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Add Request Modal */}
@@ -128,8 +158,8 @@ const PurchaseRequests = () => {
                 <input 
                   type="text" 
                   required
-                  value={newRequest.itemName}
-                  onChange={(e) => setNewRequest({...newRequest, itemName: e.target.value})}
+                  value={newRequest.item}
+                  onChange={(e) => setNewRequest({...newRequest, item: e.target.value})}
                   className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                 />
               </div>
@@ -140,8 +170,8 @@ const PurchaseRequests = () => {
                   <input 
                     type="number" 
                     required
-                    value={newRequest.qty}
-                    onChange={(e) => setNewRequest({...newRequest, qty: e.target.value})}
+                    value={newRequest.quantity}
+                    onChange={(e) => setNewRequest({...newRequest, quantity: e.target.value})}
                     className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                   />
                 </div>
@@ -164,8 +194,8 @@ const PurchaseRequests = () => {
                 <input 
                   type="number" 
                   required
-                  value={newRequest.cost}
-                  onChange={(e) => setNewRequest({...newRequest, cost: e.target.value})}
+                  value={newRequest.estimatedCost}
+                  onChange={(e) => setNewRequest({...newRequest, estimatedCost: e.target.value})}
                   className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
                 />
               </div>
@@ -193,9 +223,10 @@ const PurchaseRequests = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold"
                 >
-                  Submit Request
+                  {isSubmitting ? 'Saving...' : 'Submit Request'}
                 </button>
               </div>
             </form>

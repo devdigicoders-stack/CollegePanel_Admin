@@ -1,17 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
+import axiosInstance from '../utils/axiosInstance';
+import toast from 'react-hot-toast';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const Fees = () => {
+  if (!checkPermission('View Fees') && !checkPermission('Collect Fees')) {
+    return <AccessDenied />;
+  }
   const [activeTab, setActiveTab] = useState('Dashboard');
+  const [studentFees, setStudentFees] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const tabs = ['Dashboard', 'Collections', 'Pending Dues', 'Receipts', 'Refunds'];
 
-  const tableData = [
-    { id: 1, enrollNo: 'OP/23/CE/001', name: 'Aarav Singh', course: 'Diploma in CE', totalFees: '₹85,000', paid: '₹60,000', due: '₹25,000', status: 'Partial', statusColor: 'text-orange-600 bg-orange-50 border border-orange-100' },
-    { id: 2, enrollNo: 'OP/23/CE/002', name: 'Neha Verma', course: 'Diploma in CE', totalFees: '₹85,000', paid: '₹85,000', due: '₹0', status: 'Paid', statusColor: 'text-green-700 bg-green-50 border border-green-100' },
-    { id: 3, enrollNo: 'OP/23/EE/115', name: 'Rohan Kumar', course: 'Diploma in EE', totalFees: '₹80,000', paid: '₹20,000', due: '₹60,000', status: 'Partial', statusColor: 'text-orange-600 bg-orange-50 border border-orange-100' },
-    { id: 4, enrollNo: 'OP/23/ME/021', name: 'Pooja Sahu', course: 'Diploma in ME', totalFees: '₹80,000', paid: '₹0', due: '₹80,000', status: 'Due', statusColor: 'text-red-600 bg-red-50 border border-red-100' },
-  ];
+  useEffect(() => {
+    fetchFees();
+  }, []);
+
+  const fetchFees = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get('/fees/student-fees');
+      setStudentFees(res.data.data || []);
+    } catch (error) {
+      toast.error('Failed to fetch fees data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const stats = useMemo(() => {
+    let totalDemand = 0;
+    let totalCollection = 0;
+    let pendingDues = 0;
+    
+    studentFees.forEach(fee => {
+      totalDemand += (fee.totalFee || 0);
+      totalCollection += (fee.paid || 0);
+      pendingDues += (fee.pending || 0);
+    });
+
+    return {
+      demand: totalDemand,
+      collection: totalCollection,
+      pending: pendingDues,
+    };
+  }, [studentFees]);
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(amount || 0);
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col h-full font-['Inter']">
@@ -44,22 +89,22 @@ const Fees = () => {
             {/* Card 1 */}
             <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Total Fee Demand</div>
-              <div className="text-[22px] font-bold text-[#022A36]">₹2.85 Cr</div>
+              <div className="text-[22px] font-bold text-[#022A36]">{formatCurrency(stats.demand)}</div>
             </div>
             {/* Card 2 */}
             <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Total Collections</div>
-              <div className="text-[22px] font-bold text-[#0A6C54]">₹1.48 Cr</div>
+              <div className="text-[22px] font-bold text-[#0A6C54]">{formatCurrency(stats.collection)}</div>
             </div>
             {/* Card 3 */}
             <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Pending Dues</div>
-              <div className="text-[22px] font-bold text-[#022A36]">₹1.37 Cr</div>
+              <div className="text-[22px] font-bold text-[#022A36]">{formatCurrency(stats.pending)}</div>
             </div>
             {/* Card 4 */}
             <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-              <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">This Month Collection</div>
-              <div className="text-[22px] font-bold text-[#0A6C54]">₹48.75 L</div>
+              <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Total Students</div>
+              <div className="text-[22px] font-bold text-[#0A6C54]">{studentFees.length}</div>
             </div>
           </div>
 
@@ -127,27 +172,40 @@ const Fees = () => {
                 </tr>
               </thead>
               <tbody>
-                {tableData.map((row) => (
-                  <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="py-4 px-4 text-[13px] text-gray-600 font-medium">{row.id}</td>
-                    <td className="py-4 px-4 text-[13px] font-semibold text-[#0A6C54] cursor-pointer hover:underline">{row.enrollNo}</td>
-                    <td className="py-4 px-4 text-[13px] font-medium text-gray-800">{row.name}</td>
-                    <td className="py-4 px-4 text-[13px] text-gray-600 font-medium">{row.course}</td>
-                    <td className="py-4 px-4 text-[13px] text-gray-800 font-semibold">{row.totalFees}</td>
-                    <td className="py-4 px-4 text-[13px] text-gray-600 font-medium">{row.paid}</td>
-                    <td className="py-4 px-4 text-[13px] text-gray-600 font-medium">{row.due}</td>
-                    <td className="py-4 px-4">
-                      <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide ${row.statusColor}`}>
-                        {row.status}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                      <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                        <MoreHorizontal size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {loading ? (
+                  <tr><SkeletonLoader type="table" rows={5} cols={5} /></tr>
+                ) : studentFees.length === 0 ? (
+                  <tr><td colSpan="9" className="text-center py-6 text-gray-500 text-sm">No fee records found.</td></tr>
+                ) : (
+                  studentFees.map((row, index) => {
+                    let statusColor = 'text-gray-600 bg-gray-50 border border-gray-100';
+                    if (row.status === 'Paid') statusColor = 'text-green-700 bg-green-50 border border-green-100';
+                    if (row.status === 'Partial') statusColor = 'text-orange-600 bg-orange-50 border border-orange-100';
+                    if (row.status === 'Due' || row.status === 'Pending') statusColor = 'text-red-600 bg-red-50 border border-red-100';
+
+                    return (
+                      <tr key={row._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                        <td className="py-4 px-4 text-[13px] text-gray-600 font-medium">{index + 1}</td>
+                        <td className="py-4 px-4 text-[13px] font-semibold text-[#0A6C54] cursor-pointer hover:underline">{row.enrollNo || 'N/A'}</td>
+                        <td className="py-4 px-4 text-[13px] font-medium text-gray-800">{row.studentName}</td>
+                        <td className="py-4 px-4 text-[13px] text-gray-600 font-medium">{row.course}</td>
+                        <td className="py-4 px-4 text-[13px] text-gray-800 font-semibold">{formatCurrency(row.totalFee)}</td>
+                        <td className="py-4 px-4 text-[13px] text-gray-600 font-medium">{formatCurrency(row.paid)}</td>
+                        <td className="py-4 px-4 text-[13px] text-gray-600 font-medium">{formatCurrency(row.pending)}</td>
+                        <td className="py-4 px-4">
+                          <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide ${statusColor}`}>
+                            {row.status || (row.pending > 0 ? 'Due' : 'Paid')}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                            <MoreHorizontal size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -155,7 +213,7 @@ const Fees = () => {
           {/* Pagination */}
           <div className="flex flex-col sm:flex-row justify-between items-center p-6 pt-4 mt-auto">
             <div className="text-[13px] text-gray-500 font-medium">
-              Showing 1 to 4 of 3,345 entries
+              Showing {studentFees.length} entries
             </div>
             <div className="flex items-center gap-1">
               <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors">

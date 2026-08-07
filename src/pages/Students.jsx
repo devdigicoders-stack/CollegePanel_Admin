@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   Search, ChevronDown, Eye, ChevronLeft, ChevronRight, Plus, X, 
-  Edit2, Trash2, Download, RefreshCw, AlertTriangle, CheckCircle 
-} from 'lucide-react';
+  Edit2, Trash2, AlertTriangle} from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const STATUS_OPTIONS = ['Active', 'Inactive', 'Graduated', 'Dropped'];
 const COURSE_OPTIONS = ['Diploma', 'B.Tech', 'M.Tech'];
@@ -20,15 +23,21 @@ const Students = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [departments, setDepartments] = useState([]);
-  const [semesters, setSemesters] = useState([]);
-  const [courses, setCourses] = useState([]);
+  const [filterOptions, setFilterOptions] = useState({
+    branches: [],
+    years: [],
+    sessions: [],
+    courses: []
+  });
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [viewTab, setViewTab] = useState('Personal');
 
   const [filters, setFilters] = useState({
-    department: 'All Departments',
-    semester: 'All Semesters',
+    branch: 'All Branches',
+    course: 'All Courses',
+    year: 'All Years',
+    session: 'All Sessions',
     status: 'All Status',
     search: '',
     page: 1,
@@ -57,14 +66,13 @@ const Students = () => {
 
   const fetchStaticData = useCallback(async () => {
     try {
-      const [deptRes, semRes, courseRes] = await Promise.all([
-        axiosInstance.get('/academics/departments'),
-        axiosInstance.get('/academics/semesters'),
-        axiosInstance.get('/academics/courses')
-      ]);
-      setDepartments(deptRes.data.data || deptRes.data || []);
-      setSemesters(semRes.data.data || semRes.data || []);
-      setCourses(courseRes.data.data || courseRes.data || []);
+      const res = await axiosInstance.get('/students/filters');
+      setFilterOptions({
+        branches: res.data.branches || [],
+        years: res.data.years || [],
+        sessions: res.data.sessions || [],
+        courses: res.data.courses || []
+      });
     } catch {
       toast.error('Failed to load filter options');
     }
@@ -74,8 +82,10 @@ const Students = () => {
     try {
       setLoading(true);
       const params = {};
-      if (filters.department && filters.department !== 'All Departments') params.branch = filters.department;
-      if (filters.semester && filters.semester !== 'All Semesters') params.year = filters.semester;
+      if (filters.branch && filters.branch !== 'All Branches') params.branch = filters.branch;
+      if (filters.course && filters.course !== 'All Courses') params.course = filters.course;
+      if (filters.year && filters.year !== 'All Years') params.year = filters.year;
+      if (filters.session && filters.session !== 'All Sessions') params.session = filters.session;
       if (filters.status && filters.status !== 'All Status') params.status = filters.status;
       if (filters.search) params.search = filters.search;
       params.page = filters.page;
@@ -229,6 +239,62 @@ const Students = () => {
     toast.success('CSV exported successfully!');
   };
 
+  const handleExportExcel = () => {
+    if (students.length === 0) {
+      toast.error('No data to export');
+      return;
+    }
+    const data = students.map(s => ({
+      'Enrollment No.': s.studentId || '',
+      'Name': s.studentName || '',
+      'Department': s.branch || '',
+      'Course': s.course || '',
+      'Year': s.year || '',
+      'Mobile': s.phone || '',
+      'Email': s.email || '',
+      'Status': s.status || ''
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Students');
+    XLSX.writeFile(workbook, `students_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+    toast.success('Excel exported successfully!');
+  };
+
+  const handleExportPDF = () => {
+    if (students.length === 0) {
+      toast.error('No data to export');
+      return;
+    }
+    const doc = new jsPDF();
+    const tableColumn = ['Enrollment No.', 'Name', 'Department', 'Course', 'Year', 'Mobile', 'Status'];
+    const tableRows = [];
+
+    students.forEach(s => {
+      const studentData = [
+        s.studentId || '',
+        s.studentName || '',
+        s.branch || '',
+        s.course || '',
+        s.year || '',
+        s.phone || '',
+        s.status || ''
+      ];
+      tableRows.push(studentData);
+    });
+
+    doc.text('Students List', 14, 15);
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [10, 108, 84] }
+    });
+    doc.save(`students_export_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success('PDF exported successfully!');
+  };
+
   const getStatusColor = (status) => {
     switch(status) {
       case 'Active': return 'text-green-700 bg-green-50';
@@ -251,13 +317,13 @@ const Students = () => {
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:flex-none">
             <select
-              value={filters.department}
-              onChange={(e) => handleFilterChange('department', e.target.value)}
+              value={filters.branch}
+              onChange={(e) => handleFilterChange('branch', e.target.value)}
               className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
             >
-              <option>All Departments</option>
-              {departments.map(dept => (
-                <option key={dept._id} value={dept.name}>{dept.name}</option>
+              <option>All Branches</option>
+              {filterOptions.branches.map(val => (
+                <option key={val} value={val}>{val}</option>
               ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
@@ -265,14 +331,42 @@ const Students = () => {
 
           <div className="relative flex-1 md:flex-none">
             <select
-              value={filters.semester}
-              onChange={(e) => handleFilterChange('semester', e.target.value)}
+              value={filters.course}
+              onChange={(e) => handleFilterChange('course', e.target.value)}
               className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
             >
-              <option>All Semesters</option>
-              <option value="1st Year">1st Year</option>
-              <option value="2nd Year">2nd Year</option>
-              <option value="3rd Year">3rd Year</option>
+              <option>All Courses</option>
+              {filterOptions.courses.map(val => (
+                <option key={val} value={val}>{val}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+          </div>
+
+          <div className="relative flex-1 md:flex-none">
+            <select
+              value={filters.year}
+              onChange={(e) => handleFilterChange('year', e.target.value)}
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+            >
+              <option>All Years</option>
+              {filterOptions.years.map(val => (
+                <option key={val} value={val}>{val}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+          </div>
+
+          <div className="relative flex-1 md:flex-none">
+            <select
+              value={filters.session}
+              onChange={(e) => handleFilterChange('session', e.target.value)}
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+            >
+              <option>All Sessions</option>
+              {filterOptions.sessions.map(val => (
+                <option key={val} value={val}>{val}</option>
+              ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
           </div>
@@ -292,13 +386,15 @@ const Students = () => {
           </div>
         </div>
 
-        <button
-          onClick={() => { setIsAddPanelOpen(true); resetForm(); }}
-          className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
-        >
-          <Plus size={16} strokeWidth={2.5} />
-          Add Student
-        </button>
+        {checkPermission('Add Student') && (
+          <button
+            onClick={() => { setIsAddPanelOpen(true); resetForm(); }}
+            className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
+          >
+            <Plus size={16} strokeWidth={2.5} />
+            Add Student
+          </button>
+        )}
       </div>
 
       {/* Filters Bottom Row */}
@@ -327,21 +423,27 @@ const Students = () => {
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
         </div>
 
-        <div className="relative w-full sm:w-auto">
-          <select
-            onChange={(e) => {
-              if (e.target.value === 'csv') handleExportCSV();
-              else toast.error('Export feature coming soon');
-            }}
-            className="appearance-none w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm"
-          >
-            <option>Export</option>
-            <option value="csv">Export to CSV</option>
-            <option value="excel">Export to Excel</option>
-            <option value="pdf">Export to PDF</option>
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-        </div>
+        {checkPermission('Export Students') && (
+          <div className="relative w-full sm:w-auto">
+            <select
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === 'csv') handleExportCSV();
+                else if (val === 'excel') handleExportExcel();
+                else if (val === 'pdf') handleExportPDF();
+                
+                e.target.value = 'Export'; // reset so it can be clicked again
+              }}
+              className="appearance-none w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm"
+            >
+              <option>Export</option>
+              <option value="csv">Export to CSV</option>
+              <option value="excel">Export to Excel</option>
+              <option value="pdf">Export to PDF</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -392,20 +494,24 @@ const Students = () => {
                       >
                         <Eye size={18} strokeWidth={2} />
                       </button>
-                      <button
-                        onClick={() => handleEditStudent(row)}
-                        className="text-gray-400 hover:text-[#0A6C54] transition-colors p-1"
-                        title="Edit"
-                      >
-                        <Edit2 size={18} strokeWidth={2} />
-                      </button>
-                      <button
-                        onClick={() => { setDeleteTarget(row); setIsDeleteConfirmOpen(true); }}
-                        className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                        title="Delete"
-                      >
-                        <Trash2 size={18} strokeWidth={2} />
-                      </button>
+                      {checkPermission('Edit Student') && (
+                        <button
+                          onClick={() => handleEditStudent(row)}
+                          className="text-gray-400 hover:text-[#0A6C54] transition-colors p-1"
+                          title="Edit"
+                        >
+                          <Edit2 size={18} strokeWidth={2} />
+                        </button>
+                      )}
+                      {checkPermission('Delete Student') && (
+                        <button
+                          onClick={() => { setDeleteTarget(row); setIsDeleteConfirmOpen(true); }}
+                          className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                          title="Delete"
+                        >
+                          <Trash2 size={18} strokeWidth={2} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -533,7 +639,7 @@ const Students = () => {
                       <div className="relative">
                         <select name="course" value={formData.course} onChange={handleInputChange} required className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Course</option>
-                          {COURSE_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                          {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
@@ -543,7 +649,7 @@ const Students = () => {
                       <div className="relative">
                         <select name="branch" value={formData.branch} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Branch</option>
-                          {BRANCH_OPTIONS.map(b => <option key={b} value={b}>{b}</option>)}
+                          {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
@@ -553,9 +659,13 @@ const Students = () => {
                       <div className="relative">
                         <select name="year" value={formData.year} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Year/Sem</option>
-                          <option value="1st Year">1st Year / 1st Sem</option>
-                          <option value="2nd Year">2nd Year / 3rd Sem</option>
-                          <option value="3rd Year">3rd Year / 5th Sem</option>
+                          {semesters.map(s => (
+                            <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber} ({s.courseName})</option>
+                          ))}
+                          <option value="1st Year">1st Year</option>
+                          <option value="2nd Year">2nd Year</option>
+                          <option value="3rd Year">3rd Year</option>
+                          <option value="4th Year">4th Year</option>
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
@@ -663,7 +773,7 @@ const Students = () => {
                       <div className="relative">
                         <select name="course" value={editFormData.course} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Course</option>
-                          {COURSE_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                          {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
@@ -673,7 +783,7 @@ const Students = () => {
                       <div className="relative">
                         <select name="branch" value={editFormData.branch} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Branch</option>
-                          {BRANCH_OPTIONS.map(b => <option key={b} value={b}>{b}</option>)}
+                          {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
@@ -683,9 +793,13 @@ const Students = () => {
                       <div className="relative">
                         <select name="year" value={editFormData.year} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
                           <option value="">Select Year/Sem</option>
-                          <option value="1st Year">1st Year / 1st Sem</option>
-                          <option value="2nd Year">2nd Year / 3rd Sem</option>
-                          <option value="3rd Year">3rd Year / 5th Sem</option>
+                          {semesters.map(s => (
+                            <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber} ({s.courseName})</option>
+                          ))}
+                          <option value="1st Year">1st Year</option>
+                          <option value="2nd Year">2nd Year</option>
+                          <option value="3rd Year">3rd Year</option>
+                          <option value="4th Year">4th Year</option>
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                       </div>
@@ -719,66 +833,240 @@ const Students = () => {
 
       {/* View Student Modal */}
       {isViewModalOpen && selectedStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={() => { setIsViewModalOpen(false); setSelectedStudent(null); }}></div>
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-[18px] font-bold text-gray-800 font-['Outfit']">Student Details</h2>
-              <button onClick={() => { setIsViewModalOpen(false); setSelectedStudent(null); }} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-8">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-[#0A6C54] to-[#085a46]">
+              <h3 className="text-lg font-bold text-white">Student Details</h3>
+              <button 
+                onClick={() => { setIsViewModalOpen(false); setSelectedStudent(null); }}
+                className="text-white/80 hover:text-white transition-colors"
+              >
                 <X size={20} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Enrollment No.</p>
-                  <p className="text-[13px] font-semibold text-[#0A6C54]">{selectedStudent.studentId}</p>
+
+            {/* Content */}
+            <div className="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
+              {/* Basic Info Card */}
+              <div className="bg-gradient-to-br from-[#0A6C54]/5 to-[#0A6C54]/10 rounded-xl p-6 mb-8">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-full bg-[#0A6C54] flex items-center justify-center text-white text-2xl font-bold border-2 border-[#0A6C54]/20 shadow-sm">
+                    {selectedStudent.studentName?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-gray-800">{selectedStudent.studentName}</h4>
+                    <p className="text-sm text-[#0A6C54] font-medium">{selectedStudent.course} - {selectedStudent.branch}</p>
+                  </div>
+                  <div className="ml-auto">
+                    <span className={`px-4 py-2 rounded-full text-xs font-bold tracking-wide inline-block ${getStatusColor(selectedStudent.status)}`}>
+                      {selectedStudent.status}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Name</p>
-                  <p className="text-[13px] font-medium text-gray-800">{selectedStudent.studentName}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Course</p>
-                  <p className="text-[13px] text-gray-600">{selectedStudent.course}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Branch</p>
-                  <p className="text-[13px] text-gray-600">{selectedStudent.branch}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Year</p>
-                  <p className="text-[13px] text-gray-600">{selectedStudent.year}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Status</p>
-                  <span className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide ${getStatusColor(selectedStudent.status)}`}>{selectedStudent.status}</span>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Email</p>
-                  <p className="text-[13px] text-gray-600">{selectedStudent.email}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Phone</p>
-                  <p className="text-[13px] text-gray-600">{selectedStudent.phone}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Gender</p>
-                  <p className="text-[13px] text-gray-600">{selectedStudent.gender}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Date of Birth</p>
-                  <p className="text-[13px] text-gray-600">{selectedStudent.dob ? new Date(selectedStudent.dob).toLocaleDateString() : '-'}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Address</p>
-                  <p className="text-[13px] text-gray-600">{selectedStudent.address || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Enrollment Date</p>
-                  <p className="text-[13px] text-gray-600">{selectedStudent.enrollmentDate ? new Date(selectedStudent.enrollmentDate).toLocaleDateString() : '-'}</p>
+                <div className="grid grid-cols-3 gap-4 text-sm mt-4 pt-4 border-t border-[#0A6C54]/10">
+                  <div>
+                    <span className="text-gray-500 font-medium">Enrollment No:</span>
+                    <span className="ml-2 font-bold text-gray-800">{selectedStudent.studentId}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-medium">Year:</span>
+                    <span className="ml-2 font-bold text-gray-800">{selectedStudent.year}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 font-medium">Enrollment Date:</span>
+                    <span className="ml-2 font-bold text-gray-800">{selectedStudent.enrollmentDate ? new Date(selectedStudent.enrollmentDate).toLocaleDateString() : 'N/A'}</span>
+                  </div>
                 </div>
               </div>
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Personal Information */}
+                <div className="space-y-4">
+                  <h5 className="text-[13px] font-bold text-[#0A6C54] uppercase tracking-wider border-b border-gray-200 pb-2">Personal Information</h5>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Email</label>
+                      <p className="text-[13px] font-medium text-gray-800">{selectedStudent.email || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Mobile</label>
+                      <p className="text-[13px] font-medium text-gray-800">{selectedStudent.phone || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Date of Birth</label>
+                      <p className="text-[13px] font-medium text-gray-800">{selectedStudent.dob ? new Date(selectedStudent.dob).toLocaleDateString() : 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Gender</label>
+                      <p className="text-[13px] font-medium text-gray-800">{selectedStudent.gender || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Category</label>
+                      <p className="text-[13px] font-medium text-gray-800">{selectedStudent.category || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Religion</label>
+                      <p className="text-[13px] font-medium text-gray-800">{selectedStudent.religion || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Aadhaar No</label>
+                      <p className="text-[13px] font-medium text-gray-800">{selectedStudent.aadhaar || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Nationality</label>
+                      <p className="text-[13px] font-medium text-gray-800">{selectedStudent.nationality || 'Indian'}</p>
+                    </div>
+                  </div>
+
+                  {/* Addresses */}
+                  <div className="pt-2">
+                    <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Current Address</label>
+                    <p className="text-[13px] font-medium text-gray-800">{selectedStudent.address || 'N/A'}</p>
+                  </div>
+                  <div className="pt-1">
+                    <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Permanent Address</label>
+                    <p className="text-[13px] font-medium text-gray-800">{selectedStudent.permanentAddress ? `${selectedStudent.permanentAddress}, ${selectedStudent.permanentCity}, ${selectedStudent.permanentPincode}` : 'N/A'}</p>
+                  </div>
+
+                  {/* Portal Credentials */}
+                  <div className="pt-4 mt-4 border-t border-gray-100">
+                    <h6 className="text-[11px] font-semibold text-[#0A6C54] uppercase tracking-wider mb-3">Portal Credentials</h6>
+                    <div className="flex gap-4">
+                      <div className="flex-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">Username</label>
+                        <p className="text-[13px] font-bold text-gray-800">{selectedStudent.username || 'N/A'}</p>
+                      </div>
+                      <div className="flex-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">Password</label>
+                        <p className="text-[13px] font-bold text-gray-800">{selectedStudent.password || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  {/* Parent / Guardian Information */}
+                  <div className="space-y-4">
+                    <h5 className="text-[13px] font-bold text-[#0A6C54] uppercase tracking-wider border-b border-gray-200 pb-2">Parent & Guardian Details</h5>
+                    
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Father's Name</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.fatherName || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Father's Mobile</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.fatherMobile || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Mother's Name</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.motherName || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Mother's Mobile</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.motherMobile || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Guardian Name</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.guardianName || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Guardian Mobile</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.guardianMobile || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Parent Occupation</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.fatherOccupation || selectedStudent.motherOccupation || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Annual Income</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.annualIncome ? `₹${selectedStudent.annualIncome}` : 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Academic Information */}
+                  <div className="space-y-4">
+                    <h5 className="text-[13px] font-bold text-[#0A6C54] uppercase tracking-wider border-b border-gray-200 pb-2">Previous Education</h5>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">School / College</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.prevSchool || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Board / University</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.board || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Passing Year</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.passingYear || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Qualification</label>
+                        <p className="text-[13px] font-medium text-gray-800">{selectedStudent.qualification || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Percentage</label>
+                        <p className="text-[13px] font-bold text-gray-800">{selectedStudent.percentage ? `${selectedStudent.percentage}%` : 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Documents Section */}
+              <div className="mt-8">
+                <h5 className="text-[13px] font-bold text-[#0A6C54] uppercase tracking-wider border-b border-gray-200 pb-2 mb-4">Uploaded Documents</h5>
+                {(!selectedStudent.documents || selectedStudent.documents.length === 0) ? (
+                  <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-100 border-dashed">
+                    <p className="text-gray-500 text-[13px] font-medium">No documents uploaded for this student.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {selectedStudent.documents.map((doc, idx) => (
+                      <div key={idx} className="flex flex-col p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-bold text-gray-800 line-clamp-1" title={doc.name}>{doc.name}</p>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${doc.status === 'Verified' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {doc.status || 'Pending'}
+                            </span>
+                          </div>
+                        </div>
+                        {doc.url ? (
+                          <a href={doc.url.startsWith('http') ? doc.url : `http://localhost:5000${doc.url.startsWith('/') ? doc.url : '/' + doc.url}`} target="_blank" rel="noopener noreferrer" className="mt-auto block w-full text-center px-3 py-2 text-[12px] font-bold text-[#0A6C54] bg-[#0A6C54]/5 border border-[#0A6C54]/20 rounded-lg hover:bg-[#0A6C54] hover:text-white transition-all">
+                            View Document
+                          </a>
+                        ) : (
+                          <div className="mt-auto block w-full text-center px-3 py-2 text-[12px] font-bold text-gray-400 bg-gray-50 border border-gray-100 rounded-lg cursor-not-allowed">
+                            Not Uploaded
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end bg-gray-50/50 rounded-b-2xl">
+              <button 
+                onClick={() => { setIsViewModalOpen(false); setSelectedStudent(null); }}
+                className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-[13px] font-bold hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

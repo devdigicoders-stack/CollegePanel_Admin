@@ -2,16 +2,21 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   ChevronDown, Calendar, Users, FileText, AlertCircle, CheckCircle, Clock, RotateCcw, 
   BookOpen, AlertTriangle, Zap, Search, Save, RefreshCw, Upload, Download, Eye, 
-  ChevronLeft, ChevronRight, Loader2, Edit2
+  ChevronLeft, ChevronRight, Loader2, Edit2, Plus, X
 } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
 
 const STATUS_OPTIONS = ['Upcoming', 'Ongoing', 'Completed'];
 const GRADE_OPTIONS = ['A', 'B', 'C', 'D', 'F'];
 
 const Examinations = () => {
+  if (!checkPermission('View Exams') && !checkPermission('Create Exam') && !checkPermission('Enter Marks') && !checkPermission('View Results')) {
+    return <AccessDenied />;
+  }
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -35,6 +40,9 @@ const Examinations = () => {
   const [admitCards, setAdmitCards] = useState([]);
   const [questionPapers, setQuestionPapers] = useState([]);
   const [dashboardStats, setDashboardStats] = useState(null);
+  const [departments, setDepartments] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [failedResults, setFailedResults] = useState([]);
 
   const [filters, setFilters] = useState({
     exam: '',
@@ -53,6 +61,11 @@ const Examinations = () => {
   const [selectedExamForMarks, setSelectedExamForMarks] = useState('');
   const [selectedExamForResults, setSelectedExamForResults] = useState('');
   const [selectedExamForAdmit, setSelectedExamForAdmit] = useState('');
+  
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [examForm, setExamForm] = useState({
+    examName: '', course: '', semester: '', subject: '', date: '', startTime: '', endTime: '', totalMarks: 100, passingMarks: 40
+  });
 
   const fetchDashboardStats = useCallback(async () => {
     try {
@@ -146,13 +159,42 @@ const Examinations = () => {
     }
   }, [selectedExamForMarks]);
 
+  const fetchDepartments = async () => {
+    try {
+      const res = await axiosInstance.get('/academics/departments');
+      setDepartments(res.data.data || res.data || []);
+    } catch (error) {
+      console.error('Failed to fetch departments', error);
+    }
+  };
+
+  const fetchSemesters = async () => {
+    try {
+      const res = await axiosInstance.get('/academics/semesters');
+      setSemesters(res.data.data || res.data || []);
+    } catch (error) {
+      console.error('Failed to fetch semesters', error);
+    }
+  };
+
+  const fetchFailedResults = useCallback(async () => {
+    try {
+      const res = await axiosInstance.get('/exams/results/failed');
+      setFailedResults(res.data || []);
+    } catch {
+      toast.error('Failed to fetch back paper students');
+    }
+  }, []);
+
   useEffect(() => {
     const init = async () => {
       setLoading(true);
       await Promise.all([
         fetchDashboardStats(),
         fetchExams(),
-        fetchQuestionPapers()
+        fetchQuestionPapers(),
+        fetchDepartments(),
+        fetchSemesters()
       ]);
       setLoading(false);
     };
@@ -176,6 +218,29 @@ const Examinations = () => {
       fetchMarksData();
     }
   }, [activeTab, selectedExamForMarks, fetchMarksData]);
+
+  useEffect(() => {
+    if (activeTab === 'Back Papers & Invigilators') {
+      fetchFailedResults();
+    }
+  }, [activeTab, fetchFailedResults]);
+
+  const handleScheduleExam = async (e) => {
+    e.preventDefault();
+    try {
+      setSaving(true);
+      await axiosInstance.post('/exams', { ...examForm, status: 'Upcoming' });
+      toast.success('Exam scheduled successfully!');
+      setShowScheduleModal(false);
+      setExamForm({ examName: '', course: '', semester: '', subject: '', date: '', startTime: '', endTime: '', totalMarks: 100, passingMarks: 40 });
+      fetchExams();
+      fetchDashboardStats();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to schedule exam');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
@@ -203,9 +268,15 @@ const Examinations = () => {
       const practicalVal = parseInt(updated[index].practicalMarks) || 0;
       updated[index].totalMarks = theoryVal + practicalVal;
       const total = theoryVal + practicalVal;
-      if (total >= 80) { updated[index].grade = 'A'; updated[index].status = 'Pass'; }
-      else if (total >= 60) { updated[index].grade = 'B'; updated[index].status = 'Pass'; }
-      else if (total >= 40) { updated[index].grade = 'C'; updated[index].status = 'Pass'; }
+      
+      const selectedExam = exams.find(e => e._id === selectedExamForMarks);
+      const examTotalMarks = selectedExam?.totalMarks || 100;
+      const examPassingMarks = selectedExam?.passingMarks || 40;
+
+      if (total >= examTotalMarks * 0.8) { updated[index].grade = 'A'; updated[index].status = 'Pass'; }
+      else if (total >= examTotalMarks * 0.6) { updated[index].grade = 'B'; updated[index].status = 'Pass'; }
+      else if (total >= examTotalMarks * 0.4) { updated[index].grade = 'C'; updated[index].status = 'Pass'; }
+      else if (total >= examPassingMarks) { updated[index].grade = 'D'; updated[index].status = 'Pass'; }
       else { updated[index].grade = 'F'; updated[index].status = 'Fail'; }
       return updated;
     });
@@ -413,6 +484,15 @@ const Examinations = () => {
                 className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] placeholder:text-gray-400 shadow-sm"
               />
             </div>
+            {checkPermission('Create Exam') && (
+              <button
+                onClick={() => setShowScheduleModal(true)}
+                className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Plus size={16} />
+                Schedule Exam
+              </button>
+            )}
           </div>
           {loading ? (
             <SkeletonLoader type="table" rows={5} cols={4} />
@@ -637,13 +717,12 @@ const Examinations = () => {
                   <select
                     value={filters.course}
                     onChange={(e) => handleFilterChange('course', e.target.value)}
-                    className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm"
+                    className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm bg-white"
                   >
                     <option value="">All Courses</option>
-                    <option>Diploma in CE</option>
-                    <option>Diploma in ME</option>
-                    <option>Diploma in EE</option>
-                    <option>Diploma in IT</option>
+                    {departments.map(d => (
+                      <option key={d._id} value={d.name}>{d.name}</option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                 </div>
@@ -655,12 +734,12 @@ const Examinations = () => {
                   <select
                     value={filters.semester}
                     onChange={(e) => handleFilterChange('semester', e.target.value)}
-                    className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm"
+                    className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm bg-white"
                   >
                     <option value="">All Semesters</option>
-                    <option>2nd Semester</option>
-                    <option>4th Semester</option>
-                    <option>6th Semester</option>
+                    {semesters.map(s => (
+                      <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber}</option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                 </div>
@@ -703,48 +782,54 @@ const Examinations = () => {
           ) : (
             <>
               <div className="flex-1 overflow-x-auto p-6 pt-2">
-                <table className="w-full text-left border-collapse min-w-[800px]">
-                  <thead>
-                    <tr className="bg-[#F9FAFB] border-y border-gray-100">
-                      <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[5%] rounded-tl-xl">#</th>
-                      <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%]">Enrollment No.</th>
-                      <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[20%]">Name</th>
-                      <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%] text-center">Theory (80)</th>
-                      <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%] text-center">Practical (20)</th>
-                      <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%] text-center">Total (100)</th>
-                      <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%] text-center rounded-tr-xl">Grade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {marksData.map((student, index) => (
-                      <tr key={student._id || index} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                        <td className="py-4 px-6 text-[13px] font-medium text-gray-600">{index + 1}</td>
-                        <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{student.rollNo}</td>
-                        <td className="py-4 px-6 text-[13px] font-medium text-gray-800">{student.studentName}</td>
-                        <td className="py-4 px-6 text-center">
-                          <input
-                            type="number"
-                            min="0"
-                            max="80"
-                            value={student.theoryMarks || ''}
-                            onChange={(e) => handleMarksChange(index, 'theoryMarks', e.target.value)}
-                            className="w-[70px] text-center border border-gray-200 rounded-md py-1.5 text-[13px] font-medium text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
-                          />
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          <input
-                            type="number"
-                            min="0"
-                            max="20"
-                            value={student.practicalMarks || ''}
-                            onChange={(e) => handleMarksChange(index, 'practicalMarks', e.target.value)}
-                            className="w-[70px] text-center border border-gray-200 rounded-md py-1.5 text-[13px] font-medium text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
-                          />
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          <input
-                            type="text"
-                            value={student.totalMarks || 0}
+                {(() => {
+                  const selectedExam = exams.find(e => e._id === selectedExamForMarks);
+                  const examTotal = selectedExam?.totalMarks || 100;
+                  const theoryMax = Math.round(examTotal * 0.8);
+                  const practicalMax = examTotal - theoryMax;
+                  return (
+                    <table className="w-full text-left border-collapse min-w-[800px]">
+                      <thead>
+                        <tr className="bg-[#F9FAFB] border-y border-gray-100">
+                          <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[5%] rounded-tl-xl">#</th>
+                          <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%]">Enrollment No.</th>
+                          <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[20%]">Name</th>
+                          <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%] text-center">Theory ({theoryMax})</th>
+                          <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%] text-center">Practical ({practicalMax})</th>
+                          <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%] text-center">Total ({examTotal})</th>
+                          <th className="py-4 px-6 text-[12px] font-bold text-gray-800 w-[15%] text-center rounded-tr-xl">Grade</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {marksData.map((student, index) => (
+                          <tr key={student._id || index} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                            <td className="py-4 px-6 text-[13px] font-medium text-gray-600">{index + 1}</td>
+                            <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{student.rollNo}</td>
+                            <td className="py-4 px-6 text-[13px] font-medium text-gray-800">{student.studentName}</td>
+                            <td className="py-4 px-6 text-center">
+                              <input
+                                type="number"
+                                min="0"
+                                max={theoryMax}
+                                value={student.theoryMarks || ''}
+                                onChange={(e) => handleMarksChange(index, 'theoryMarks', e.target.value)}
+                                className="w-[70px] text-center border border-gray-200 rounded-md py-1.5 text-[13px] font-medium text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                              />
+                            </td>
+                            <td className="py-4 px-6 text-center">
+                              <input
+                                type="number"
+                                min="0"
+                                max={practicalMax}
+                                value={student.practicalMarks || ''}
+                                onChange={(e) => handleMarksChange(index, 'practicalMarks', e.target.value)}
+                                className="w-[70px] text-center border border-gray-200 rounded-md py-1.5 text-[13px] font-medium text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                              />
+                            </td>
+                            <td className="py-4 px-6 text-center">
+                              <input
+                                type="text"
+                                value={student.totalMarks || 0}
                             readOnly
                             className="w-[70px] text-center border border-gray-200 rounded-md py-1.5 text-[13px] font-medium text-gray-800 bg-gray-50 cursor-not-allowed"
                           />
@@ -761,6 +846,8 @@ const Examinations = () => {
                     ))}
                   </tbody>
                 </table>
+                );
+                })()}
               </div>
 
               <div className="p-4 md:p-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 rounded-b-2xl bg-gray-50/30">
@@ -771,22 +858,26 @@ const Examinations = () => {
                   <Download size={14} />
                   Export CSV
                 </button>
-                <button
-                  onClick={handleSaveMarks}
-                  disabled={saving}
-                  className="w-full sm:w-auto px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] disabled:bg-gray-400 rounded-lg transition-colors shadow-sm flex items-center gap-2"
-                >
-                  {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                  Save Marks
-                </button>
-                <button
-                  onClick={handlePublishResult}
-                  disabled={saving}
-                  className="w-full sm:w-auto px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] disabled:bg-gray-400 rounded-lg transition-colors shadow-sm flex items-center gap-2"
-                >
-                  {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
-                  Publish Result
-                </button>
+                {checkPermission('Enter Marks') && (
+                  <>
+                    <button
+                      onClick={handleSaveMarks}
+                      disabled={saving}
+                      className="w-full sm:w-auto px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] disabled:bg-gray-400 rounded-lg transition-colors shadow-sm flex items-center gap-2"
+                    >
+                      {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                      Save Marks
+                    </button>
+                    <button
+                      onClick={handlePublishResult}
+                      disabled={saving}
+                      className="w-full sm:w-auto px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] disabled:bg-gray-400 rounded-lg transition-colors shadow-sm flex items-center gap-2"
+                    >
+                      {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                      Publish Result
+                    </button>
+                  </>
+                )}
               </div>
             </>
           )}
@@ -895,14 +986,14 @@ const Examinations = () => {
         <div className="flex-1 overflow-y-auto p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-[14px] font-bold text-gray-800 mb-4">Back Paper Students ({examResults.filter(r => r.status === 'Fail').length})</h3>
-              {examResults.filter(r => r.status === 'Fail').length === 0 ? (
+              <h3 className="text-[14px] font-bold text-gray-800 mb-4">Back Paper Students ({failedResults.length})</h3>
+              {failedResults.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-gray-400">
                   <p className="text-[13px] font-medium">No back paper students.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {examResults.filter(r => r.status === 'Fail').map(student => (
+                  {failedResults.map(student => (
                     <div key={student._id} className="bg-rose-50 p-4 rounded-lg border border-rose-100">
                       <div className="flex items-start justify-between">
                         <div>
@@ -950,6 +1041,155 @@ const Examinations = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Exam Modal */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-2xl flex flex-col shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50">
+              <h2 className="text-xl font-bold text-gray-800">Schedule New Exam</h2>
+              <button 
+                onClick={() => setShowScheduleModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
+              >
+                <X size={18} className="text-gray-500" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleScheduleExam} className="p-6 overflow-y-auto max-h-[70vh]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="md:col-span-2">
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Exam Name (e.g. Mid Sem, Unit Test 1)</label>
+                  <input
+                    required
+                    type="text"
+                    value={examForm.examName}
+                    onChange={(e) => setExamForm({ ...examForm, examName: e.target.value })}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                    placeholder="Enter exam name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Course / Department</label>
+                  <div className="relative">
+                    <select
+                      required
+                      value={examForm.course}
+                      onChange={(e) => setExamForm({ ...examForm, course: e.target.value })}
+                      className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+                    >
+                      <option value="">Select Course</option>
+                      {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Semester</label>
+                  <div className="relative">
+                    <select
+                      required
+                      value={examForm.semester}
+                      onChange={(e) => setExamForm({ ...examForm, semester: e.target.value })}
+                      className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+                    >
+                      <option value="">Select Semester</option>
+                      {semesters.map(s => <option key={s._id} value={`Sem ${s.semesterNumber}`}>Sem {s.semesterNumber}</option>)}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Subject</label>
+                  <input
+                    required
+                    type="text"
+                    value={examForm.subject}
+                    onChange={(e) => setExamForm({ ...examForm, subject: e.target.value })}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                    placeholder="Enter subject name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Date</label>
+                  <input
+                    required
+                    type="date"
+                    value={examForm.date}
+                    onChange={(e) => setExamForm({ ...examForm, date: e.target.value })}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                  />
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Start Time</label>
+                    <input
+                      type="time"
+                      value={examForm.startTime}
+                      onChange={(e) => setExamForm({ ...examForm, startTime: e.target.value })}
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">End Time</label>
+                    <input
+                      type="time"
+                      value={examForm.endTime}
+                      onChange={(e) => setExamForm({ ...examForm, endTime: e.target.value })}
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Total Marks</label>
+                  <input
+                    required
+                    type="number"
+                    value={examForm.totalMarks}
+                    onChange={(e) => setExamForm({ ...examForm, totalMarks: Number(e.target.value) })}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Passing Marks</label>
+                  <input
+                    required
+                    type="number"
+                    value={examForm.passingMarks}
+                    onChange={(e) => setExamForm({ ...examForm, passingMarks: Number(e.target.value) })}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(false)}
+                  className="px-6 py-2.5 rounded-lg text-[13px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-6 py-2.5 rounded-lg text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] disabled:bg-gray-400 transition-colors flex items-center gap-2"
+                >
+                  {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  Schedule Exam
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

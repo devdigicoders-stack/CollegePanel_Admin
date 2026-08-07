@@ -4,10 +4,15 @@ import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import axios from 'axios';
 import SkeletonLoader from '../../components/SkeletonLoader';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
 
 const HCReact = HighchartsReact.default || HighchartsReact;
 
 const AdmissionOfficerDashboard = () => {
+  if (!checkPermission('View Admissions')) {
+    return <AccessDenied />;
+  }
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +50,7 @@ const AdmissionOfficerDashboard = () => {
     { label: 'Rejected/Cancelled', value: stats.rejectedAdmissions, icon: XCircle, color: 'bg-red-50', iconColor: 'text-red-500' },
     { label: 'Document Verification', value: stats.docVerPending, icon: FileText, color: 'bg-indigo-50', iconColor: 'text-indigo-500' },
     { label: 'Fee Pending Admissions', value: stats.feePending, icon: DollarSign, color: 'bg-pink-50', iconColor: 'text-pink-500' },
-    { label: 'Total Available Seats', value: 'N/A', icon: Zap, color: 'bg-cyan-50', iconColor: 'text-cyan-500' },
+    { label: 'Seat Management', value: 'Check module', icon: Zap, color: 'bg-cyan-50', iconColor: 'text-cyan-500' },
   ];
 
   const conversionChartOptions = {
@@ -175,7 +180,7 @@ const AdmissionOfficerDashboard = () => {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div className="bg-[#0A6C54] h-2 rounded-full" style={{ width: `${Math.min(item.count, 100)}%` }}></div>
                 </div>
-                <p className="text-[11px] text-gray-600 mt-1">{item.count} / 100 (Default Target)</p>
+                <p className="text-[11px] text-gray-600 mt-1">{item.count} Admits</p>
               </div>
             )) : (
               <div className="p-3 bg-gray-50 rounded-lg text-[13px] text-gray-500">No admission data yet.</div>
@@ -190,10 +195,9 @@ const AdmissionOfficerDashboard = () => {
               <div key={idx} className="p-3 bg-gray-50 rounded-lg">
                 <div className="flex justify-between mb-2">
                   <span className="text-[12px] font-medium text-gray-800">{item._id}</span>
-                  <span className="text-[12px] font-bold text-emerald-600">{100 - item.count} Available</span>
+                  <span className="text-[12px] font-bold text-emerald-600">Active Course</span>
                 </div>
                 <div className="flex gap-2 text-[11px]">
-                  <span className="text-gray-600">Total: 100</span>
                   <span className="text-gray-600">Filled: {item.count}</span>
                 </div>
               </div>

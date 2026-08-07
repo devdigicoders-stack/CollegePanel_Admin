@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Eye, ChevronDown, Download, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Eye, ChevronDown, Download, Wallet } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
 
 const statusColors = {
   'Paid': 'bg-green-100 text-green-700',
@@ -12,12 +15,30 @@ const statusColors = {
 };
 
 const StudentFees = () => {
+  if (!checkPermission('View Fees') && !checkPermission('Collect Fees')) {
+    return <AccessDenied />;
+  }
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterCourse, setFilterCourse] = useState('All');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await axiosInstance.get('/academics/courses');
+        const courseList = res.data?.data || res.data || [];
+        setCourses(courseList.map(c => c.name || c.courseName).filter(Boolean));
+      } catch (error) {
+        console.error('Failed to fetch courses', error);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -39,12 +60,27 @@ const StudentFees = () => {
     fetchData();
   }, [search, filterStatus, filterCourse]);
 
-  const paymentHistory = [
-    { date: '2024-01-15', receiptNo: 'RCP/2024/001', head: 'Admission Fee', amount: 5000, mode: 'Cash', status: 'Completed' },
-    { date: '2024-01-20', receiptNo: 'RCP/2024/015', head: 'Tuition Fee (1st Inst.)', amount: 12500, mode: 'UPI', status: 'Completed' },
-    { date: '2024-02-10', receiptNo: 'RCP/2024/042', head: 'Registration Fee', amount: 2000, mode: 'Bank Transfer', status: 'Completed' },
-    { date: '2024-02-15', receiptNo: 'RCP/2024/058', head: 'Lab Fee', amount: 2000, mode: 'UPI', status: 'Completed' },
-  ];
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  useEffect(() => {
+    if (selectedStudent) {
+      const fetchHistory = async () => {
+        setLoadingHistory(true);
+        try {
+          const res = await axiosInstance.get('/fees/collections', { params: { search: selectedStudent.enrollNo } });
+          setPaymentHistory(res.data?.data || res.data || []);
+        } catch (error) {
+          toast.error('Failed to fetch payment history');
+        } finally {
+          setLoadingHistory(false);
+        }
+      };
+      fetchHistory();
+    } else {
+      setPaymentHistory([]);
+    }
+  }, [selectedStudent]);
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -68,7 +104,7 @@ const StudentFees = () => {
           <select value={filterCourse} onChange={e => setFilterCourse(e.target.value)}
             className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
             <option>All</option>
-            {['Diploma in CE', 'Diploma in IT', 'Diploma in ME', 'Diploma in EE'].map(c => <option key={c}>{c}</option>)}
+            {courses.length > 0 ? courses.map(c => <option key={c}>{c}</option>) : ['Diploma in CE', 'Diploma in IT', 'Diploma in ME', 'Diploma in EE'].map(c => <option key={c}>{c}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
         </div>
@@ -98,7 +134,7 @@ const StudentFees = () => {
               {data.map(s => (
                 <tr key={s._id || s.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                   <td className="py-3 px-4 text-[13px] font-semibold text-[#0A6C54]">{s.enrollNo}</td>
-                  <td className="py-3 px-4 text-[13px] font-medium text-gray-800">{s.name}</td>
+                  <td className="py-3 px-4 text-[13px] font-medium text-gray-800">{s.studentName || s.name}</td>
                   <td className="py-3 px-4 text-[13px] text-gray-600">{s.course}</td>
                   <td className="py-3 px-4 text-[13px] text-gray-600">{s.semester}</td>
                   <td className="py-3 px-4 text-[13px] text-gray-700">₹{(s.totalFee || 0).toLocaleString()}</td>
@@ -138,10 +174,15 @@ const StudentFees = () => {
           <div className="bg-white rounded-2xl w-full max-w-3xl shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white">
               <div>
-                <h3 className="text-[16px] font-bold text-gray-800">{selectedStudent.name} - Fee Ledger</h3>
+                <h3 className="text-[16px] font-bold text-gray-800">{(selectedStudent.studentName || selectedStudent.name)} - Fee Ledger</h3>
                 <p className="text-[12px] text-gray-500">{selectedStudent.enrollNo} • {selectedStudent.course}</p>
               </div>
-              <button onClick={() => setSelectedStudent(null)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500">✕</button>
+              <div className="flex items-center gap-3">
+                <button onClick={() => navigate('/financial/fee-collection', { state: { student: selectedStudent } })} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2 rounded-lg text-[13px] font-semibold flex items-center gap-2">
+                  <Wallet size={15} /> Collect Fee
+                </button>
+                <button onClick={() => setSelectedStudent(null)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500">✕</button>
+              </div>
             </div>
             <div className="p-6 space-y-5">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -168,14 +209,18 @@ const StudentFees = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {paymentHistory.map((p, idx) => (
-                      <tr key={idx} className="border-b border-gray-50">
-                        <td className="py-2.5 px-4 text-[13px] text-gray-600">{p.date}</td>
+                    {loadingHistory ? (
+                      <tr><SkeletonLoader type="table" rows={5} cols={5} /></tr>
+                    ) : paymentHistory.length === 0 ? (
+                      <tr><td colSpan={6} className="py-4 text-center text-gray-500 text-[13px]">No payment history found</td></tr>
+                    ) : paymentHistory.map((p, idx) => (
+                      <tr key={p._id || idx} className="border-b border-gray-50">
+                        <td className="py-2.5 px-4 text-[13px] text-gray-600">{new Date(p.date).toLocaleDateString()}</td>
                         <td className="py-2.5 px-4 text-[13px] font-semibold text-[#0A6C54]">{p.receiptNo}</td>
-                        <td className="py-2.5 px-4 text-[13px] text-gray-700">{p.head}</td>
-                        <td className="py-2.5 px-4 text-[13px] font-semibold text-gray-800">₹{p.amount.toLocaleString()}</td>
+                        <td className="py-2.5 px-4 text-[13px] text-gray-700">{p.feeHeads?.map(h => typeof h === 'string' ? h : h.head).join(', ') || 'Fee'}</td>
+                        <td className="py-2.5 px-4 text-[13px] font-semibold text-gray-800">₹{(p.amount || 0).toLocaleString()}</td>
                         <td className="py-2.5 px-4 text-[13px] text-gray-600">{p.mode}</td>
-                        <td className="py-2.5 px-4"><span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-700">{p.status}</span></td>
+                        <td className="py-2.5 px-4"><span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${p.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>{p.status}</span></td>
                       </tr>
                     ))}
                   </tbody>

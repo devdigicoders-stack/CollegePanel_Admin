@@ -1,33 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Save, Plus, AlertCircle } from 'lucide-react';
+import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
-
-const initialComplaints = [
-  { id: 1, type: 'IT Support', desc: 'Hostel Block A WiFi signal weak on 1st floor', status: 'In Progress', date: '12-Feb' },
-  { id: 2, type: 'Infrastructure', desc: 'Classroom 4 fan regulator broken', status: 'Resolved', date: '10-Feb' },
-];
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const Complaints = () => {
-  const [complaints, setComplaints] = useState(initialComplaints);
+  const [complaints, setComplaints] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newComplaint, setNewComplaint] = useState({
     type: 'IT Support',
     desc: '',
   });
 
-  const handleApply = (e) => {
-    e.preventDefault();
-    const itemToAdd = {
-      id: complaints.length + 1,
-      type: newComplaint.type,
-      desc: newComplaint.desc,
-      date: new Date().toLocaleDateString([], { day: '2-digit', month: 'short' }),
-      status: 'Open'
-    };
-    setComplaints([itemToAdd, ...complaints]);
-    setShowModal(false);
-    toast.success('Complaint ticket created and assigned to administration!');
+  useEffect(() => {
+    fetchComplaints();
+  }, []);
+
+  const fetchComplaints = async () => {
+    try {
+      const res = await axiosInstance.get('/student-portal/complaints');
+      setComplaints(res.data);
+    } catch (error) {
+      toast.error('Failed to fetch complaints');
+    } finally { setLoading(false); }
   };
+
+  const handleApply = async (e) => {
+    e.preventDefault();
+    try {
+      await axiosInstance.post('/student-portal/complaints', {
+        category: newComplaint.type === 'IT Support' ? 'IT' :
+                  newComplaint.type === 'Infrastructure' ? 'Maintenance' :
+                  newComplaint.type === 'Academic' ? 'Academics' : 'Hostel',
+        description: newComplaint.desc
+      });
+      setShowModal(false);
+      setNewComplaint({ type: 'IT Support', desc: '' });
+      toast.success('Complaint ticket created and assigned to administration!');
+      fetchComplaints();
+    } catch (error) {
+      toast.error('Failed to file complaint');
+    } finally { setLoading(false); }
+  };
+
+  
+  if (loading) {
+    return (
+      <div className="p-6">
+        <SkeletonLoader type="table" rows={6} cols={5} />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -41,13 +65,14 @@ const Complaints = () => {
         </button>
       </div>
 
-      <div className="p-6 space-y-6 flex-1 overflow-y-auto max-w-3xl">
-        {complaints.map(item => (
-          <div key={item.id} className="p-4 border border-gray-100 rounded-xl space-y-3 bg-gray-50/20 shadow-sm text-[13px]">
+      <div className="p-6 space-y-6 flex-1 overflow-y-auto">
+        {complaints.length > 0 ? complaints.map(item => (
+          <div key={item._id} className="p-4 border border-gray-100 rounded-xl space-y-3 bg-gray-50/20 shadow-sm text-[13px]">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[11px] font-semibold text-gray-400">{item.type} | {item.date}</span>
-                <p className="font-bold text-gray-800 mt-1">{item.desc}</p>
+                <span className="text-[11px] font-semibold text-gray-400">{item.category} | {new Date(item.createdAt).toLocaleDateString()}</span>
+                <p className="font-bold text-gray-800 mt-1">{item.description}</p>
+                {item.adminReply && <p className="text-[11px] text-[#0A6C54] mt-2">Admin Reply: {item.adminReply}</p>}
               </div>
               <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
                 item.status === 'Resolved' ? 'bg-green-50 text-green-700 border border-green-100' :
@@ -58,7 +83,11 @@ const Complaints = () => {
               </span>
             </div>
           </div>
-        ))}
+        )) : (
+          <div className="text-gray-500 text-[13px] p-4 bg-gray-50 rounded-xl border border-gray-100">
+            No complaints found.
+          </div>
+        )}
       </div>
 
       {/* Modal */}

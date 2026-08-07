@@ -1,19 +1,30 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Search, Edit, Trash2, X, AlertTriangle, Eye, User, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, Search, Edit, Trash2, X, AlertTriangle, Eye, ChevronDown } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
 
 const Hods = () => {
+  if (!checkPermission('View Departments') && !checkPermission('Manage Departments')) {
+    return <AccessDenied />;
+  }
   const [hods, setHods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 1 });
   const [searchQuery, setSearchQuery] = useState('');
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [selectedHod, setSelectedHod] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [filterDepartment, setFilterDepartment] = useState('All Departments');
+  
+  const [teachers, setTeachers] = useState([]);
+  const [selectedTeacherId, setSelectedTeacherId] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
   const searchTimeout = useRef(null);
 
   useEffect(() => {
@@ -58,7 +69,7 @@ const Hods = () => {
       setHods(hodsData);
       setPagination(prev => ({
         ...prev,
-        total: res.data.total || 0,
+        total: res.data.total || hodsData.length,
         pages: res.data.pages || 1
       }));
     } catch (error) {
@@ -67,6 +78,18 @@ const Hods = () => {
       setHods([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTeachersList = async () => {
+    try {
+      const res = await axiosInstance.get('/teachers/list/all');
+      const data = res.data?.data || res.data || [];
+      // Filter out teachers who are already HODs
+      const filtered = data.filter(t => (t.designation || '').toLowerCase() !== 'hod');
+      setTeachers(filtered);
+    } catch (err) {
+      toast.error('Failed to fetch teachers list');
     }
   };
 
@@ -88,15 +111,33 @@ const Hods = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleRemoveHodConfirm = async () => {
     try {
-      await axiosInstance.delete(`/teachers/${selectedHod._id}`);
-      toast.success('HOD deleted successfully');
+      // Just change designation back to 'Teacher' instead of deleting the employee profile!
+      await axiosInstance.put(`/teachers/${selectedHod._id}`, { designation: 'Teacher' });
+      toast.success('HOD designation removed successfully');
       setShowDeleteModal(false);
       setSelectedHod(null);
       fetchHods();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete HOD');
+      toast.error(error.response?.data?.message || 'Failed to remove HOD designation');
+    }
+  };
+
+  const handleAssignHod = async (e) => {
+    e.preventDefault();
+    if (!selectedTeacherId) return toast.error('Please select a teacher');
+    setSubmitting(true);
+    try {
+      await axiosInstance.put(`/teachers/${selectedTeacherId}`, { designation: 'HOD' });
+      toast.success('Teacher assigned as HOD successfully');
+      setShowAddModal(false);
+      setSelectedTeacherId('');
+      fetchHods();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to assign HOD');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -152,7 +193,15 @@ const Hods = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+          {checkPermission('Add Department') && (
+            <button 
+              onClick={() => { fetchTeachersList(); setShowAddModal(true); }}
+              className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm"
+            >
+              <Plus size={16} /> Assign HOD
+            </button>
+          )}
           <div className="text-sm text-gray-600">
             <span className="font-semibold">{pagination.total}</span> HOD{pagination.total !== 1 ? 's' : ''} found
           </div>
@@ -220,13 +269,15 @@ const Hods = () => {
                       >
                         <Eye size={14} strokeWidth={2} />
                       </button>
-                      <button
-                        onClick={() => handleDeleteClick(hod)}
-                        className="w-8 h-8 rounded border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm bg-red-50/50 flex-shrink-0"
-                        title="Delete HOD"
-                      >
-                        <Trash2 size={14} strokeWidth={2} />
-                      </button>
+                      {checkPermission('Delete Department') && (
+                        <button
+                          onClick={() => handleDeleteClick(hod)}
+                          className="w-8 h-8 rounded border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm bg-red-50/50 flex-shrink-0"
+                          title="Remove HOD Role"
+                        >
+                          <Trash2 size={14} strokeWidth={2} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -289,42 +340,80 @@ const Hods = () => {
         </div>
       )}
 
+      {/* Assign HOD Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/40 z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-[#0A6C54]">
+              <h3 className="text-md font-bold text-white">Assign Teacher as HOD</h3>
+              <button onClick={() => { setShowAddModal(false); setSelectedTeacherId(''); }} className="text-white hover:text-gray-200"><X size={18} /></button>
+            </div>
+            <form onSubmit={handleAssignHod} className="p-6 space-y-4">
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Select Teacher</label>
+                <div className="relative">
+                  <select
+                    value={selectedTeacherId}
+                    onChange={(e) => setSelectedTeacherId(e.target.value)}
+                    required
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] appearance-none bg-white"
+                  >
+                    <option value="">Choose a teacher</option>
+                    {teachers.map(t => (
+                      <option key={t._id} value={t._id}>{t.name} ({t.department || 'No Department'})</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+                </div>
+                <p className="text-[11px] text-gray-400 mt-1">This list displays teachers who do not currently have the HOD role.</p>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => { setShowAddModal(false); setSelectedTeacherId(''); }}
+                  className="flex-1 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                <button type="submit" disabled={submitting}
+                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold transition-colors">
+                  {submitting ? 'Assigning...' : 'Assign as HOD'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* View Modal */}
       {showViewModal && selectedHod && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-[#0A6C54] to-[#0d8566]">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-[#0A6C54]">
               <h3 className="text-lg font-bold text-white">HOD Details</h3>
               <button
                 onClick={() => { setShowViewModal(false); setSelectedHod(null); }}
-                className="text-white/80 hover:text-white transition-colors"
+                className="text-white hover:text-gray-200 transition-colors"
               >
                 <X size={20} />
               </button>
             </div>
 
-            <div className="p-6 max-h-[70vh] overflow-y-auto">
+            <div className="p-6">
               <div className="bg-gradient-to-br from-[#0A6C54]/5 to-[#0A6C54]/10 rounded-xl p-6 mb-6">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-full bg-[#0A6C54] flex items-center justify-center text-white text-2xl font-bold">
-                    {selectedHod.name?.charAt(0).toUpperCase()}
-                  </div>
+                  {selectedHod.profileImage ? (
+                    <img 
+                      src={`http://localhost:5000${selectedHod.profileImage}`} 
+                      alt={selectedHod.name} 
+                      className="w-16 h-16 rounded-full object-cover border-2 border-[#0A6C54] bg-white shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-[#0A6C54] flex items-center justify-center text-white text-2xl font-bold">
+                      {selectedHod.name?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <h4 className="text-xl font-bold text-gray-800">{selectedHod.name}</h4>
                     <p className="text-sm text-[#0A6C54] font-medium">{selectedHod.designation} - {selectedHod.department}</p>
                     <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-bold tracking-wide mt-2 ${getStatusColor(selectedHod.status)}`}>
                       {selectedHod.status}
                     </span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-500">Employee ID:</span>
-                    <span className="ml-2 font-semibold text-[#0A6C54]">{selectedHod.empId}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Department:</span>
-                    <span className="ml-2 font-semibold text-gray-800">{selectedHod.department}</span>
                   </div>
                 </div>
               </div>
@@ -340,30 +429,6 @@ const Hods = () => {
                     <span className="text-xs font-semibold text-gray-500">Mobile</span>
                     <p className="text-sm text-gray-800 font-medium">{selectedHod.mobile || 'N/A'}</p>
                   </div>
-                  {selectedHod.dateOfBirth && (
-                    <div>
-                      <span className="text-xs font-semibold text-gray-500">Date of Birth</span>
-                      <p className="text-sm text-gray-800 font-medium">{formatDate(selectedHod.dateOfBirth)}</p>
-                    </div>
-                  )}
-                  {selectedHod.gender && (
-                    <div>
-                      <span className="text-xs font-semibold text-gray-500">Gender</span>
-                      <p className="text-sm text-gray-800 font-medium">{selectedHod.gender}</p>
-                    </div>
-                  )}
-                  {selectedHod.qualification && (
-                    <div>
-                      <span className="text-xs font-semibold text-gray-500">Qualification</span>
-                      <p className="text-sm text-gray-800 font-medium">{selectedHod.qualification}</p>
-                    </div>
-                  )}
-                  {selectedHod.experience && (
-                    <div>
-                      <span className="text-xs font-semibold text-gray-500">Experience</span>
-                      <p className="text-sm text-gray-800 font-medium">{selectedHod.experience} years</p>
-                    </div>
-                  )}
                 </div>
 
                 <div className="space-y-4">
@@ -373,29 +438,9 @@ const Hods = () => {
                     <p className="text-sm text-gray-800 font-medium">{selectedHod.department || 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-xs font-semibold text-gray-500">Designation</span>
-                    <p className="text-sm text-gray-800 font-medium">{selectedHod.designation || 'N/A'}</p>
-                  </div>
-                  <div>
                     <span className="text-xs font-semibold text-gray-500">Date of Joining</span>
                     <p className="text-sm text-gray-800 font-medium">{formatDate(selectedHod.dateOfJoining)}</p>
                   </div>
-                  {selectedHod.payScale && (
-                    <div>
-                      <span className="text-xs font-semibold text-gray-500">Pay Scale</span>
-                      <p className="text-sm text-gray-800 font-medium">{selectedHod.payScale}</p>
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-xs font-semibold text-gray-500">Status</span>
-                    <p className="text-sm text-gray-800 font-medium">{selectedHod.status || 'N/A'}</p>
-                  </div>
-                  {selectedHod.createdAt && (
-                    <div>
-                      <span className="text-xs font-semibold text-gray-500">Created Date</span>
-                      <p className="text-sm text-gray-800 font-medium">{formatDate(selectedHod.createdAt)}</p>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -418,19 +463,19 @@ const Hods = () => {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-red-50">
               <AlertTriangle size={24} className="text-red-600" />
-              <h3 className="text-lg font-bold text-gray-800">Delete HOD</h3>
+              <h3 className="text-lg font-bold text-gray-800">Remove HOD Designation</h3>
             </div>
 
             <div className="px-6 py-6">
-              <p className="text-gray-600 text-sm">Are you sure you want to delete {selectedHod.name}? This will remove them from the HOD role but they will still exist as a teacher.</p>
+              <p className="text-gray-600 text-sm">Are you sure you want to remove HOD designation from <strong>{selectedHod.name}</strong>? They will be demoted back to a regular Teacher profile and will not be deleted from the system.</p>
             </div>
 
             <div className="flex gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
               <button
-                onClick={handleDeleteConfirm}
+                onClick={handleRemoveHodConfirm}
                 className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm"
               >
-                Delete
+                Remove Role
               </button>
               <button
                 onClick={() => { setShowDeleteModal(false); setSelectedHod(null); }}

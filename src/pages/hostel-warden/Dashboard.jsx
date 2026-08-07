@@ -2,22 +2,33 @@ import { useState, useEffect } from 'react';
 import { ShieldAlert, Users, Bed, CheckSquare, RefreshCw, Clipboard, Zap, Landmark, UserMinus } from 'lucide-react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosInstance';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const HCReact = HighchartsReact.default || HighchartsReact;
 
 const HostelWardenDashboard = () => {
+  if (!checkPermission('View Hostels')) {
+    return <AccessDenied />;
+  }
   const [data, setData] = useState({
     totalCapacity: 0,
     occupiedBeds: 0,
     availableBeds: 0,
-    hostelStudents: 0
+    hostelStudents: 0,
+    activeLeaves: 0,
+    pendingLeaves: 0,
+    todayComplaints: 0
   });
 
   const [allocations, setAllocations] = useState([]);
+  const [checkInOutLogs, setCheckInOutLogs] = useState([]);
   const [blockCategories, setBlockCategories] = useState([]);
   const [blockOccupied, setBlockOccupied] = useState([]);
   const [blockAvailable, setBlockAvailable] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchHostelData();
@@ -25,24 +36,27 @@ const HostelWardenDashboard = () => {
 
   const fetchHostelData = async () => {
     try {
-      const token = localStorage.getItem('admin_token');
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/hostel/rooms`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      setLoading(true);
+      // Fetch rooms and allocations
+      const resRooms = await axiosInstance.get('/hostel/rooms');
+      // Fetch dashboard stats
+      const resStats = await axiosInstance.get('/hostel/dashboard/stats');
       
-      const { rooms, allocations, blockData } = res.data;
+      const { rooms, allocations: recentAllocations, blockData } = resRooms.data;
+      const { stats, checkInOutLogs: recentLogs } = resStats.data;
       
-      const capacity = rooms.reduce((acc, r) => acc + r.capacity, 0);
-      const occupied = rooms.reduce((acc, r) => acc + r.occupancy, 0);
-
       setData({
-        totalCapacity: capacity,
-        occupiedBeds: occupied,
-        availableBeds: capacity - occupied,
-        hostelStudents: occupied
+        totalCapacity: stats.totalCapacity,
+        occupiedBeds: stats.totalOccupied,
+        availableBeds: stats.available,
+        hostelStudents: stats.totalOccupied,
+        activeLeaves: stats.activeLeaves,
+        pendingLeaves: stats.pendingLeaves,
+        todayComplaints: stats.todayComplaints
       });
       
-      setAllocations(allocations || []);
+      setAllocations(recentAllocations || []);
+      setCheckInOutLogs(recentLogs || []);
       
       const categories = Object.keys(blockData || {});
       const occupiedSeries = categories.map(c => blockData[c].occupied);
@@ -52,7 +66,9 @@ const HostelWardenDashboard = () => {
       setBlockOccupied(occupiedSeries);
       setBlockAvailable(availableSeries);
     } catch (error) {
-      console.error('Error fetching hostel data:', error);
+      console.error('Error fetching hostel dashboard data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,14 +77,10 @@ const HostelWardenDashboard = () => {
     { label: 'Occupied Beds', value: `${data.occupiedBeds} Beds`, icon: Bed, color: 'bg-green-50', iconColor: 'text-green-500' },
     { label: 'Available Beds', value: `${data.availableBeds} Beds`, icon: Bed, color: 'bg-emerald-50', iconColor: 'text-emerald-500' },
     { label: 'Hostel Students', value: `${data.hostelStudents}`, icon: Users, color: 'bg-cyan-50', iconColor: 'text-cyan-500' },
-    { label: 'Students Present', value: '0', icon: CheckSquare, color: 'bg-indigo-50', iconColor: 'text-indigo-500' },
-    { label: 'Students on Leave', value: '0', icon: UserMinus, color: 'bg-orange-50', iconColor: 'text-orange-500' },
-    { label: 'Outing Requests', value: '0 Pending', icon: Clipboard, color: 'bg-yellow-50', iconColor: 'text-yellow-600' },
-    { label: 'Pending Complaints', value: '0 Open', icon: ShieldAlert, color: 'bg-red-50', iconColor: 'text-red-500' },
-    { label: 'Visitors Today', value: '0', icon: Users, color: 'bg-purple-50', iconColor: 'text-purple-500' },
-    { label: 'Maintenance Pending', value: '0 Tasks', icon: Zap, color: 'bg-amber-50', iconColor: 'text-amber-500' },
-    { label: 'Fee Defaulters', value: '0 Students', icon: Landmark, color: 'bg-rose-50', iconColor: 'text-rose-500' },
-    { label: 'Upcoming Check-Outs', value: '0', icon: RefreshCw, color: 'bg-pink-50', iconColor: 'text-pink-500' },
+    { label: 'Students on Leave', value: `${data.activeLeaves}`, icon: UserMinus, color: 'bg-orange-50', iconColor: 'text-orange-500' },
+    { label: 'Outing/Leave Req.', value: `${data.pendingLeaves} Pending`, icon: Clipboard, color: 'bg-yellow-50', iconColor: 'text-yellow-600' },
+    { label: 'Today Complaints', value: `${data.todayComplaints} Open`, icon: ShieldAlert, color: 'bg-red-50', iconColor: 'text-red-500' },
+    { label: 'Recent Logs', value: `${checkInOutLogs.length}`, icon: RefreshCw, color: 'bg-purple-50', iconColor: 'text-purple-500' }
   ];
 
   const occupancyOptions = {
@@ -84,9 +96,13 @@ const HostelWardenDashboard = () => {
     credits: { enabled: false }
   };
 
+  if (loading) {
+    return <SkeletonLoader type="table" rows={5} cols={5} />;
+  }
+
   return (
     <div className="space-y-6 font-['Inter']">
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
@@ -112,32 +128,35 @@ const HostelWardenDashboard = () => {
         </div>
 
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-[14px] font-bold text-gray-800 mb-4 font-semibold uppercase tracking-wider">Pending Leave & Outing Approvals</h3>
-          <div className="space-y-3">
-             <div className="p-3 bg-gray-50 rounded-lg text-[13px] border border-gray-100 text-gray-500">
-               No pending leaves found.
-             </div>
+          <h3 className="text-[14px] font-bold text-gray-800 mb-4 font-semibold uppercase tracking-wider">Recent Check-In/Out Logs</h3>
+          <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            {checkInOutLogs.length > 0 ? checkInOutLogs.map((log, idx) => (
+              <div key={idx} className="p-3 bg-gray-50 rounded-lg text-[13px] border border-gray-100 flex justify-between items-center">
+                <div>
+                  <div className="font-bold text-gray-800">{log.studentId?.studentName || 'Unknown'}</div>
+                  <div className="text-[11px] text-gray-500">{new Date(log.dateTime).toLocaleString()}</div>
+                </div>
+                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${log.type === 'Check-In' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {log.type}
+                </span>
+              </div>
+            )) : (
+               <div className="p-3 bg-gray-50 rounded-lg text-[13px] border border-gray-100 text-gray-500">
+                 No recent logs found.
+               </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-[14px] font-bold text-gray-800 mb-4 font-semibold uppercase tracking-wider">Room Maintenance Complaints</h3>
-          <div className="space-y-3">
-             <div className="p-3 bg-gray-50 rounded-lg text-[13px] border border-gray-100 text-gray-500">
-               No open complaints found.
-             </div>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h3 className="text-[14px] font-bold text-gray-800 mb-4 font-semibold uppercase tracking-wider">Recent Allocations</h3>
           <div className="space-y-3">
             {allocations.length > 0 ? allocations.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <div key={idx} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100">
                 <div>
-                  <h4 className="text-[13px] font-bold text-gray-800">{item.studentId?.name || 'Unknown'}</h4>
+                  <h4 className="text-[13px] font-bold text-gray-800">{item.studentId?.studentName || 'Unknown'} ({item.studentId?.studentId || 'N/A'})</h4>
                   <p className="text-[11px] text-gray-500">{item.roomId?.blockName} - {item.roomId?.roomNumber}</p>
                 </div>
                 <div className="text-right">
@@ -160,9 +179,10 @@ const HostelWardenDashboard = () => {
           <div className="space-y-3">
             {[
               { role: 'Campus Security Gate 1', contact: '+91 9988776655' },
-              { role: 'Local Hospital / Ambulance', contact: '0265-223344' }
+              { role: 'Local Hospital / Ambulance', contact: '0265-223344' },
+              { role: 'Hostel Maintenance Head', contact: '+91 8877665544' }
             ].map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg text-[13px]">
+              <div key={idx} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg text-[13px] border border-gray-100">
                 <span className="font-semibold text-gray-700">{item.role}</span>
                 <span className="font-bold text-[#0A6C54]">{item.contact}</span>
               </div>

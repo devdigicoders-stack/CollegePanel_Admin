@@ -3,6 +3,8 @@ import { Search, Plus, Edit2, Trash2, Save, X, RefreshCw, ChevronDown, AlertTria
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
+import { checkPermission } from '../../utils/checkPermission';
+import AccessDenied from '../../components/AccessDenied';
 
 const CATEGORY_LABELS = {
   generalSeats: 'General',
@@ -23,10 +25,26 @@ const CATEGORY_COLORS = {
 };
 
 const SeatManagement = () => {
+  if (!checkPermission('View Admissions')) {
+    return <AccessDenied />;
+  }
+  const currentYear = new Date().getFullYear();
+  const dynamicSessions = [
+    `${currentYear - 1}-${(currentYear).toString().slice(-2)}`,
+    `${currentYear}-${(currentYear + 1).toString().slice(-2)}`,
+    `${currentYear + 1}-${(currentYear + 2).toString().slice(-2)}`,
+    `${currentYear + 2}-${(currentYear + 3).toString().slice(-2)}`
+  ];
+
   const [seatData, setSeatData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState({ totalSeats: 0, filled: 0, available: 0, courses: 0 });
   const [sessions, setSessions] = useState([]);
+  
+  // Dynamic Data States
+  const [courses, setCourses] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  
   const [selectedSession, setSelectedSession] = useState('');
   const [search, setSearch] = useState('');
   const [showConfigModal, setShowConfigModal] = useState(false);
@@ -72,10 +90,24 @@ const SeatManagement = () => {
     }
   }, []);
 
+  const fetchDynamicData = useCallback(async () => {
+    try {
+      const [courseRes, deptRes] = await Promise.all([
+        axiosInstance.get('/academics/courses'),
+        axiosInstance.get('/academics/departments')
+      ]);
+      setCourses(courseRes.data || []);
+      setDepartments(deptRes.data || []);
+    } catch (error) {
+      console.error('Error fetching dynamic data', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchSeatData();
     fetchSessions();
-  }, [fetchSeatData, fetchSessions]);
+    fetchDynamicData();
+  }, [fetchSeatData, fetchSessions, fetchDynamicData]);
 
   const openConfigModal = (seat = null) => {
     if (seat) {
@@ -337,15 +369,46 @@ const SeatManagement = () => {
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto flex-1">
               <div>
                 <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Course Name *</label>
-                <input type="text" value={configForm.courseName} onChange={e => setConfigForm({ ...configForm, courseName: e.target.value })} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" placeholder="e.g. Diploma in CE" />
+                <select 
+                  value={configForm.courseName} 
+                  onChange={e => {
+                    const selectedCourseName = e.target.value;
+                    const courseObj = courses.find(c => c.name === selectedCourseName);
+                    
+                    setConfigForm(prev => ({ 
+                      ...prev, 
+                      courseName: selectedCourseName,
+                      // Auto-fill department if course has it and it's populated
+                      ...(courseObj?.department?.name && { department: courseObj.department.name })
+                    }));
+                  }} 
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                >
+                  <option value="">Select Course</option>
+                  {courses.map(c => <option key={c._id || c.name} value={c.name}>{c.name}</option>)}
+                </select>
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Department</label>
-                <input type="text" value={configForm.department} onChange={e => setConfigForm({ ...configForm, department: e.target.value })} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" placeholder="e.g. Computer Engineering" />
+                <select 
+                  value={configForm.department} 
+                  onChange={e => setConfigForm({ ...configForm, department: e.target.value })} 
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                >
+                  <option value="">Select Department</option>
+                  {departments.map(d => <option key={d._id || d.name} value={d.name}>{d.name}</option>)}
+                </select>
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Academic Session *</label>
-                <input type="text" value={configForm.academicSession} onChange={e => setConfigForm({ ...configForm, academicSession: e.target.value })} className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" placeholder="e.g. 2025-26" />
+                <select 
+                  value={configForm.academicSession} 
+                  onChange={e => setConfigForm({ ...configForm, academicSession: e.target.value })} 
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                >
+                  <option value="">Select Session</option>
+                  {dynamicSessions.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Total Seats *</label>

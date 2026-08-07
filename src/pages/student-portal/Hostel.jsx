@@ -1,33 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldAlert, Plus, CheckCircle, Home } from 'lucide-react';
+import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
-
-const initialOutings = [
-  { id: 1, type: 'Temporary Outing', purpose: 'Purchase drawing board tools', outTime: '11:00 AM', inTime: '01:30 PM', status: 'Returned' },
-];
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const Hostel = () => {
-  const [outings, setOutings] = useState(initialOutings);
+  const [allocation, setAllocation] = useState(null);
+  const [outings, setOutings] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newOuting, setNewOuting] = useState({
-    type: 'Temporary Outing',
+    type: 'Outing',
     purpose: '',
+    fromDate: '',
+    toDate: ''
   });
 
-  const handleApply = (e) => {
-    e.preventDefault();
-    const itemToAdd = {
-      id: outings.length + 1,
-      type: newOuting.type,
-      purpose: newOuting.purpose,
-      outTime: '-',
-      inTime: '-',
-      status: 'Pending Warden Approval'
-    };
-    setOutings([itemToAdd, ...outings]);
-    setShowModal(false);
-    toast.success('Outing Pass request submitted to Warden!');
+  useEffect(() => {
+    fetchHostelDetails();
+  }, []);
+
+  const fetchHostelDetails = async () => {
+    try {
+      const res = await axiosInstance.get('/student-portal/hostel');
+      setAllocation(res.data.allocation);
+      
+      const combined = [
+        ...(res.data.leaves || []).map(l => ({ ...l, recordType: 'Leave' })),
+        ...(res.data.gatepasses || []).map(g => ({ ...g, recordType: 'Gatepass' }))
+      ].sort((a, b) => new Date(b.createdAt || b.fromDate || b.passDate) - new Date(a.createdAt || a.fromDate || a.passDate));
+      
+      setOutings(combined);
+    } catch (error) {
+      toast.error('Failed to fetch hostel details');
+    } finally { setLoading(false); }
   };
+
+  const handleApply = async (e) => {
+    e.preventDefault();
+    try {
+      if (!newOuting.purpose.trim()) {
+        return toast.error('Please enter a valid reason');
+      }
+      if (!newOuting.fromDate || !newOuting.toDate) {
+        return toast.error('Please select both From and To dates/times');
+      }
+      if (new Date(newOuting.toDate) <= new Date(newOuting.fromDate)) {
+        return toast.error('Return time must be after leaving time');
+      }
+      await axiosInstance.post('/student-portal/leaves', {
+        reason: newOuting.purpose,
+        duration: newOuting.type,
+        fromDate: newOuting.fromDate,
+        toDate: newOuting.toDate
+      });
+      toast.success('Outing/Leave Pass request submitted to Warden!');
+      setShowModal(false);
+      setNewOuting({ type: 'Outing', purpose: '', fromDate: '', toDate: '' });
+      fetchHostelDetails(); // Refresh list
+    } catch (error) {
+      toast.error('Failed to apply for outing');
+    } finally { setLoading(false); }
+  };
+
+  
+  if (loading) {
+    return (
+      <div className="p-6">
+        <SkeletonLoader type="table" rows={6} cols={5} />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -41,34 +84,50 @@ const Hostel = () => {
         </button>
       </div>
 
-      <div className="p-6 space-y-6 flex-1 overflow-y-auto max-w-3xl">
+      <div className="p-6 space-y-6 flex-1 overflow-y-auto">
         <div className="p-5 border border-gray-100 rounded-xl bg-gray-50/50 flex items-center gap-4 shadow-sm">
           <div className="w-12 h-12 rounded-xl bg-[#0A6C54]/10 text-[#0A6C54] flex items-center justify-center">
             <Home size={24} />
           </div>
           <div>
             <h4 className="font-bold text-gray-800 text-[14px]">Room Allocation</h4>
-            <p className="text-[12px] text-gray-500 mt-0.5">Block A - Room 102 | Bed B (Under Warden Rawat)</p>
+            {allocation ? (
+              <p className="text-[12px] text-gray-500 mt-0.5">
+                Block {allocation.roomId?.block} - Room {allocation.roomId?.roomNo} | Floor {allocation.roomId?.floor} (Allocated on {new Date(allocation.allotmentDate).toLocaleDateString()})
+              </p>
+            ) : (
+              <p className="text-[12px] text-gray-500 mt-0.5">No active hostel allocation found.</p>
+            )}
           </div>
         </div>
 
         <div className="space-y-4">
           <h3 className="font-bold text-gray-800 text-[14px]">My Outing & Leave History</h3>
-          {outings.map(item => (
-            <div key={item.id} className="p-4 border border-gray-100 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/20 shadow-sm text-[13px]">
+          {outings.length > 0 ? outings.map((item, idx) => (
+            <div key={idx} className="p-4 border border-gray-100 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/20 shadow-sm text-[13px]">
               <div>
-                <h4 className="font-bold text-gray-800">{item.type}</h4>
-                <p className="text-[11px] text-gray-500 mt-0.5">Purpose: {item.purpose}</p>
-                <p className="text-[11px] text-gray-400 mt-1">Timings: {item.outTime} to {item.inTime}</p>
+                <h4 className="font-bold text-gray-800">{item.type || item.recordType}</h4>
+                <p className="text-[11px] text-gray-500 mt-0.5">Purpose: {item.reason || item.purpose}</p>
+                {item.recordType === 'Leave' ? (
+                  <p className="text-[11px] text-gray-400 mt-1">From: {new Date(item.fromDate).toLocaleDateString()} to {new Date(item.toDate).toLocaleDateString()}</p>
+                ) : (
+                  <p className="text-[11px] text-gray-400 mt-1">Pass Date: {new Date(item.passDate || item.createdAt).toLocaleDateString()} | Out: {item.outTime || '-'} In: {item.inTime || '-'}</p>
+                )}
               </div>
 
               <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold md:self-center self-start ${
-                item.status === 'Returned' ? 'bg-gray-50 text-gray-600 border border-gray-200' : 'bg-yellow-50 text-yellow-700 border border-yellow-100'
+                item.status === 'Returned' || item.status === 'Approved' ? 'bg-green-50 text-green-700 border border-green-100' : 
+                item.status === 'Pending' ? 'bg-yellow-50 text-yellow-700 border border-yellow-100' : 
+                'bg-gray-50 text-gray-600 border border-gray-200'
               }`}>
                 {item.status}
               </span>
             </div>
-          ))}
+          )) : (
+            <div className="text-gray-500 text-[13px] p-4 bg-gray-50 rounded-xl border border-gray-100">
+              No outing or leave history found.
+            </div>
+          )}
         </div>
       </div>
 
@@ -86,11 +145,34 @@ const Hostel = () => {
                 <select 
                   value={newOuting.type} 
                   onChange={(e) => setNewOuting({...newOuting, type: e.target.value})}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
                 >
-                  <option value="Temporary Outing">Temporary Outing (Under 4 hours)</option>
-                  <option value="Night Outing Pass">Night Outing Pass (Home visit)</option>
+                  <option value="Outing">Temporary Outing (Hours)</option>
+                  <option value="Leave">Night Outing Pass / Leave (Days)</option>
                 </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-600 mb-1">From Date & Time</label>
+                  <input 
+                    type={newOuting.type === 'Outing' ? 'datetime-local' : 'date'}
+                    required
+                    value={newOuting.fromDate}
+                    onChange={(e) => setNewOuting({...newOuting, fromDate: e.target.value})}
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-600 mb-1">To Date & Time</label>
+                  <input 
+                    type={newOuting.type === 'Outing' ? 'datetime-local' : 'date'}
+                    required
+                    value={newOuting.toDate}
+                    onChange={(e) => setNewOuting({...newOuting, toDate: e.target.value})}
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  />
+                </div>
               </div>
 
               <div>
