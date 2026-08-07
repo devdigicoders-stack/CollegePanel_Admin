@@ -4,6 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { checkPermission } from '../../utils/checkPermission';
 import AccessDenied from '../../components/AccessDenied';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const callStatusColors = {
   'Interested': 'bg-green-100 text-green-700',
@@ -27,6 +28,7 @@ const FollowUps = () => {
     return <AccessDenied />;
   }
   const [followUps, setFollowUps] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showModal, setShowModal] = useState(false);
@@ -41,6 +43,7 @@ const FollowUps = () => {
 
   const fetchFollowUps = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('admin_token');
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/followups`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -49,6 +52,8 @@ const FollowUps = () => {
       setFollowUps(res.data);
     } catch (error) {
       console.error('Error fetching follow-ups', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -172,7 +177,9 @@ const FollowUps = () => {
             </tr>
           </thead>
           <tbody>
-            {filtered.length > 0 ? filtered.map(f => (
+            {loading ? (
+              <SkeletonLoader type="table" rows={6} cols={9} />
+            ) : filtered.length > 0 ? filtered.map(f => (
               <tr key={f._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                 <td className="py-3 px-4 text-[13px] font-semibold text-[#0A6C54]">{f.followUpNo}</td>
                 <td className="py-3 px-4">

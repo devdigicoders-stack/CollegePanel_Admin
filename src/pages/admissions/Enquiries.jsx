@@ -4,6 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { checkPermission } from '../../utils/checkPermission';
 import AccessDenied from '../../components/AccessDenied';
+import SkeletonLoader from '../../components/SkeletonLoader';
 
 const statusColors = {
   'New': 'bg-blue-100 text-blue-700',
@@ -30,6 +31,7 @@ const Enquiries = () => {
     return <AccessDenied />;
   }
   const [enquiries, setEnquiries] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterSource, setFilterSource] = useState('All');
@@ -46,6 +48,7 @@ const Enquiries = () => {
 
   const fetchEnquiries = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('admin_token');
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/enquiries`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -54,6 +57,8 @@ const Enquiries = () => {
       setEnquiries(res.data);
     } catch (error) {
       console.error('Error fetching enquiries', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -194,7 +199,9 @@ const Enquiries = () => {
             </tr>
           </thead>
           <tbody>
-            {enquiries.length > 0 ? enquiries.map(e => (
+            {loading ? (
+              <SkeletonLoader type="table" rows={6} cols={8} />
+            ) : enquiries.length > 0 ? enquiries.map(e => (
               <tr key={e._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                 <td className="py-3 px-4 text-[13px] font-semibold text-[#0A6C54]">{e.enquiryNo}</td>
                 <td className="py-3 px-4">
