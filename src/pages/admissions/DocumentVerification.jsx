@@ -51,8 +51,18 @@ const DocumentVerification = () => {
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // Refresh data after update
-      fetchAdmissions();
+      // Optimistically update the state to prevent full refresh
+      setAdmissions(prev => prev.map(a => {
+        if (a._id === admissionId) {
+          return {
+            ...a,
+            documents: a.documents.map(d => 
+              d._id === docId ? { ...d, status: newStatus } : d
+            )
+          };
+        }
+        return a;
+      }));
     } catch (error) {
       console.error('Error updating document status', error);
       alert('Failed to update document status');
@@ -126,21 +136,24 @@ const DocumentVerification = () => {
                             )}
                             <button
                               onClick={() => handleDocStatus(student._id, doc._id, 'Verified')}
-                              className="p-1.5 bg-green-50 hover:bg-green-100 rounded-md transition-colors" title="Verify"
+                              disabled={doc.status === 'Verified'}
+                              className={`p-1.5 rounded-md transition-colors ${doc.status === 'Verified' ? 'bg-gray-100 cursor-not-allowed' : 'bg-green-50 hover:bg-green-100'}`} title="Verify"
                             >
-                              <CheckCircle size={14} className="text-green-600" />
+                              <CheckCircle size={14} className={doc.status === 'Verified' ? 'text-gray-400' : 'text-green-600'} />
                             </button>
                             <button
                               onClick={() => handleDocStatus(student._id, doc._id, 'Rejected')}
-                              className="p-1.5 bg-red-50 hover:bg-red-100 rounded-md transition-colors" title="Reject"
+                              disabled={doc.status === 'Rejected'}
+                              className={`p-1.5 rounded-md transition-colors ${doc.status === 'Rejected' ? 'bg-gray-100 cursor-not-allowed' : 'bg-red-50 hover:bg-red-100'}`} title="Reject"
                             >
-                              <XCircle size={14} className="text-red-600" />
+                              <XCircle size={14} className={doc.status === 'Rejected' ? 'text-gray-400' : 'text-red-600'} />
                             </button>
                             <button
                               onClick={() => handleDocStatus(student._id, doc._id, 'Correction Required')}
-                              className="p-1.5 bg-yellow-50 hover:bg-yellow-100 rounded-md transition-colors" title="Request Correction"
+                              disabled={doc.status === 'Correction Required'}
+                              className={`p-1.5 rounded-md transition-colors ${doc.status === 'Correction Required' ? 'bg-gray-100 cursor-not-allowed' : 'bg-yellow-50 hover:bg-yellow-100'}`} title="Request Correction"
                             >
-                              <AlertCircle size={14} className="text-yellow-600" />
+                              <AlertCircle size={14} className={doc.status === 'Correction Required' ? 'text-gray-400' : 'text-yellow-600'} />
                             </button>
                           </div>
                         )}

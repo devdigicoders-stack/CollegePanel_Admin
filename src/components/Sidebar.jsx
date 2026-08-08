@@ -7,8 +7,9 @@ import {
   Building2, PieChart,
   ClipboardList, AlertCircle, LogOut, ChevronDown, ChevronRight,
   DollarSign, Receipt, CreditCard, TrendingDown, TrendingUp,
-  BookOpen, Award, RotateCcw, ShoppingCart, Landmark, BookMarked,CheckSquare ,Bed,ShieldAlert,
-  Briefcase, Calendar} from 'lucide-react';
+  BookOpen, Award, RotateCcw, ShoppingCart, Landmark,  CheckSquare, Wrench, Shield, Home, Briefcase, 
+  MapPin, CheckCircle, UserCircle2, Calculator, Bed, BookMarked, ShieldAlert, Calendar, Clock
+} from 'lucide-react';
 
 export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
   const location = useLocation();
@@ -24,9 +25,23 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
 
   const menuGroups = [
     {
-      name: 'Main',
+      name: 'MySpace',
+      icon: UserCircle2,
+      items: [
+        { name: 'My Attendance', icon: MapPin, path: '/my-attendance' }
+      ]
+    },
+    {
+      name: 'Academic Management',
       items: [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+      ]
+    },
+    {
+      name: 'Self Service',
+      icon: UserSquare2,
+      items: [
+        { name: 'My Payroll', icon: FileText, path: '/payroll/my-payroll' },
       ]
     },
     {
@@ -93,9 +108,21 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
       items: [
         { name: 'Employees', icon: Users, path: '/employees' },
         { name: 'Users & Roles', icon: Settings, path: '/roles' },
+        { name: 'Punch Logs', icon: MapPin, path: '/punch-logs' },
+        { name: 'Attendance Settings', icon: Clock, path: '/attendance-settings' },
         { name: 'Meetings', icon: Users, path: '/meetings' },
         { name: 'Notice Board', icon: ClipboardList, path: '/notice' },
         { name: 'Complaints', icon: AlertCircle, path: '/complaints' },
+      ]
+    },
+    {
+      name: 'Payroll',
+      icon: DollarSign,
+      items: [
+        { name: 'Salary Structures', icon: Settings, path: '/payroll/structures' },
+        { name: 'Employee Salary', icon: Users, path: '/payroll/employee-salary' },
+        { name: 'Generate Payroll', icon: Calculator, path: '/payroll/generate' },
+        { name: 'Payroll History', icon: FileText, path: '/payroll/history' },
       ]
     },
     {
@@ -229,7 +256,13 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
     '/financial/receipts': ['Generate Receipt', 'View Fees'],
     '/financial/cash-bank': ['View Fee Reports'],
     '/financial/ledger': ['View Fee Reports'],
+    '/financial/ledger': ['View Fee Reports'],
     '/financial/reports': ['View Fee Reports'],
+    // Payroll items
+    '/payroll/structures': ['Manage Salary Structure'],
+    '/payroll/employee-salary': ['Assign Salary'],
+    '/payroll/generate': ['Generate Payroll'],
+    '/payroll/history': ['Approve Payroll', 'View Payroll'],
     // HR & Admin items
     '/employees': ['View Employees', 'Add Employee', 'Edit Employee'],
     '/roles': ['Manage Roles', 'Manage Permissions'],
@@ -304,10 +337,12 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
     // Group to Permission mapping
     const groupPermissionCategories = {
       'Main': ['View Dashboard', 'View Analytics'],
+      'Self Service': ['*'], // Accessible to any logged in non-student user
       'Admissions': ['View Admissions', 'Add Admission', 'Edit Admission', 'Delete Admission', 'Approve Admission'],
       'Financial': ['View Fees', 'Collect Fees', 'Generate Receipt', 'View Fee Reports', 'Manage Fee Structure'],
       'Academic': ['View Students', 'Add Student', 'Edit Student', 'Delete Student', 'Export Students', 'View Teachers', 'Add Teacher', 'Edit Teacher', 'Delete Teacher', 'Assign Subjects', 'View Courses', 'Manage Courses', 'View Departments', 'Manage Departments', 'View Subjects', 'Manage Subjects', 'View Sections', 'Manage Sections', 'View Attendance', 'Mark Attendance', 'Edit Attendance', 'View Attendance Reports', 'View Exams', 'Create Exam', 'Edit Exam', 'Delete Exam', 'Enter Marks', 'View Results'],
       'HR & Admin': ['View Employees', 'Add Employee', 'Edit Employee', 'Delete Employee', 'View Credentials', 'Manage Roles', 'Manage Permissions', 'System Configuration'],
+      'Payroll': ['View Payroll', 'Manage Salary Structure', 'Assign Salary', 'Generate Payroll', 'Approve Payroll'],
       'Library': ['View Books', 'Add Book', 'Edit Book', 'Delete Book', 'Issue Book', 'Return Book'],
       'Hostel Warden': ['View Hostels', 'Manage Rooms', 'Manage Allocations', 'View Hostel Reports'],
       'Security': ['View Security Dashboard', 'Log Student Entry/Exit', 'Scan Gate Pass', 'Log Vehicle Registry', 'Log Security Incident'],
@@ -317,7 +352,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
 
     const categoryPermissions = groupPermissionCategories[group.name];
     if (categoryPermissions) {
-      const hasPermission = categoryPermissions.some(p => userPermissions.includes(p));
+      const hasPermission = categoryPermissions.includes('*') || categoryPermissions.some(p => userPermissions.includes(p));
       if (hasPermission) {
         // Filter individual items within the group
         const filteredItems = group.items.filter(item => hasItemPermission(item.path));

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Eye, MoreVertical, ChevronDown, Download, X, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Search, Edit2, Eye, MoreVertical, ChevronDown, Download, X, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
@@ -127,11 +127,6 @@ const Applications = () => {
     }
   };
 
-  const openAddModal = () => {
-    setEditingId(null);
-    setFormData({ name: '', mobile: '', email: '', parentName: '', course: 'Diploma in CE', category: 'General', academicSession: '2024-25', admissionType: 'Regular', status: 'Pending Verification' });
-    setShowModal(true);
-  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -143,9 +138,6 @@ const Applications = () => {
         <div className="flex gap-3">
           <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">
             <Download size={15} /> Export
-          </button>
-          <button onClick={openAddModal} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2">
-            <Plus size={16} /> New Application
           </button>
         </div>
       </div>

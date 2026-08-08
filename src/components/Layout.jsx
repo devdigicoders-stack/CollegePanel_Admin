@@ -60,25 +60,27 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen bg-[#F8F9FA] font-['Inter'] overflow-hidden relative">
+    <div className="flex h-screen bg-[#F8F9FA] font-['Inter'] overflow-hidden relative print:h-auto print:overflow-visible print:bg-white">
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div 
-          className="md:hidden fixed inset-0 bg-black/50 z-40" 
+          className="md:hidden fixed inset-0 bg-black/50 z-40 print:hidden" 
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
       
       <div className={`
-        fixed md:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out h-full
+        fixed md:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out h-full print:hidden
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <Sidebar key={permissionsKey} isOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} onLogoutClick={() => setShowLogoutModal(true)} />
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden w-full">
-        <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#F8F9FA] p-4 md:p-6">
+      <div className="flex-1 flex flex-col overflow-hidden w-full print:overflow-visible">
+        <div className="print:hidden">
+          <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+        </div>
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#F8F9FA] p-4 md:p-6 print:overflow-visible print:bg-white print:p-0">
           {children}
         </main>
       </div>

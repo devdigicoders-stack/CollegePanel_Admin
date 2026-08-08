@@ -87,7 +87,13 @@ const permissionCategories = [
     name: 'Fees',
     icon: DollarSign,
     color: 'green',
-    permissions: ['View Fees', 'Collect Fees', 'Generate Receipt', 'View Fee Reports', 'Manage Fee Structure', 'Add Discount', 'Approve Refund', 'View Payroll', 'Manage Payroll']
+    permissions: ['View Fees', 'Collect Fees', 'Generate Receipt', 'View Fee Reports', 'Manage Fee Structure', 'Add Discount', 'Approve Refund']
+  },
+  {
+    name: 'Payroll Management',
+    icon: DollarSign,
+    color: 'emerald',
+    permissions: ['View Payroll', 'Manage Salary Structure', 'Assign Salary', 'Generate Payroll', 'Approve Payroll']
   },
   {
     name: 'Attendance',

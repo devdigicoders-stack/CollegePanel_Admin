@@ -22,6 +22,8 @@ const Receipts = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
+  const [collegeDetails, setCollegeDetails] = useState(null);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -31,6 +33,7 @@ const Receipts = () => {
       if (filterStatus !== 'All') params.status = filterStatus;
       const res = await axiosInstance.get('/fees/receipts', { params });
       setData(res.data?.data || res.data || []);
+      if (res.data?.college) setCollegeDetails(res.data.college);
     } catch (error) {
       toast.error('Failed to fetch receipts');
     } finally {
@@ -65,7 +68,8 @@ const Receipts = () => {
   });
 
   return (
-    <div className={`bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter'] ${printData ? 'print:hidden' : ''}`}>
+    <div className="h-full flex flex-col font-['Inter'] print:h-auto print:block">
+      <div className={`bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col flex-1 ${printData ? 'print:hidden' : ''}`}>
       {/* Header */}
       <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -212,6 +216,8 @@ const Receipts = () => {
         </div>
       )}
 
+      </div>
+
       {/* Awesome Printable Receipt Modal */}
       {printData && (
         <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4 sm:p-6 print:static print:bg-transparent print:p-0 print:block">
@@ -237,9 +243,9 @@ const Receipts = () => {
                 {/* Header */}
                 <div className="flex justify-between items-start border-b border-gray-200 pb-8 mb-8">
                   <div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-[#0A6C54] tracking-tight">DIGITAL COLLEGE</h1>
-                    <p className="text-[13px] text-gray-500 mt-2 font-medium">123 Education Lane, Tech City, 10001</p>
-                    <p className="text-[13px] text-gray-500 mt-0.5 font-medium">Phone: +1 234 567 8900 | Email: accounts@college.edu</p>
+                    <h1 className="text-2xl sm:text-3xl font-black text-[#0A6C54] tracking-tight">{collegeDetails?.collegeName || 'COLLEGE NAME'}</h1>
+                    <p className="text-[13px] text-gray-500 mt-2 font-medium">{collegeDetails?.address || 'College Address'}</p>
+                    <p className="text-[13px] text-gray-500 mt-0.5 font-medium">Phone: {collegeDetails?.contactNumber || 'N/A'} | Email: {collegeDetails?.officialEmail || 'N/A'}</p>
                   </div>
                   <div className="text-right">
                     <h2 className="text-xl sm:text-2xl font-bold text-gray-800 tracking-wider uppercase">{printData.type || 'FEE RECEIPT'}</h2>

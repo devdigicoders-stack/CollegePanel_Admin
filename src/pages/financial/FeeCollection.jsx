@@ -26,11 +26,14 @@ const FeeCollection = () => {
     studentId: '', studentName: '', enrollNo: '', amount: '', mode: 'Cash', status: 'Completed', feeHeads: '', remarks: ''
   });
 
+  const [collegeDetails, setCollegeDetails] = useState(null);
+
   const fetchCollections = async () => {
     setLoadingCollections(true);
     try {
       const res = await axiosInstance.get('/fees/collections');
       setCollections(res.data?.data || res.data || []);
+      if (res.data?.college) setCollegeDetails(res.data.college);
     } catch (error) {
       toast.error('Failed to fetch collections');
     } finally {
@@ -108,8 +111,8 @@ const FeeCollection = () => {
   };
 
   return (
-    <div className={`h-full flex flex-col font-['Inter'] ${printData ? 'print:hidden' : ''}`}>
-      <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col flex-1">
+    <div className="h-full flex flex-col font-['Inter'] print:h-auto print:block">
+      <div className={`bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col flex-1 ${printData ? 'print:hidden' : ''}`}>
         {/* Tabs */}
         <div className="flex border-b border-gray-100 px-6 pt-2">
           {['Collect', 'History'].map(tab => (
@@ -354,9 +357,9 @@ const FeeCollection = () => {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-6 border-b border-gray-200 pb-6 mb-6">
                   <div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-[#0A6C54] tracking-tight">DIGITAL COLLEGE</h1>
-                    <p className="text-[13px] text-gray-500 mt-2 font-medium">123 Education Lane, Tech City, 10001</p>
-                    <p className="text-[13px] text-gray-500 mt-0.5 font-medium">Phone: +1 234 567 8900 | Email: accounts@college.edu</p>
+                    <h1 className="text-2xl sm:text-3xl font-black text-[#0A6C54] tracking-tight">{collegeDetails?.collegeName || 'COLLEGE NAME'}</h1>
+                    <p className="text-[13px] text-gray-500 mt-2 font-medium">{collegeDetails?.address || 'College Address'}</p>
+                    <p className="text-[13px] text-gray-500 mt-0.5 font-medium">Phone: {collegeDetails?.contactNumber || 'N/A'} | Email: {collegeDetails?.officialEmail || 'N/A'}</p>
                   </div>
                   <div className="text-left sm:text-right">
                     <h2 className="text-xl sm:text-2xl font-bold text-gray-800 tracking-wider">FEE RECEIPT</h2>

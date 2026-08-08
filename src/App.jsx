@@ -25,7 +25,17 @@ import LeaveRequests from './pages/LeaveRequests';
 import LessonPlans from './pages/LessonPlans';
 import InternalMarks from './pages/InternalMarks';
 import FacultyAttendance from './pages/FacultyAttendance';
+import PunchLogs from './pages/PunchLogs';
+import MyAttendance from './pages/MyAttendance';
+import AttendanceSettings from './pages/AttendanceSettings';
 import Timetable from './pages/Timetable';
+
+// Payroll Module
+import SalaryStructures from './pages/payroll/SalaryStructures';
+import EmployeeSalary from './pages/payroll/EmployeeSalary';
+import GeneratePayroll from './pages/payroll/GeneratePayroll';
+import PayrollHistory from './pages/payroll/PayrollHistory';
+import MyPayroll from './pages/payroll/MyPayroll';
 import Assignments from './pages/Assignments';
 import StudyMaterials from './pages/StudyMaterials';
 import Meetings from './pages/Meetings';
@@ -209,6 +219,14 @@ function App() {
                 <Route path="/hod" element={<Hods />} />
                 <Route path="/roles" element={<Roles />} />
                 <Route path="/employees" element={<Employees />} />
+                
+                {/* Payroll Routes */}
+                <Route path="/payroll/structures" element={<SalaryStructures />} />
+                <Route path="/payroll/employee-salary" element={<EmployeeSalary />} />
+                <Route path="/payroll/generate" element={<GeneratePayroll />} />
+                <Route path="/payroll/history" element={<PayrollHistory />} />
+                <Route path="/payroll/my-payroll" element={<MyPayroll />} />
+                
                 <Route path="/attendance" element={<Attendance />} />
                 <Route path="/exams" element={<Examinations />} />
                 <Route path="/fees" element={<Fees />} />
@@ -222,7 +240,11 @@ function App() {
                 <Route path="/leave-requests" element={<LeaveRequests />} />
                 <Route path="/lesson-plans" element={<LessonPlans />} />
                 <Route path="/internal-marks" element={<InternalMarks />} />
+                <Route path="/attendance" element={<Attendance />} />
                 <Route path="/faculty-attendance" element={<FacultyAttendance />} />
+                <Route path="/punch-logs" element={<PunchLogs />} />
+                <Route path="/my-attendance" element={<MyAttendance />} />
+                <Route path="/attendance-settings" element={<AttendanceSettings />} />
                 <Route path="/timetable" element={<Timetable />} />
                 <Route path="/assignments" element={<Assignments />} />
                 <Route path="/study-materials" element={<StudyMaterials />} />
