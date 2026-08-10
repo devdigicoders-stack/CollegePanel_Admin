@@ -334,9 +334,9 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
       return null;
     }
 
-    // Group to Permission mapping
     const groupPermissionCategories = {
       'Main': ['View Dashboard', 'View Analytics'],
+      'MySpace': ['*'],
       'Self Service': ['*'], // Accessible to any logged in non-student user
       'Admissions': ['View Admissions', 'Add Admission', 'Edit Admission', 'Delete Admission', 'Approve Admission'],
       'Financial': ['View Fees', 'Collect Fees', 'Generate Receipt', 'View Fee Reports', 'Manage Fee Structure'],
