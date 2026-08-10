@@ -114,9 +114,33 @@ const MyPayroll = () => {
 
       {/* Payslip View Modal */}
       {selectedPayroll && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-xl">
-            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+        <>
+          <style>{`
+            @media print {
+              body * {
+                visibility: hidden;
+              }
+              #payslip-modal, #payslip-modal * {
+                visibility: visible;
+              }
+              #payslip-modal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 20px;
+                background: white !important;
+                display: block !important;
+              }
+              .print-hide {
+                display: none !important;
+              }
+            }
+          `}</style>
+          <div id="payslip-modal" className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] print:max-h-none print:shadow-none flex flex-col shadow-xl">
+              <div className="print-hide p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
               <h3 className="text-[15px] font-bold text-gray-800 flex items-center gap-2"><FileText size={16}/> Payslip Preview</h3>
               <div className="flex gap-2">
                 <button onClick={() => window.print()} className="px-3 py-1.5 bg-gray-900 text-white rounded text-[11px] font-bold flex items-center gap-1"><Download size={12}/> Print</button>
@@ -207,6 +231,7 @@ const MyPayroll = () => {
             </div>
           </div>
         </div>
+      </>
       )}
     </div>
   );
