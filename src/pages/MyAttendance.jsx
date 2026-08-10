@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
-import { Download, Search } from 'lucide-react';
+import { Download } from 'lucide-react';
 import SkeletonLoader from '../components/SkeletonLoader';
 import toast from 'react-hot-toast';
 
@@ -35,12 +35,20 @@ const MyAttendance = () => {
   const downloadCSV = () => {
     if (!reportData || !reportData.dailyLogs) return;
 
-    const headers = ['Date', 'Punch In', 'Punch Out', 'Status'];
+    const headers = ['Date', 'Punch In', 'Punch Out', 'Total Hours', 'Status'];
     const rows = reportData.dailyLogs.map(log => {
       const dateStr = new Date(log.date).toLocaleDateString('en-IN');
       const inStr = log.punchIn ? new Date(log.punchIn).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'N/A';
       const outStr = log.punchOut ? new Date(log.punchOut).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'N/A';
-      return [dateStr, inStr, outStr, log.status];
+      
+      let totalHrsStr = 'N/A';
+      if (log.punchIn && log.punchOut) {
+        const diff = new Date(log.punchOut) - new Date(log.punchIn);
+        const hrs = Math.floor(diff / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        totalHrsStr = `${hrs}h ${mins}m`;
+      }
+      return [dateStr, inStr, outStr, totalHrsStr, log.status];
     });
 
     const csvContent = "data:text/csv;charset=utf-8," 
@@ -146,6 +154,7 @@ const MyAttendance = () => {
                     <th className="px-6 py-4 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Date</th>
                     <th className="px-6 py-4 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Punch In</th>
                     <th className="px-6 py-4 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Punch Out</th>
+                    <th className="px-6 py-4 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Total Hours</th>
                     <th className="px-6 py-4 text-left text-[12px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
                   </tr>
                 </thead>
@@ -165,6 +174,16 @@ const MyAttendance = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-[13px] text-gray-600 font-medium">
                           {log.punchOut ? new Date(log.punchOut).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-[13px] text-gray-600 font-medium">
+                          {log.punchIn && log.punchOut ? (() => {
+                            const diff = new Date(log.punchOut) - new Date(log.punchIn);
+                            const hrs = Math.floor(diff / (1000 * 60 * 60));
+                            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                            return `${hrs}h ${mins}m`;
+                          })() : '-'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
