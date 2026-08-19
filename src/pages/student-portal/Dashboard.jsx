@@ -197,7 +197,7 @@ const StudentDashboard = () => {
                 { label: 'Hostel', icon: Home, color: 'bg-purple-50 text-purple-500', path: '/student/hostel' },
                 { label: 'Materials', icon: BookOpen, color: 'bg-blue-50 text-blue-500', path: '/student/materials' },
                 { label: 'Assignments', icon: FileText, color: 'bg-amber-50 text-amber-600', path: '/student/assignments' },
-                { label: 'Downloads', icon: CheckSquare, color: 'bg-emerald-50 text-emerald-600', path: '/student/downloads' },
+                { label: 'Notices', icon: Bell, color: 'bg-emerald-50 text-emerald-600', path: '/student/notices' },
               ].map((link, i) => {
                 const Icon = link.icon;
                 return (
@@ -216,22 +216,27 @@ const StudentDashboard = () => {
 
           {/* Notices */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex-1">
-            <h3 className="text-[12px] font-black text-gray-700 mb-3 uppercase tracking-wider flex items-center gap-2">
-              <Bell size={13} className="text-orange-500" /> Notices
-            </h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-[12px] font-black text-gray-700 uppercase tracking-wider flex items-center gap-2">
+                <Bell size={13} className="text-orange-500" /> Notices
+              </h3>
+              <Link to="/student/notices" className="text-[10px] text-orange-600 font-bold hover:underline">
+                View All
+              </Link>
+            </div>
             <div className="space-y-2">
               {notices.length > 0 ? notices.map((n, i) => (
-                <div key={i} className="p-3 bg-orange-50/40 border border-orange-100 rounded-xl">
+                <Link key={i} to="/student/notices" className="block p-3 bg-orange-50/40 border border-orange-100 rounded-xl hover:bg-orange-50 transition-colors">
                   <p className="text-[12px] font-bold text-orange-800 leading-tight">{n.title}</p>
-                  {n.description && (
-                    <p className="text-[10px] text-orange-600/70 mt-1 line-clamp-1">{n.description}</p>
+                  {n.details && (
+                    <p className="text-[10px] text-orange-600/70 mt-1 line-clamp-1">{n.details}</p>
                   )}
-                  {n.createdAt && (
+                  {n.dateOfPublishing && (
                     <p className="text-[10px] text-orange-400 mt-1 font-medium">
-                      {new Date(n.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      {new Date(n.dateOfPublishing).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                     </p>
                   )}
-                </div>
+                </Link>
               )) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Bell size={28} className="text-gray-200 mb-2" />

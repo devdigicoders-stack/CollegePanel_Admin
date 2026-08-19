@@ -129,7 +129,7 @@ import StudentStudyMaterials from './pages/student-portal/StudyMaterials';
 import StudentHostel from './pages/student-portal/Hostel';
 import StudentPlacement from './pages/student-portal/Placement';
 import StudentComplaints from './pages/student-portal/Complaints';
-import StudentDownloads from './pages/student-portal/Downloads';
+import StudentNotices from './pages/student-portal/Notices';
 
 function App() {
   return (
@@ -274,7 +274,7 @@ function App() {
                 <Route path="/student/hostel" element={<StudentHostel />} />
                 <Route path="/student/placement" element={<StudentPlacement />} />
                 <Route path="/student/complaints" element={<StudentComplaints />} />
-                <Route path="/student/downloads" element={<StudentDownloads />} />
+                <Route path="/student/notices" element={<StudentNotices />} />
               </Routes>
             </Layout>
           </PrivateRoute>

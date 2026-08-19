@@ -124,7 +124,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         { name: 'Study Materials', icon: BookOpen, path: '/student/materials' },
         { name: 'Assignments', icon: FileText, path: '/student/assignments' },
         { name: 'Hostel Room', icon: Bed, path: '/student/hostel' },
-        { name: 'Downloads', icon: FileText, path: '/student/downloads' },
+        { name: 'Notices', icon: ClipboardList, path: '/student/notices' },
       ]
     },
     {
@@ -150,7 +150,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
     '/internal-marks': ['Enter Marks', 'View Results'],
     '/employees': ['View Employees', 'Add Employee', 'Edit Employee'],
     '/roles': ['Manage Roles', 'Manage Permissions'],
-    '/notice': ['View Employees', 'View Students'],
+    '/notice': ['View Notices', 'Manage Notices'],
     '/complaints': ['View Students', 'View Employees'],
     '/library/dashboard': ['View Books'],
     '/library/books': ['View Books', 'Add Book', 'Edit Book'],
@@ -197,7 +197,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
     'Main': ['View Dashboard', 'View Analytics'],
     'Admissions': ['View Admissions', 'Add Admission', 'Edit Admission', 'Delete Admission', 'Approve Admission'],
     'Academic': ['View Students', 'Add Student', 'Edit Student', 'Delete Student', 'View Teachers', 'Add Teacher', 'Edit Teacher', 'View Courses', 'Manage Courses', 'View Departments', 'View Subjects', 'View Sections', 'Enter Marks', 'View Results'],
-    'HR & Admin': ['View Employees', 'Add Employee', 'Edit Employee', 'Delete Employee', 'Manage Roles', 'Manage Permissions'],
+    'HR & Admin': ['View Employees', 'Add Employee', 'Edit Employee', 'Delete Employee', 'Manage Roles', 'Manage Permissions', 'View Notices', 'Manage Notices'],
     'Library': ['View Books', 'Add Book', 'Edit Book', 'Delete Book', 'Issue Book', 'Return Book'],
     'Hostel': ['View Hostels', 'Manage Rooms', 'Manage Allocations', 'View Hostel Reports'],
     'Security': ['View Security Dashboard', 'Log Student Entry/Exit', 'Scan Gate Pass', 'Log Vehicle Registry', 'Log Security Incident'],

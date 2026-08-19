@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { 
-  Plus, Search, ChevronDown, Eye, Edit2, Trash2, X as XIcon,
-  ChevronLeft, ChevronRight, Calendar, BookOpen, Users, Save, X, Paperclip, Send
+  Plus, Search, ChevronDown, X as XIcon,
+  ChevronLeft, ChevronRight, BookOpen, Paperclip, Send
 } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
@@ -11,9 +11,10 @@ import { checkPermission } from '../utils/checkPermission';
 import AccessDenied from '../components/AccessDenied';
 
 const Notice = () => {
-  if (!checkPermission('View Students') && !checkPermission('View Employees')) {
+  if (!checkPermission('View Notices') && !checkPermission('Manage Notices')) {
     return <AccessDenied />;
   }
+  const canManageNotices = checkPermission('Manage Notices');
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 1 });
@@ -32,7 +33,9 @@ const Notice = () => {
     dateOfPublishing: '',
     details: '',
     status: 'Draft',
-    attachments: []
+    pdfs: [],
+    images: [],
+    link: ''
   });
   const [formLoading, setFormLoading] = useState(false);
   const [departments, setDepartments] = useState([]);
@@ -114,7 +117,11 @@ const Notice = () => {
       dateOfPublishing: '',
       details: '',
       status: 'Draft',
-      attachments: []
+      details: '',
+      status: 'Draft',
+      pdfs: [],
+      images: [],
+      link: ''
     });
     setIsEditing(false);
     setSelectedNotice(null);
@@ -135,8 +142,11 @@ const Notice = () => {
       department: notice.department || '',
       dateOfPublishing: notice.dateOfPublishing ? notice.dateOfPublishing.split('T')[0] : '',
       details: notice.details || '',
+      details: notice.details || '',
       status: notice.status || 'Draft',
-      attachments: notice.attachments || []
+      pdfs: notice.pdfs || [],
+      images: notice.images || [],
+      link: notice.link || ''
     });
     setIsEditing(true);
     setSelectedNotice(notice);
@@ -186,10 +196,20 @@ const Notice = () => {
       payload.append('details', formData.details);
       payload.append('status', formData.status);
 
-      if (formData.attachments && formData.attachments.length > 0) {
-        formData.attachments.forEach(file => {
+      if (formData.link) payload.append('link', formData.link);
+      
+      if (formData.pdfs && formData.pdfs.length > 0) {
+        formData.pdfs.forEach(file => {
           if (file instanceof File) {
-            payload.append('attachments', file);
+            payload.append('pdfs', file);
+          }
+        });
+      }
+      
+      if (formData.images && formData.images.length > 0) {
+        formData.images.forEach(file => {
+          if (file instanceof File) {
+            payload.append('images', file);
           }
         });
       }
@@ -246,13 +266,13 @@ const Notice = () => {
           <h2 className="text-lg font-bold text-gray-800">Notice Board</h2>
           <p className="text-[13px] text-gray-500 mt-1">Manage and track notices</p>
         </div>
-        {checkPermission('Add Notice') && (
+        {canManageNotices && (
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#085a46] transition-colors"
+            className="bg-[#0A6C54] text-white px-4 py-2 rounded-xl hover:bg-[#085a46] transition-colors font-semibold text-[13px] shadow-sm flex items-center gap-2"
           >
             <Plus size={16} />
-            Create Notice
+            New Notice
           </button>
         )}
       </div>
@@ -492,32 +512,58 @@ const Notice = () => {
                 />
               </div>
 
-              {/* Attachments */}
+              {/* Link */}
               <div>
-                <label className="block text-[13px] font-semibold text-gray-700 mb-2">Attachments</label>
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors text-[13px] font-medium text-gray-600">
+                <label className="block text-[13px] font-semibold text-gray-700 mb-2">External Link (Optional)</label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={formData.link}
+                  onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                />
+              </div>
+
+              {/* Attachments */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">PDF Documents (Unlimited)</label>
+                  <label className="flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors text-[13px] font-medium text-gray-600">
                     <Paperclip size={16} />
-                    Upload Files
+                    {formData.pdfs.length > 0 ? `${formData.pdfs.length} PDFs Selected` : 'Upload PDFs'}
                     <input
                       type="file"
+                      accept=".pdf"
                       multiple
                       className="hidden"
                       onChange={(e) => {
                         const files = Array.from(e.target.files);
-                        setFormData(prev => ({
-                          ...prev,
-                          attachments: [...prev.attachments, ...files]
-                        }));
+                        setFormData(prev => ({ ...prev, pdfs: files }));
                       }}
                     />
                   </label>
-                  {formData.attachments.length > 0 && (
-                    <span className="text-[12px] text-gray-500">{formData.attachments.length} file(s) selected</span>
-                  )}
+                </div>
+                
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Images (Unlimited)</label>
+                  <label className="flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors text-[13px] font-medium text-gray-600">
+                    <Paperclip size={16} />
+                    {formData.images.length > 0 ? `${formData.images.length} Images Selected` : 'Upload Images'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files);
+                        setFormData(prev => ({ ...prev, images: files }));
+                      }}
+                    />
+                  </label>
                 </div>
               </div>
             </div>
+
 
             <div className="flex gap-3 mt-6">
               <button
@@ -658,30 +704,54 @@ const Notice = () => {
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] resize-none"
                 />
               </div>
-              
-              {/* Attachments */}
+              {/* Link */}
               <div>
-                <label className="block text-[13px] font-semibold text-gray-700 mb-2">Attachments (Upload new files to replace old ones)</label>
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors text-[13px] font-medium text-gray-600">
+                <label className="block text-[13px] font-semibold text-gray-700 mb-2">External Link (Optional)</label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={formData.link}
+                  onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                />
+              </div>
+
+              {/* Attachments */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">PDF Documents (Unlimited)</label>
+                  <label className="flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors text-[13px] font-medium text-gray-600">
                     <Paperclip size={16} />
-                    Upload Files
+                    {formData.pdfs.length > 0 ? `${formData.pdfs.length} PDFs Selected` : 'Upload PDFs'}
                     <input
                       type="file"
+                      accept=".pdf"
                       multiple
                       className="hidden"
                       onChange={(e) => {
                         const files = Array.from(e.target.files);
-                        setFormData(prev => ({
-                          ...prev,
-                          attachments: files // replacing since we do simple replace on backend
-                        }));
+                        setFormData(prev => ({ ...prev, pdfs: files }));
                       }}
                     />
                   </label>
-                  {formData.attachments && formData.attachments.length > 0 && (
-                    <span className="text-[12px] text-gray-500">{formData.attachments.length} file(s) selected</span>
-                  )}
+                </div>
+                
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Images (Unlimited)</label>
+                  <label className="flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors text-[13px] font-medium text-gray-600">
+                    <Paperclip size={16} />
+                    {formData.images.length > 0 ? `${formData.images.length} Images Selected` : 'Upload Images'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files);
+                        setFormData(prev => ({ ...prev, images: files }));
+                      }}
+                    />
+                  </label>
                 </div>
               </div>
             </div>
@@ -738,19 +808,56 @@ const Notice = () => {
                 <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">{selectedNotice.details}</p>
               </div>
 
-              {selectedNotice.attachments && selectedNotice.attachments.length > 0 && (
+              {selectedNotice.link && (
                 <div className="border-t border-gray-100 pt-4">
-                  <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2"><Paperclip size={16} /> Attachments</h4>
-                  <div className="flex flex-col gap-2">
-                    {selectedNotice.attachments.map((att, i) => (
+                  <h4 className="text-sm font-bold text-gray-700 mb-2">External Link</h4>
+                  <a 
+                    href={selectedNotice.link.startsWith('http') ? selectedNotice.link : `https://${selectedNotice.link}`} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="text-sm text-blue-600 hover:underline break-all"
+                  >
+                    {selectedNotice.link}
+                  </a>
+                </div>
+              )}
+
+              {selectedNotice.pdfs && selectedNotice.pdfs.length > 0 && (
+                <div className="border-t border-gray-100 pt-4">
+                  <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2"><Paperclip size={16} /> Attached PDFs</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedNotice.pdfs.map((pdf, i) => (
                       <a 
-                        key={i} 
-                        href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${att}`} 
+                        key={i}
+                        href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${pdf}`} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="text-[13px] text-blue-600 hover:underline flex items-center gap-2 bg-blue-50/50 p-2 rounded-lg border border-blue-100 w-fit"
+                        className="text-[13px] text-red-600 hover:bg-red-50 flex items-center gap-2 bg-red-50/50 p-2.5 rounded-lg border border-red-100 w-fit transition-colors font-medium"
                       >
-                        <BookOpen size={14} /> File {i + 1}
+                        <BookOpen size={16} /> Document {i + 1}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedNotice.images && selectedNotice.images.length > 0 && (
+                <div className="border-t border-gray-100 pt-4">
+                  <h4 className="text-sm font-bold text-gray-700 mb-3">Attached Images</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {selectedNotice.images.map((img, i) => (
+                      <a 
+                        key={i} 
+                        href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${img}`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="block rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition-shadow"
+                      >
+                        <img 
+                          src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${img}`} 
+                          alt={`Notice Attachment ${i+1}`}
+                          className="w-full h-24 object-cover"
+                        />
                       </a>
                     ))}
                   </div>
