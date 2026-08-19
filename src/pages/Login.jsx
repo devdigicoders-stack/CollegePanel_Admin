@@ -141,14 +141,25 @@ const Login = () => {
               {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Login'}
             </button>
           </form>
-        </div>
 
-        {/* Footer */}
-        {/* <div className="absolute bottom-4 lg:bottom-6 left-0 w-full text-center">
-          <p className="text-[#9CA3AF] text-[12px] font-['Inter']">
-            © 2024 Polytechnic College ERP. All rights reserved.
-          </p>
-        </div> */}
+          {/* Footer inside form box */}
+          <div className="mt-6 pt-5 border-t border-gray-100 text-center">
+            <p className="text-gray-400 text-[12.5px] flex items-center justify-center gap-1.5 font-medium">
+              Crafted with
+              <span className="text-red-500 animate-pulse">♥</span>
+              by
+              <a
+                href="https://digicoders.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-red-500 hover:text-red-600 underline underline-offset-2 transition-colors duration-200"
+              >
+                Team Digicoders
+              </a>
+            </p>
+          </div>
+
+        </div>
       </div>
 
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Users, TrendingUp, Clock, CheckCircle, AlertCircle, XCircle, FileText, DollarSign, Zap } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle, AlertCircle, XCircle, FileText } from 'lucide-react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import axios from 'axios';
@@ -38,19 +38,13 @@ const AdmissionOfficerDashboard = () => {
     return <SkeletonLoader type="cards" />;
   }
 
-  const { stats, recentEnquiriesList, todayFollowUpsList, docVerPendingList, admissionsByCourse } = dashboardData;
+  const { stats, latestPendingApps = [], admissionsByCourse } = dashboardData;
 
   const statCards = [
-    { label: 'Total Enquiries', value: stats.totalEnquiries, icon: Users, color: 'bg-blue-50', iconColor: 'text-blue-500' },
-    { label: 'New Enquiries Today', value: stats.todayEnquiries, icon: TrendingUp, color: 'bg-green-50', iconColor: 'text-green-500' },
-    { label: 'Pending Follow-ups', value: stats.pendingFollowUps, icon: Clock, color: 'bg-orange-50', iconColor: 'text-orange-500' },
     { label: 'Total Applications', value: stats.totalApplications, icon: FileText, color: 'bg-purple-50', iconColor: 'text-purple-500' },
     { label: 'Pending Applications', value: stats.pendingApplications, icon: AlertCircle, color: 'bg-yellow-50', iconColor: 'text-yellow-600' },
     { label: 'Approved Admissions', value: stats.approvedAdmissions, icon: CheckCircle, color: 'bg-emerald-50', iconColor: 'text-emerald-500' },
     { label: 'Rejected/Cancelled', value: stats.rejectedAdmissions, icon: XCircle, color: 'bg-red-50', iconColor: 'text-red-500' },
-    { label: 'Document Verification', value: stats.docVerPending, icon: FileText, color: 'bg-indigo-50', iconColor: 'text-indigo-500' },
-    { label: 'Fee Pending Admissions', value: stats.feePending, icon: DollarSign, color: 'bg-pink-50', iconColor: 'text-pink-500' },
-    { label: 'Seat Management', value: 'Check module', icon: Zap, color: 'bg-cyan-50', iconColor: 'text-cyan-500' },
   ];
 
   const conversionChartOptions = {
@@ -59,7 +53,6 @@ const AdmissionOfficerDashboard = () => {
     xAxis: { categories: ['Current Overview'], gridLineWidth: 0 },
     yAxis: { title: { text: '' }, gridLineDashStyle: 'Dash' },
     series: [
-      { name: 'Enquiries', data: [stats.totalEnquiries], color: '#3B82F6' },
       { name: 'Applications', data: [stats.totalApplications], color: '#10B981' },
       { name: 'Admissions', data: [stats.approvedAdmissions], color: '#0A6C54' }
     ],
@@ -81,7 +74,7 @@ const AdmissionOfficerDashboard = () => {
 
   return (
     <div className="space-y-6 font-['Inter']">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat, idx) => {
           const Icon = stat.icon;
           return (
@@ -112,101 +105,50 @@ const AdmissionOfficerDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-[14px] font-bold text-gray-800 mb-4">Recent Enquiries</h3>
-          <div className="space-y-3">
-            {recentEnquiriesList.length > 0 ? recentEnquiriesList.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-[13px] font-medium text-gray-800">{item.studentName}</p>
-                  <p className="text-[11px] text-gray-600">{item.courseInterested}</p>
-                </div>
-                <span className="text-[11px] text-gray-500">{new Date(item.createdAt).toLocaleDateString()}</span>
-              </div>
-            )) : (
-              <div className="p-3 bg-gray-50 rounded-lg text-[13px] text-gray-500">No recent enquiries.</div>
-            )}
-          </div>
+      {/* Latest Pending Applications Section */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+          <h3 className="text-[14px] font-bold text-gray-800 flex items-center gap-2">
+            <AlertCircle size={16} className="text-yellow-500" /> Latest Pending Applications
+          </h3>
         </div>
-
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-[14px] font-bold text-gray-800 mb-4">Today's Follow-ups</h3>
-          <div className="space-y-3">
-            {todayFollowUpsList.length > 0 ? todayFollowUpsList.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-[13px] font-medium text-gray-800">{item.enquiryId?.studentName || 'Unknown'}</p>
-                  <p className="text-[11px] text-gray-600">{item.callStatus}</p>
-                </div>
-                <span className="text-[11px] text-gray-500">{new Date(item.followUpDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-            )) : (
-              <div className="p-3 bg-gray-50 rounded-lg text-[13px] text-gray-500">No follow-ups today.</div>
-            )}
+        
+        {latestPendingApps.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="px-5 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">App No</th>
+                  <th className="px-5 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-5 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Course</th>
+                  <th className="px-5 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Mobile</th>
+                  <th className="px-5 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {latestPendingApps.map((app, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-5 py-3.5 text-[13px] font-bold text-[#0A6C54]">{app.appNo}</td>
+                    <td className="px-5 py-3.5 text-[13px] font-bold text-gray-800">{app.name}</td>
+                    <td className="px-5 py-3.5 text-[13px] text-gray-600 font-medium">{app.course}</td>
+                    <td className="px-5 py-3.5 text-[13px] text-gray-600">{app.mobile}</td>
+                    <td className="px-5 py-3.5">
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 inline-flex items-center gap-1">
+                        <AlertCircle size={12} /> Pending
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-[14px] font-bold text-gray-800 mb-4">Pending Document Verification</h3>
-          <div className="space-y-3">
-            {docVerPendingList.length > 0 ? docVerPendingList.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-[13px] font-medium text-gray-800">{item.name}</p>
-                  <p className="text-[11px] text-gray-600">{item.course}</p>
-                </div>
-                <span className="text-[11px] font-semibold px-2 py-1 rounded bg-yellow-100 text-yellow-700">
-                  Pending
-                </span>
-              </div>
-            )) : (
-              <div className="p-3 bg-gray-50 rounded-lg text-[13px] text-gray-500">No pending verifications.</div>
-            )}
+        ) : (
+          <div className="p-8 text-center text-gray-500 text-[13px] bg-gray-50/50">
+            No pending applications right now.
           </div>
-        </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-[14px] font-bold text-gray-800 mb-4">Admission Target Progress (Beta)</h3>
-          <div className="space-y-4">
-            {admissionsByCourse.length > 0 ? admissionsByCourse.map((item, idx) => (
-              <div key={idx}>
-                <div className="flex justify-between mb-2">
-                  <span className="text-[12px] font-medium text-gray-800">{item._id}</span>
-                  <span className="text-[12px] font-bold text-gray-800">{item.count} Admitted</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-[#0A6C54] h-2 rounded-full" style={{ width: `${Math.min(item.count, 100)}%` }}></div>
-                </div>
-                <p className="text-[11px] text-gray-600 mt-1">{item.count} Admits</p>
-              </div>
-            )) : (
-              <div className="p-3 bg-gray-50 rounded-lg text-[13px] text-gray-500">No admission data yet.</div>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-[14px] font-bold text-gray-800 mb-4">Seat Availability</h3>
-          <div className="space-y-4">
-            {admissionsByCourse.length > 0 ? admissionsByCourse.map((item, idx) => (
-              <div key={idx} className="p-3 bg-gray-50 rounded-lg">
-                <div className="flex justify-between mb-2">
-                  <span className="text-[12px] font-medium text-gray-800">{item._id}</span>
-                  <span className="text-[12px] font-bold text-emerald-600">Active Course</span>
-                </div>
-                <div className="flex gap-2 text-[11px]">
-                  <span className="text-gray-600">Filled: {item.count}</span>
-                </div>
-              </div>
-            )) : (
-              <div className="p-3 bg-gray-50 rounded-lg text-[13px] text-gray-500">No admission data yet.</div>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

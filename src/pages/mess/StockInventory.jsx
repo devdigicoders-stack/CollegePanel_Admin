@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import { Search, Download, Plus, AlertTriangle, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../utils/axiosInstance';
@@ -59,7 +60,16 @@ const StockInventory = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Are you sure you want to delete this item?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, proceed!'
+    });
+    if (result.isConfirmed) {
       try {
         await axiosInstance.delete(`/mess/inventory/${id}`);
         toast.success('Item deleted successfully');

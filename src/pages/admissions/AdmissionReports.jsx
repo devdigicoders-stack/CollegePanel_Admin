@@ -26,6 +26,7 @@ const AdmissionReports = () => {
     return d.toISOString().split('T')[0];
   });
   const [toDate, setToDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [statusFilter, setStatusFilter] = useState('All');
   
   const [summaryData, setSummaryData] = useState(null);
   const [reportData, setReportData] = useState({ columns: [], data: [] });
@@ -40,13 +41,14 @@ const AdmissionReports = () => {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/admissions/dashboard-stats`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const stats = res.data.stats;
-        setSummaryData([
-          { label: 'Total Enquiries', value: stats.totalEnquiries || 0 },
-          { label: 'Total Applications', value: stats.totalApplications || 0 },
-          { label: 'Approved Admissions', value: stats.approvedAdmissions || 0 },
-          { label: 'Cancelled Admissions', value: stats.rejectedAdmissions || 0 },
-        ]);
+        if (res.data.stats) {
+          const stats = res.data.stats;
+          setSummaryData([
+            { label: 'Total Applications', value: stats.totalApplications || 0 },
+            { label: 'Approved Admissions', value: stats.approvedAdmissions || 0 },
+            { label: 'Cancelled Admissions', value: stats.rejectedAdmissions || 0 },
+          ]);
+        }
       } catch (error) {
         console.error('Error fetching summary stats', error);
       } finally {
@@ -65,7 +67,8 @@ const AdmissionReports = () => {
         params: {
           reportType: selectedReport,
           startDate: fromDate,
-          endDate: toDate
+          endDate: toDate,
+          status: statusFilter
         }
       });
       setReportData({
@@ -155,6 +158,21 @@ const AdmissionReports = () => {
           </select>
           <ChevronDown className="absolute right-3 top-9 text-gray-400 pointer-events-none" size={14} />
         </div>
+
+        {selectedReport === 'Applications Overview' && (
+          <div className="relative w-full md:w-auto md:flex-1">
+            <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Status</label>
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+              className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+              <option value="All">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-9 text-gray-400 pointer-events-none" size={14} />
+          </div>
+        )}
+
         <div className="flex gap-4 w-full md:w-auto">
           <div className="flex-1">
             <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">From Date</label>

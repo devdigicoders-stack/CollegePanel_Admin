@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import Swal from 'sweetalert2';
 import { 
   Search, ChevronDown, Eye, Plus, Edit2, Trash2, X as XIcon,
   ChevronLeft, ChevronRight, CheckCircle, Download, FileText } from 'lucide-react';
@@ -260,7 +261,16 @@ const Assignments = () => {
   };
 
   const handleDeleteAssignment = async (assignment) => {
-    if (!window.confirm(`Delete assignment "${assignment.title}"? This will also remove all submissions.`)) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: `Delete assignment "${assignment.title}"? This will also remove all submissions.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, proceed!'
+    });
+    if (!result.isConfirmed) return;
     try {
       await axiosInstance.delete(`/assignments/${assignment._id}`);
       toast.success('Assignment deleted successfully');

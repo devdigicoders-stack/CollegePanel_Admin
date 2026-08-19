@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import { BookOpen, Plus, Trash2, Link as LinkIcon, Upload, Loader2 } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
@@ -104,7 +105,16 @@ const StudyMaterials = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this material?')) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Are you sure you want to delete this material?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, proceed!'
+    });
+    if (result.isConfirmed) {
       try {
         await axiosInstance.delete(`/study-materials/${id}`);
         toast.success('Material deleted');

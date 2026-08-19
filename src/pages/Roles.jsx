@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
+import Swal from 'sweetalert2';
 import { 
   Plus, Search, Edit, Trash2, X, Shield, Check, ChevronLeft, ArrowLeft,
   LayoutDashboard, GraduationCap, Users, UserCheck, ClipboardList,
-  BookOpen, DollarSign, Calendar, FileText, BookMarked, Home, 
+  BookOpen, FileText, BookMarked, Home,
   BarChart3, Settings, ShieldAlert} from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
@@ -66,46 +67,16 @@ const permissionCategories = [
     permissions: ['View Sections', 'Add Section', 'Edit Section', 'Delete Section']
   },
   {
-    name: 'Academics — Timetable',
-    icon: Calendar,
-    color: 'orange',
-    permissions: ['View Timetable', 'Manage Timetable']
-  },
-  {
-    name: 'Academics — Lesson Plans',
-    icon: BookOpen,
-    color: 'orange',
-    permissions: ['View Lesson Plans', 'Add Lesson Plan', 'Edit Lesson Plan', 'Delete Lesson Plan']
-  },
-  {
     name: 'Academics — Assignments',
     icon: FileText,
     color: 'orange',
     permissions: ['View Assignments', 'Add Assignment', 'Edit Assignment', 'Delete Assignment', 'Grade Assignment']
   },
   {
-    name: 'Fees',
-    icon: DollarSign,
-    color: 'green',
-    permissions: ['View Fees', 'Collect Fees', 'Generate Receipt', 'View Fee Reports', 'Manage Fee Structure', 'Add Discount', 'Approve Refund']
-  },
-  {
-    name: 'Payroll Management',
-    icon: DollarSign,
-    color: 'emerald',
-    permissions: ['View Payroll', 'Manage Salary Structure', 'Assign Salary', 'Generate Payroll', 'Approve Payroll']
-  },
-  {
-    name: 'Attendance',
-    icon: Calendar,
-    color: 'teal',
-    permissions: ['View Attendance', 'Mark Attendance', 'Edit Attendance', 'View Attendance Reports', 'View Faculty Attendance', 'Mark Faculty Attendance']
-  },
-  {
-    name: 'Examinations',
+    name: 'Academics — Marks',
     icon: FileText,
-    color: 'cyan',
-    permissions: ['View Exams', 'Create Exam', 'Edit Exam', 'Delete Exam', 'Enter Marks', 'View Results', 'Export Results']
+    color: 'orange',
+    permissions: ['Enter Marks', 'View Results', 'Export Results']
   },
   {
     name: 'Library — Books',
@@ -117,13 +88,13 @@ const permissionCategories = [
     name: 'Library — Circulation',
     icon: BookMarked,
     color: 'amber',
-    permissions: ['Issue Book', 'Return Book', 'View Reservations', 'Manage Reservations', 'Collect Fine']
+    permissions: ['Issue Book', 'Return Book', 'Collect Fine']
   },
   {
     name: 'Hostel',
     icon: Home,
     color: 'lime',
-    permissions: ['View Hostels', 'Manage Rooms', 'Manage Allocations', 'View Hostel Reports', 'Approve Leave Outing', 'Reject Leave Outing', 'Mark Hostel Attendance', 'Log Check In', 'Log Check Out', 'Manage Hostel Inventory', 'Add Hostel Notice']
+    permissions: ['View Hostels', 'Manage Rooms', 'Manage Allocations', 'View Hostel Reports', 'Approve Leave Outing', 'Reject Leave Outing', 'Log Check In', 'Log Check Out', 'Manage Hostel Inventory', 'Add Hostel Notice']
   },
   {
     name: 'Security & Gate',
@@ -135,7 +106,7 @@ const permissionCategories = [
     name: 'Student Portal',
     icon: GraduationCap,
     color: 'emerald',
-    permissions: ['View Portal Dashboard', 'Submit Course Assignments', 'View Semester Results', 'Pay Fees Online', 'Apply For Outings']
+    permissions: ['View Portal Dashboard', 'Submit Course Assignments', 'View Semester Results', 'Apply For Outings']
   },
   {
     name: 'Reports',
@@ -147,7 +118,7 @@ const permissionCategories = [
     name: 'HR & Communication',
     icon: Settings,
     color: 'indigo',
-    permissions: ['View Notices', 'Add Notice', 'Edit Notice', 'Delete Notice', 'View Complaints', 'Manage Complaints', 'View Meetings', 'Add Meeting', 'View Leave Requests', 'Approve Leave Request']
+    permissions: ['View Notices', 'Add Notice', 'Edit Notice', 'Delete Notice', 'View Complaints', 'Manage Complaints']
   },
   {
     name: 'Settings',
@@ -279,7 +250,16 @@ const Roles = () => {
   };
 
   const handleDeleteRole = async (role) => {
-    if (!window.confirm(`Delete role "${role.name}"?`)) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: `Delete role "${role.name}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, proceed!'
+    });
+    if (!result.isConfirmed) return;
     try {
       await axiosInstance.delete(`/roles/${role._id}`);
       toast.success('Role deleted successfully');

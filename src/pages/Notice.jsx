@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Swal from 'sweetalert2';
 import { 
   Plus, Search, ChevronDown, Eye, Edit2, Trash2, X as XIcon,
   ChevronLeft, ChevronRight, Calendar, BookOpen, Users, Save, X, Paperclip, Send
@@ -148,7 +149,16 @@ const Notice = () => {
   };
 
   const handleDelete = async (notice) => {
-    if (!window.confirm(`Delete notice "${notice.title}"?`)) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: `Delete notice "${notice.title}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, proceed!'
+    });
+    if (!result.isConfirmed) return;
     try {
       await axiosInstance.delete(`/notices/${notice._id}`);
       toast.success('Notice deleted successfully');
@@ -762,8 +772,17 @@ const Notice = () => {
         )}
         {checkPermission('Delete Notice') && (
           <button
-            onClick={() => {
-              if (window.confirm('Are you sure you want to delete this notice?')) {
+            onClick={async () => {
+              const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Are you sure you want to delete this notice?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, proceed!'
+    });
+    if (result.isConfirmed) {
                 axiosInstance.delete(`/notices/${selectedNotice._id}`)
                   .then(() => { toast.success('Notice deleted'); setShowViewModal(false); fetchNotices(); })
                   .catch(() => toast.error('Failed to delete'));

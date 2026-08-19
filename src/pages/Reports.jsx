@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   Download, Calendar, Filter, FileSpreadsheet, FileText,
-  Users, DollarSign, BookOpen, Home, ShieldAlert,
+  Users, BookOpen, Home, ShieldAlert,
   GraduationCap, Briefcase, Loader2, RefreshCw, AlertCircle,
   ChevronRight, BarChart2, Table2
 } from 'lucide-react';
@@ -20,15 +20,7 @@ const MODULES = [
     endpoint: '/reports/admissions',
     reports: ['Applications Overview', 'Course-wise Registrations', 'Pending Verifications']
   },
-  {
-    id: 'financial',
-    name: 'Financial',
-    icon: DollarSign,
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-50',
-    endpoint: '/reports/financial',
-    reports: ['Fee Collections', 'Pending Dues', 'Collection Summary']
-  },
+
   {
     id: 'academic',
     name: 'Academic',
@@ -36,7 +28,7 @@ const MODULES = [
     color: 'text-violet-600',
     bg: 'bg-violet-50',
     endpoint: '/reports/academic',
-    reports: ['Student Directory', 'Faculty Directory', 'Exam Schedule', 'Leave Requests', 'Assignments']
+    reports: ['Student Directory', 'Faculty Directory', 'Assignments', 'Internal Marks']
   },
   {
     id: 'hr',
@@ -63,7 +55,7 @@ const MODULES = [
     color: 'text-indigo-600',
     bg: 'bg-indigo-50',
     endpoint: '/reports/hostel',
-    reports: ['Room Occupancy', 'Student Allotments', 'Leave & Outings']
+    reports: ['Room Occupancy', 'Student Allotments', 'Hostel Incidents']
   },
   {
     id: 'security',

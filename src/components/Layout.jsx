@@ -83,6 +83,21 @@ const Layout = ({ children }) => {
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#F8F9FA] p-4 md:p-6 print:overflow-visible print:bg-white print:p-0">
           {children}
         </main>
+
+        {/* Footer */}
+        <footer className="print:hidden flex-shrink-0 text-gray-600 py-2.5 px-6 flex items-center justify-center gap-2 text-[14px] font-semibold tracking-wide select-none border-t border-gray-200">
+          <span>Crafted with</span>
+          <span className="text-red-500 text-base animate-pulse">♥</span>
+          <span>by</span>
+          <a
+            href="https://digicoders.in/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold underline underline-offset-2 text-red-500 hover:text-red-600 transition-colors duration-200"
+          >
+            Team Digicoders
+          </a>
+        </footer>
       </div>
 
       {/* Logout Confirmation Modal - Full Page */}

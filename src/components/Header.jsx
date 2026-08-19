@@ -1,96 +1,13 @@
-import { useState, useEffect } from 'react';
-import { Menu, Plus, Maximize, MapPin, CheckCircle } from 'lucide-react';
+import { Menu, Plus, Maximize } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axiosInstance from '../utils/axiosInstance';
-import toast from 'react-hot-toast';
-import Swal from 'sweetalert2';
 
 export const Header = ({ onMenuClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [punchStatus, setPunchStatus] = useState(null); // null = loading, 'none', 'punched-in', 'punched-out'
-  const [isPunching, setIsPunching] = useState(false);
-  
   const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
   const userRole = adminInfo.role || 'college_admin';
   const isStudent = userRole.toLowerCase() === 'student';
-
-  useEffect(() => {
-    if (!isStudent) {
-      fetchPunchStatus();
-    }
-  }, [isStudent]);
-
-  const fetchPunchStatus = async () => {
-    try {
-      const res = await axiosInstance.get('/punch/today');
-      const log = res.data.data;
-      if (!log) {
-        setPunchStatus('none');
-      } else if (log.punchInTime && !log.punchOutTime) {
-        setPunchStatus('punched-in');
-      } else if (log.punchOutTime) {
-        setPunchStatus('punched-out');
-      }
-    } catch (err) {
-      console.error('Failed to fetch punch status', err);
-      // Fail silently for non-employees
-      setPunchStatus('none');
-    }
-  };
-
-  const handlePunch = async (type) => {
-    setIsPunching(true);
-    if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported by your browser');
-      setIsPunching(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      try {
-        const { latitude, longitude } = position.coords;
-        const endpoint = type === 'in' ? '/punch/in' : '/punch/out';
-        
-        await axiosInstance.post(endpoint, {
-          lat: latitude,
-          lng: longitude
-        });
-        
-        toast.success(`Successfully Punched ${type === 'in' ? 'In' : 'Out'}!`);
-        fetchPunchStatus();
-      } catch (err) {
-        console.error(err);
-        const errMsg = err.response?.data?.message || `Failed to punch ${type}`;
-        
-        if (errMsg.includes('too far') || errMsg.includes('Location is required') || errMsg.includes('already punched in') || errMsg.includes('punch in first')) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Action Failed',
-            text: errMsg,
-            confirmButtonColor: '#5a4bda'
-          });
-        } else {
-          toast.error(errMsg);
-        }
-      } finally {
-        setIsPunching(false);
-      }
-    }, (error) => {
-      Swal.fire({
-        icon: 'error',
-        title: 'Location Required',
-        text: 'Location access denied. Please allow location access to punch in/out.',
-        confirmButtonColor: '#5a4bda'
-      });
-      setIsPunching(false);
-    }, {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
-    });
-  };
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
@@ -183,27 +100,7 @@ export const Header = ({ onMenuClick }) => {
           </button>
         )}
 
-        {/* Geofence Punch In/Out Button */}
-        {!isStudent && punchStatus !== 'punched-out' && (
-          <button 
-            onClick={() => handlePunch(punchStatus === 'none' ? 'in' : 'out')}
-            disabled={isPunching || punchStatus === null}
-            className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[12px] md:text-[13px] font-bold flex items-center gap-1.5 transition-colors shadow-sm font-['Inter']
-              ${punchStatus === 'none' ? 'bg-[#5a4bda] hover:bg-[#4d3ecc] text-white' : 
-                punchStatus === 'punched-in' ? 'bg-orange-500 hover:bg-orange-600 text-white' : 
-                'bg-gray-100 text-gray-400'}`}
-          >
-            {isPunching ? (
-              <span className="animate-pulse">Locating...</span>
-            ) : punchStatus === 'none' ? (
-              <><MapPin size={16} /> <span className="hidden sm:inline">Punch In</span></>
-            ) : punchStatus === 'punched-in' ? (
-              <><CheckCircle size={16} /> <span className="hidden sm:inline">Punch Out</span></>
-            ) : (
-              'Loading...'
-            )}
-          </button>
-        )}
+
         <button 
           onClick={toggleFullScreen}
           className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-50"

@@ -1,4 +1,5 @@
 import SkeletonLoader from '../../components/SkeletonLoader';
+import Swal from 'sweetalert2';
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
@@ -138,7 +139,16 @@ const Books = () => {
   };
 
   const handleDeleteBook = async (id) => {
-    if(!window.confirm('Are you sure you want to delete this book?')) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Are you sure you want to delete this book?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, proceed!'
+    });
+    if (!result.isConfirmed) return;
     try {
       await axiosInstance.delete(`/library/books/${id}`);
       toast.success('Book deleted successfully');

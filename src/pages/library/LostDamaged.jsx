@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import { Search, Download, Plus, Check, Trash2, Eye, Edit2, X } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import axiosInstance from '../../utils/axiosInstance';
@@ -123,7 +124,16 @@ const LostDamaged = () => {
   };
 
   const handleDelete = async (id) => {
-    if(!window.confirm('Delete this case?')) return;
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Delete this case?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, proceed!'
+    });
+    if (!result.isConfirmed) return;
     try {
       await axiosInstance.delete(`/library/lost-damaged/${id}`);
       toast.success('Case deleted');
