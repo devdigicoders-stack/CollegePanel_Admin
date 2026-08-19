@@ -13,6 +13,9 @@ const ApprovedApplications = () => {
   }
   const [applications, setApplications] = useState([]);
   const [search, setSearch] = useState('');
+  const [filterBranch, setFilterBranch] = useState('All Branches');
+  const [filterSession, setFilterSession] = useState('All Sessions');
+  const [filterYear, setFilterYear] = useState('All Years');
   const [loading, setLoading] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
@@ -40,28 +43,66 @@ const ApprovedApplications = () => {
     fetchApplications();
   }, []);
 
+  const branches = ['All Branches', ...new Set(applications.map(a => a.branch).filter(Boolean))];
+  const sessions = ['All Sessions', ...new Set(applications.map(a => a.session || a.academicSession).filter(Boolean))];
+  const years = ['All Years', ...new Set(applications.map(a => a.year).filter(Boolean))];
+
   const filteredApps = applications.filter(a => {
-    return a.name?.toLowerCase().includes(search.toLowerCase()) ||
+    const matchSearch = a.name?.toLowerCase().includes(search.toLowerCase()) ||
       a.appNo?.includes(search) || a.mobile?.includes(search);
+      
+    const matchBranch = filterBranch === 'All Branches' || a.branch === filterBranch;
+    const matchSession = filterSession === 'All Sessions' || (a.session || a.academicSession) === filterSession;
+    const matchYear = filterYear === 'All Years' || a.year === filterYear;
+    
+    return matchSearch && matchBranch && matchSession && matchYear;
   });
 
   return (
     <div className="space-y-6 font-['Inter']">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-800 tracking-tight">Approved Students</h1>
           <p className="text-[13px] text-gray-500 font-medium mt-1">List of all students whose registrations have been approved.</p>
         </div>
-        <div className="relative w-full md:w-64">
-          <input
-            type="text"
-            placeholder="Search name, phone, App No..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]"
-          />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+        
+        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+          {/* Filters */}
+          <select 
+            value={filterBranch} 
+            onChange={(e) => setFilterBranch(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]"
+          >
+            {branches.map(b => <option key={b} value={b}>{b}</option>)}
+          </select>
+
+          <select 
+            value={filterYear} 
+            onChange={(e) => setFilterYear(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]"
+          >
+            {years.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+
+          <select 
+            value={filterSession} 
+            onChange={(e) => setFilterSession(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]"
+          >
+            {sessions.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+
+          <div className="relative w-full sm:w-64">
+            <input
+              type="text"
+              placeholder="Search name, phone, App No..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]"
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          </div>
         </div>
       </div>
 
