@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
-import { X, AlertTriangle } from 'lucide-react';
+import { X, AlertTriangle, MapPin, Compass } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../utils/axiosInstance';
 
@@ -10,6 +10,13 @@ const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [permissionsKey, setPermissionsKey] = useState('');
+  
+  const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+  const isStudent = adminInfo.role === 'Student';
+  const [locationGranted, setLocationGranted] = useState(!isStudent);
+  const [locationError, setLocationError] = useState(null);
+  const [gettingLocation, setGettingLocation] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -58,6 +65,78 @@ const Layout = ({ children }) => {
   const handleLogoutCancel = () => {
     setShowLogoutModal(false);
   };
+
+  const requestLocation = () => {
+    setGettingLocation(true);
+    setLocationError(null);
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log('Location accessed:', position.coords.latitude, position.coords.longitude);
+          setLocationGranted(true);
+          setGettingLocation(false);
+        },
+        (error) => {
+          console.error('Location error:', error);
+          let errorMsg = 'Failed to get location.';
+          if (error.code === 1) errorMsg = 'You must allow location access to continue.';
+          else if (error.code === 2) errorMsg = 'Location unavailable.';
+          else if (error.code === 3) errorMsg = 'Location request timed out.';
+          setLocationError(errorMsg);
+          setGettingLocation(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      setLocationError('Geolocation is not supported by your browser.');
+      setGettingLocation(false);
+    }
+  };
+
+  // Location Guard Screen for Students
+  if (isStudent && !locationGranted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-['Inter']">
+        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-gray-100 animate-in zoom-in-95 duration-300">
+          <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+            <MapPin className="text-blue-500 relative z-10" size={40} />
+            {gettingLocation && (
+              <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+            )}
+          </div>
+          
+          <h2 className="text-2xl font-black text-gray-800 mb-2">Location Required</h2>
+          <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+            For security and attendance verification, you must allow live location access to enter the Student Portal.
+          </p>
+
+          {locationError && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium mb-6 flex items-center gap-2 text-left">
+              <AlertTriangle size={16} className="shrink-0" />
+              {locationError}
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <button 
+              onClick={requestLocation}
+              disabled={gettingLocation}
+              className="w-full py-3 px-4 bg-[#0A6C54] hover:bg-[#085a46] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all shadow-lg shadow-[#0A6C54]/20 flex items-center justify-center gap-2"
+            >
+              <Compass size={18} />
+              {gettingLocation ? 'Detecting Location...' : 'Grant Location Access'}
+            </button>
+            <button 
+              onClick={handleLogoutConfirm}
+              className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all"
+            >
+              Logout / Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-[#F8F9FA] font-['Inter'] overflow-hidden relative print:h-auto print:overflow-visible print:bg-white">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { GraduationCap, CheckCircle, MapPin, User, Users, BookOpen, ChevronRight, Check, UploadCloud, FileText, Eye } from 'lucide-react';
+import { GraduationCap, CheckCircle, MapPin, User, Users, BookOpen, ChevronRight, Check, UploadCloud, FileText, Eye, Copy } from 'lucide-react';
 import axios from 'axios';
 
 const PublicAdmissionForm = () => {
@@ -98,6 +98,25 @@ const PublicAdmissionForm = () => {
     }
   };
 
+  const handleCopyCredentials = () => {
+    const loginLink = window.location.origin + '/login';
+    const message = `🎓 Welcome to the Student Portal!
+
+Your registration has been successfully submitted. You can now log in to track your admission status.
+
+🔐 Login Credentials:
+Username: ${appNo}
+Password: ${formData.dob}
+
+🔗 Login Link: ${loginLink}
+
+⚠️ Important: Please allow Location and Camera permissions when logging in for identity verification.`;
+
+    navigator.clipboard.writeText(message)
+      .then(() => toast.success('Credentials copied to clipboard!'))
+      .catch(() => toast.error('Failed to copy credentials'));
+  };
+
   if (submitted) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-['Inter']">
@@ -112,8 +131,52 @@ const PublicAdmissionForm = () => {
             <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Registration No</p>
             <p className="text-xl font-black text-[#0A6C54]">{appNo}</p>
           </div>
-          
-          <p className="text-sm text-gray-600 font-medium">Please save this registration number for future reference. The college administration will verify your details shortly.</p>
+
+          <div className="bg-[#0A6C54]/5 border border-[#0A6C54]/20 p-5 rounded-xl mb-6 text-left relative">
+            <button 
+              onClick={handleCopyCredentials}
+              className="absolute top-4 right-4 p-2 bg-white rounded-lg shadow-sm border border-gray-100 text-gray-500 hover:text-[#0A6C54] hover:border-[#0A6C54]/30 transition-all flex items-center gap-1.5"
+              title="Copy Login Details"
+            >
+              <Copy size={16} />
+              <span className="text-xs font-semibold hidden sm:inline">Copy</span>
+            </button>
+
+            <h3 className="font-bold text-[#0A6C54] mb-2 flex items-center gap-2">
+              <User size={18} />
+              Student Portal Access
+            </h3>
+            <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+              You can track your admission status and access your dashboard by logging into the Student Portal.
+            </p>
+            <ul className="text-sm text-gray-600 space-y-2 mb-4">
+              <li className="flex items-start gap-2">
+                <Check className="text-emerald-500 shrink-0 mt-0.5" size={16} />
+                <span><strong>Username:</strong> Your Registration No. ({appNo})</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="text-emerald-500 shrink-0 mt-0.5" size={16} />
+                <span><strong>Password:</strong> Your Date of Birth (YYYY-MM-DD)</span>
+              </li>
+            </ul>
+            
+            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg mb-4">
+              <p className="text-xs text-yellow-800 font-medium">
+                <strong>Important:</strong> You must allow <strong>Location and Camera permissions</strong> when logging into the portal for identity verification.
+              </p>
+            </div>
+
+            <a 
+              href="/login" 
+              className="block w-full text-center bg-[#0A6C54] text-white py-2.5 rounded-xl font-medium hover:bg-[#085a46] transition-colors"
+            >
+              Go to Student Login
+            </a>
+          </div>
+
+          <button onClick={() => window.location.reload()} className="w-full text-center text-[#0A6C54] font-semibold text-sm hover:underline">
+            Submit Another Application
+          </button>
         </div>
       </div>
     );
