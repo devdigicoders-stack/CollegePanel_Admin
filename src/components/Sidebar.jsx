@@ -14,6 +14,7 @@ import {
 export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
   const location = useLocation();
   const [pendingAdmissionsCount, setPendingAdmissionsCount] = useState(0);
+  const [unreadNotices, setUnreadNotices] = useState(0);
 
   useEffect(() => {
     const fetchPendingAdmissions = async () => {
@@ -28,15 +29,42 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         console.error('Error fetching pending applications count:', error);
       }
     };
+    const fetchNoticesCount = async () => {
+      try {
+        const token = localStorage.getItem('admin_token');
+        if (!token) return;
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/notices/stats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const publishedCount = res.data.data?.published || 0;
+        const lastSeen = parseInt(localStorage.getItem('last_seen_notices_count') || '0', 10);
+        
+        // If currently on notices page, auto-update the seen count
+        if (location.pathname.includes('/notices')) {
+          localStorage.setItem('last_seen_notices_count', publishedCount.toString());
+          setUnreadNotices(0);
+        } else if (publishedCount > lastSeen) {
+          setUnreadNotices(publishedCount - lastSeen);
+        } else {
+          setUnreadNotices(0);
+        }
+      } catch (error) {
+        console.error('Error fetching notices count:', error);
+      }
+    };
     
     // Fetch immediately
     fetchPendingAdmissions();
+    fetchNoticesCount();
     
-    // Set up an interval to check periodically (e.g., every 3 seconds for real-time feel)
-    const intervalId = setInterval(fetchPendingAdmissions, 3000);
+    // Set up an interval to check periodically
+    const intervalId = setInterval(() => {
+      fetchPendingAdmissions();
+      fetchNoticesCount();
+    }, 3000);
     
     return () => clearInterval(intervalId);
-  }, []);
+  }, [location.pathname]);
 
   const menuGroups = [
     {
@@ -50,7 +78,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
       items: [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/admissions/dashboard' },
         { name: 'Share Registration Link', icon: UserSquare2, path: '/admissions/new' },
-        { name: 'Pending Applications', icon: FileText, path: '/admissions/applications' },
+        { name: 'Pending Applications', icon: FileText, path: '/admissions/applications', badge: pendingAdmissionsCount },
         { name: 'Approved Students', icon: GraduationCap, path: '/admissions/approved' },
         { name: 'Rejected Students', icon: AlertCircle, path: '/admissions/rejected' },
         { name: 'Reports', icon: PieChart, path: '/admissions/reports' },
@@ -124,7 +152,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         { name: 'Study Materials', icon: BookOpen, path: '/student/materials' },
         { name: 'Assignments', icon: FileText, path: '/student/assignments' },
         { name: 'Hostel Room', icon: Bed, path: '/student/hostel' },
-        { name: 'Notices', icon: ClipboardList, path: '/student/notices' },
+        { name: 'Notices', icon: ClipboardList, path: '/student/notices', badge: unreadNotices },
       ]
     },
     {
@@ -277,16 +305,29 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
                     }`}
                   >
                     <Icon size={20} className={active ? 'text-white' : 'text-[#2DD4BF] opacity-80'} strokeWidth={active ? 2.5 : 2} />
-                    {isOpen && <span className="flex-1 truncate">{item.name}</span>}
+                    {isOpen && (
+                      <>
+                        <span className="flex-1 truncate">{item.name}</span>
+                        {item.badge > 0 && (
+                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                            active 
+                              ? 'bg-white text-[#0A6C54]' 
+                              : 'bg-red-500 text-white shadow-sm'
+                          }`}>
+                            {item.badge}
+                          </span>
+                        )}
+                      </>
+                    )}
                     
                     {/* Badge for Pending Applications */}
-                    {item.path === '/admissions/applications' && pendingAdmissionsCount > 0 && isOpen && (
+                    {item.path === '/admissions/applications' && pendingAdmissionsCount > 0 && isOpen && !item.badge && (
                       <span className="ml-auto bg-red-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-in zoom-in duration-300">
                         {pendingAdmissionsCount}
                       </span>
                     )}
                     {/* Dot for collapsed sidebar */}
-                    {item.path === '/admissions/applications' && pendingAdmissionsCount > 0 && !isOpen && (
+                    {((item.path === '/admissions/applications' && pendingAdmissionsCount > 0) || (item.badge > 0)) && !isOpen && (
                       <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-[#022A36]"></span>
                     )}
                   </Link>

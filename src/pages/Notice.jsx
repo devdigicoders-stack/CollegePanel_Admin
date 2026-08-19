@@ -32,7 +32,7 @@ const Notice = () => {
     department: '',
     dateOfPublishing: '',
     details: '',
-    status: 'Draft',
+    status: 'Published',
     pdfs: [],
     images: [],
     link: ''
@@ -116,9 +116,7 @@ const Notice = () => {
       department: '',
       dateOfPublishing: '',
       details: '',
-      status: 'Draft',
-      details: '',
-      status: 'Draft',
+      status: 'Published',
       pdfs: [],
       images: [],
       link: ''
@@ -142,8 +140,7 @@ const Notice = () => {
       department: notice.department || '',
       dateOfPublishing: notice.dateOfPublishing ? notice.dateOfPublishing.split('T')[0] : '',
       details: notice.details || '',
-      details: notice.details || '',
-      status: notice.status || 'Draft',
+      status: notice.status || 'Published',
       pdfs: notice.pdfs || [],
       images: notice.images || [],
       link: notice.link || ''
@@ -329,7 +326,8 @@ const Notice = () => {
               <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Target Audience</th>
               <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[20%]">Posted By</th>
               <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Posted On</th>
-              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%] rounded-tr-xl">Status</th>
+              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%]">Status</th>
+              <th className="py-4 px-6 text-[13px] font-bold text-gray-800 w-[15%] rounded-tr-xl">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -349,6 +347,38 @@ const Notice = () => {
                   }`}>
                     {notice.status}
                   </span>
+                </td>
+                <td className="py-4 px-6">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowViewModal(true); setSelectedNotice(notice); }}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-gray-100 text-gray-500 transition-colors"
+                      title="View"
+                    >
+                      <Search size={14} />
+                    </button>
+                    {canManageNotices && (
+                      <>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleEdit(notice); }}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-blue-50 text-blue-500 transition-colors"
+                          title="Edit"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDelete(notice._id); }}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-red-50 text-red-500 transition-colors"
+                          title="Delete"
+                        >
+                          <XIcon size={14} />
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </td>
               </tr>
             )) : (
