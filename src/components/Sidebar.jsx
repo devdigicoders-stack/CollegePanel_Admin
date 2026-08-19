@@ -41,7 +41,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         const lastSeen = parseInt(localStorage.getItem('last_seen_notices_count') || '0', 10);
         
         // If currently on notices page, auto-update the seen count
-        if (location.pathname.includes('/notices')) {
+        if (location.pathname === '/student/notices') {
           localStorage.setItem('last_seen_notices_count', publishedCount.toString());
           setUnreadNotices(0);
         } else if (publishedCount > lastSeen) {
@@ -67,7 +67,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         const totalAssignments = res.data.totalAssignments || 0;
         const lastSeen = parseInt(localStorage.getItem('last_seen_assignments_count') || '0', 10);
         
-        if (location.pathname.includes('/assignments')) {
+        if (location.pathname === '/student/assignments') {
           localStorage.setItem('last_seen_assignments_count', totalAssignments.toString());
           setUnreadAssignments(0);
         } else if (totalAssignments > lastSeen) {
