@@ -129,9 +129,9 @@ const PublicAdmissionForm = () => {
 
       <div className="max-w-3xl w-full">
         {/* Progress Tracker */}
-        <div className="flex justify-between items-center mb-8 relative">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full -z-10"></div>
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-[#0A6C54] rounded-full -z-10 transition-all duration-300" style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}></div>
+        <div className="flex justify-between items-start sm:items-center mb-8 relative px-2">
+          <div className="absolute left-6 right-6 sm:left-10 sm:right-10 top-4 sm:top-1/2 sm:-translate-y-1/2 h-1 bg-gray-200 rounded-full z-0"></div>
+          <div className="absolute left-6 sm:left-10 top-4 sm:top-1/2 sm:-translate-y-1/2 h-1 bg-[#0A6C54] rounded-full z-0 transition-all duration-300" style={{ width: `calc(${((currentStep - 1) / (steps.length - 1)) * 100}% - 48px)` }}></div>
           
           {steps.map((step) => {
             const Icon = step.icon;
@@ -139,11 +139,11 @@ const PublicAdmissionForm = () => {
             const isCompleted = currentStep > step.id;
             
             return (
-              <div key={step.id} className="flex flex-col items-center gap-2 bg-gray-50 px-2">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isActive ? 'border-[#0A6C54] bg-[#0A6C54] text-white shadow-md' : isCompleted ? 'border-[#0A6C54] bg-white text-[#0A6C54]' : 'border-gray-300 bg-white text-gray-400'}`}>
-                  {isCompleted ? <Check size={18} strokeWidth={3} /> : <Icon size={18} />}
+              <div key={step.id} className="flex flex-col items-center gap-2 bg-gray-50 px-1 sm:px-2 z-10 w-12 sm:w-auto">
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isActive ? 'border-[#0A6C54] bg-[#0A6C54] text-white shadow-md' : isCompleted ? 'border-[#0A6C54] bg-white text-[#0A6C54]' : 'border-gray-300 bg-white text-gray-400'}`}>
+                  {isCompleted ? <Check size={16} strokeWidth={3} /> : <Icon size={16} />}
                 </div>
-                <span className={`text-[11px] font-bold ${isActive || isCompleted ? 'text-gray-800' : 'text-gray-400'}`}>{step.title}</span>
+                <span className={`text-[10px] sm:text-[11px] font-bold text-center leading-tight ${isActive || isCompleted ? 'text-gray-800' : 'text-gray-400'} ${isActive ? 'block' : 'hidden sm:block'}`}>{step.title}</span>
               </div>
             );
           })}
