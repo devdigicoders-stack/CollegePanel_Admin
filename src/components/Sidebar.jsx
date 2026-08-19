@@ -15,7 +15,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
   const location = useLocation();
   const [pendingAdmissionsCount, setPendingAdmissionsCount] = useState(0);
   const [unreadNotices, setUnreadNotices] = useState(0);
-  const [pendingStudentAssignments, setPendingStudentAssignments] = useState(0);
+  const [unreadAssignments, setUnreadAssignments] = useState(0);
 
   useEffect(() => {
     const fetchPendingAdmissions = async () => {
@@ -64,7 +64,17 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/student-portal/dashboard`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setPendingStudentAssignments(res.data.pendingAssignments || 0);
+        const totalAssignments = res.data.totalAssignments || 0;
+        const lastSeen = parseInt(localStorage.getItem('last_seen_assignments_count') || '0', 10);
+        
+        if (location.pathname.includes('/assignments')) {
+          localStorage.setItem('last_seen_assignments_count', totalAssignments.toString());
+          setUnreadAssignments(0);
+        } else if (totalAssignments > lastSeen) {
+          setUnreadAssignments(totalAssignments - lastSeen);
+        } else {
+          setUnreadAssignments(0);
+        }
       } catch (error) {
         console.error('Error fetching student stats:', error);
       }
@@ -169,7 +179,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         { name: 'Dashboard', icon: LayoutDashboard, path: '/student/dashboard' },
         { name: 'My Profile', icon: Users, path: '/student/profile' },
         { name: 'Study Materials', icon: BookOpen, path: '/student/materials' },
-        { name: 'Assignments', icon: FileText, path: '/student/assignments', badge: pendingStudentAssignments },
+        { name: 'Assignments', icon: FileText, path: '/student/assignments', badge: unreadAssignments },
         { name: 'Hostel Room', icon: Bed, path: '/student/hostel' },
         { name: 'Notices', icon: ClipboardList, path: '/student/notices', badge: unreadNotices },
       ]
