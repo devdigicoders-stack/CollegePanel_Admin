@@ -370,7 +370,7 @@ const Notice = () => {
                           </svg>
                         </button>
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleDelete(notice._id); }}
+                          onClick={(e) => { e.stopPropagation(); handleDelete(notice); }}
                           className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-red-50 text-red-500 transition-colors"
                           title="Delete"
                         >
