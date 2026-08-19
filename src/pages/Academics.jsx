@@ -26,10 +26,8 @@ const Academics = () => {
   // Permission to menu tab mapping - VIEW permission needed to see the tab
   const menuPermissionMap = {
     'Departments': ['View Departments', 'Add Department', 'Edit Department', 'Delete Department'],
-    'Courses': ['View Courses', 'Add Course', 'Edit Course', 'Delete Course'],
+    'Branches': ['View Courses', 'Add Course', 'Edit Course', 'Delete Course'],
     'Semesters': ['View Courses', 'Add Course'], // semesters tied to courses
-    'Subjects': ['View Subjects', 'Add Subject', 'Edit Subject', 'Delete Subject'],
-    'Sections': ['View Sections', 'Add Section', 'Edit Section', 'Delete Section'],
     'Designations': ['View Employees', 'Add Employee']
   };
 
@@ -39,10 +37,8 @@ const Academics = () => {
 
   const allMenuItems = [
     { name: 'Departments' },
-    { name: 'Courses' },
+    { name: 'Branches' },
     { name: 'Semesters' },
-    { name: 'Subjects' },
-    { name: 'Sections' },
     { name: 'Designations' }
   ];
 
@@ -57,19 +53,19 @@ const Academics = () => {
   // Granular per-action permission check per tab
   const canAdd = (menuName) => {
     if (isFullAdmin) return true;
-    const addPerms = { 'Departments': 'Add Department', 'Courses': 'Add Course', 'Semesters': 'Add Course', 'Subjects': 'Add Subject', 'Sections': 'Add Section', 'Designations': 'Add Employee' };
+    const addPerms = { 'Departments': 'Add Department', 'Branches': 'Add Course', 'Semesters': 'Add Course', 'Designations': 'Add Employee' };
     return checkPermission(addPerms[menuName] || '');
   };
 
   const canEdit = (menuName) => {
     if (isFullAdmin) return true;
-    const editPerms = { 'Departments': 'Edit Department', 'Courses': 'Edit Course', 'Semesters': 'Edit Course', 'Subjects': 'Edit Subject', 'Sections': 'Edit Section', 'Designations': 'Edit Employee' };
+    const editPerms = { 'Departments': 'Edit Department', 'Branches': 'Edit Course', 'Semesters': 'Edit Course', 'Designations': 'Edit Employee' };
     return checkPermission(editPerms[menuName] || '');
   };
 
   const canDelete = (menuName) => {
     if (isFullAdmin) return true;
-    const deletePerms = { 'Departments': 'Delete Department', 'Courses': 'Delete Course', 'Semesters': 'Delete Course', 'Subjects': 'Delete Subject', 'Sections': 'Delete Section', 'Designations': 'Delete Employee' };
+    const deletePerms = { 'Departments': 'Delete Department', 'Branches': 'Delete Course', 'Semesters': 'Delete Course', 'Designations': 'Delete Employee' };
     return checkPermission(deletePerms[menuName] || '');
   };
 
@@ -78,10 +74,8 @@ const Academics = () => {
 
   const endpoints = {
     Departments: '/academics/departments',
-    Courses: '/academics/courses',
+    Branches: '/academics/courses',
     Semesters: '/academics/semesters',
-    Subjects: '/academics/subjects',
-    Sections: '/academics/sections',
     Designations: '/designations'
   };
 
@@ -91,34 +85,18 @@ const Academics = () => {
       { key: 'hod', label: 'HOD' },
       { key: 'totalFaculty', label: 'Total Faculty' }
     ],
-    Courses: [
-      { key: 'code', label: 'Course Code' },
-      { key: 'name', label: 'Course Name' },
+    Branches: [
+      { key: 'code', label: 'Branch Code' },
+      { key: 'name', label: 'Branch Name' },
       { key: 'department', label: 'Department' },
       { key: 'duration', label: 'Duration' },
       { key: 'status', label: 'Status' }
     ],
     Semesters: [
       { key: 'semesterNumber', label: 'Semester No.' },
-      { key: 'courseName', label: 'Course' },
+      { key: 'courseName', label: 'Branch' },
       { key: 'startDate', label: 'Start Date' },
       { key: 'endDate', label: 'End Date' },
-      { key: 'status', label: 'Status' }
-    ],
-    Subjects: [
-      { key: 'code', label: 'Subject Code' },
-      { key: 'name', label: 'Subject Name' },
-      { key: 'courseName', label: 'Course' },
-      { key: 'semester', label: 'Semester' },
-      { key: 'credits', label: 'Credits' },
-      { key: 'status', label: 'Status' }
-    ],
-    Sections: [
-      { key: 'name', label: 'Section' },
-      { key: 'courseName', label: 'Course' },
-      { key: 'semester', label: 'Semester' },
-      { key: 'classTeacher', label: 'Class Teacher' },
-      { key: 'totalStudents', label: 'Total Students' },
       { key: 'status', label: 'Status' }
     ],
     Designations: [
@@ -142,9 +120,9 @@ const Academics = () => {
         },
         { key: 'totalFaculty', label: 'Total Faculty', type: 'number', required: false }
       ],
-      Courses: [
-        { key: 'code', label: 'Course Code', type: 'text', required: true, disabled: isEditing },
-        { key: 'name', label: 'Course Name', type: 'text', required: true },
+      Branches: [
+        { key: 'code', label: 'Branch Code', type: 'text', required: true, disabled: isEditing },
+        { key: 'name', label: 'Branch Name', type: 'text', required: true },
         { 
           key: 'department', 
           label: 'Department', 
@@ -152,72 +130,32 @@ const Academics = () => {
           required: true,
           options: departments.map(d => ({ value: d.name, label: d.name }))
         },
-        { key: 'duration', label: 'Duration (e.g., 4 Years)', type: 'text', required: true },
+        { key: 'duration', label: 'Duration (Years)', type: 'number', required: true },
         { key: 'totalSemesters', label: 'Total Semesters', type: 'number', required: true },
-        { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Inactive'], required: false }
+        { 
+          key: 'status', 
+          label: 'Status', 
+          type: 'select', 
+          required: false,
+          options: [
+            { value: 'Active', label: 'Active' },
+            { value: 'Inactive', label: 'Inactive' }
+          ]
+        }
       ],
       Semesters: [
         { key: 'semesterNumber', label: 'Semester Number', type: 'number', required: true },
         { 
-          key: 'courseName', 
-          label: 'Course Name', 
+          key: 'courseId', 
+          label: 'Branch', 
           type: 'select', 
           required: true,
-          options: courses.map(c => ({ value: c.name, label: c.name }))
+          options: courses.map(c => ({ value: c._id, label: c.name }))
         },
         { key: 'startDate', label: 'Start Date', type: 'date', required: true },
         { key: 'endDate', label: 'End Date', type: 'date', required: true },
         { key: 'totalWeeks', label: 'Total Weeks', type: 'number', required: false },
         { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Upcoming', 'Completed'], required: false }
-      ],
-      Subjects: [
-        { key: 'code', label: 'Subject Code', type: 'text', required: true, disabled: isEditing },
-        { key: 'name', label: 'Subject Name', type: 'text', required: true },
-        { 
-          key: 'courseName', 
-          label: 'Course Name', 
-          type: 'select', 
-          required: true,
-          options: courses.map(c => ({ value: c.name, label: c.name }))
-        },
-        { 
-          key: 'semester', 
-          label: 'Semester', 
-          type: 'select', 
-          required: true,
-          options: semesters.map(s => ({ value: s.semesterNumber, label: `Semester ${s.semesterNumber}` }))
-        },
-        { key: 'credits', label: 'Credits', type: 'number', required: true },
-        { key: 'theory', label: 'Theory Hours', type: 'number', required: false },
-        { key: 'practical', label: 'Practical Hours', type: 'number', required: false },
-        { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Inactive'], required: false }
-      ],
-      Sections: [
-        { key: 'name', label: 'Section (e.g., A, B, C)', type: 'text', required: true },
-        { 
-          key: 'courseName', 
-          label: 'Course Name', 
-          type: 'select', 
-          required: true,
-          options: courses.map(c => ({ value: c.name, label: c.name }))
-        },
-        { 
-          key: 'semester', 
-          label: 'Semester', 
-          type: 'select', 
-          required: true,
-          options: semesters.map(s => ({ value: s.semesterNumber, label: `Semester ${s.semesterNumber}` }))
-        },
-        { 
-          key: 'classTeacher', 
-          label: 'Class Teacher', 
-          type: 'select', 
-          required: true,
-          options: teachers.map(t => ({ value: t._id, label: `${t.name} (${t.department})` }))
-        },
-        { key: 'totalStudents', label: 'Total Students', type: 'number', required: false },
-        { key: 'room', label: 'Room Number', type: 'text', required: false },
-        { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Inactive'], required: false }
       ],
       Designations: [
         { key: 'name', label: 'Designation Name', type: 'text', required: true },
@@ -226,7 +164,7 @@ const Academics = () => {
         { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Inactive'], required: false }
       ]
     };
-    return fields;
+    return fields[activeMenu] || [];
   };
 
   const formFields = getFormFields();
@@ -505,7 +443,7 @@ const Academics = () => {
       {showModal && (
         <AcademicsModal
           title={isEditing ? `Edit ${activeMenu.slice(0, -1)}` : `Add New ${activeMenu.slice(0, -1)}`}
-          fields={formFields[activeMenu]}
+          fields={formFields}
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleFormSubmit}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { GraduationCap, CheckCircle, MapPin, User, Users, BookOpen, ChevronRight, Check, UploadCloud, FileText, Eye } from 'lucide-react';
@@ -10,6 +11,21 @@ const PublicAdmissionForm = () => {
   const [appNo, setAppNo] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+
+  const [formOptions, setFormOptions] = useState({
+    branches: [],
+    sessions: [],
+    years: [],
+    courses: []
+  });
+
+  useEffect(() => {
+    if (collegeId) {
+      axios.get(`${import.meta.env.VITE_API_URL}/admissions/public/${collegeId}/form-options`)
+        .then(res => setFormOptions(res.data))
+        .catch(err => console.error('Error fetching options', err));
+    }
+  }, [collegeId]);
 
   const [formData, setFormData] = useState({
     name: '', dob: '', gender: 'Male', mobile: '', email: '',
@@ -36,8 +52,6 @@ const PublicAdmissionForm = () => {
     
     try {
       setLoading(true);
-      // It points to VITE_API_URL/upload instead of VITE_API_URL/api/upload 
-      // since VITE_API_URL includes /api already.
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/upload`, uploadData);
       const fileUrl = res.data.url;
       
@@ -63,7 +77,7 @@ const PublicAdmissionForm = () => {
     e.preventDefault();
     
     if (currentStep !== steps.length) {
-      return; // Prevent early submission if Enter is pressed on an earlier step
+      return;
     }
     
     if (!collegeId || collegeId === 'undefined') {
@@ -118,7 +132,6 @@ const PublicAdmissionForm = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4 font-['Inter']">
       
-      {/* Header */}
       <div className="text-center mb-10">
         <div className="w-16 h-16 bg-[#0A6C54] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#0A6C54]/20">
           <GraduationCap className="text-white" size={32} />
@@ -128,7 +141,6 @@ const PublicAdmissionForm = () => {
       </div>
 
       <div className="max-w-3xl w-full">
-        {/* Progress Tracker */}
         <div className="flex justify-between items-start sm:items-center mb-8 relative px-2">
           <div className="absolute left-6 right-6 sm:left-10 sm:right-10 top-4 sm:top-1/2 sm:-translate-y-1/2 h-1 bg-gray-200 rounded-full z-0"></div>
           <div className="absolute left-6 sm:left-10 top-4 sm:top-1/2 sm:-translate-y-1/2 h-1 bg-[#0A6C54] rounded-full z-0 transition-all duration-300" style={{ width: `calc(${((currentStep - 1) / (steps.length - 1)) * 100}% - 48px)` }}></div>
@@ -149,10 +161,8 @@ const PublicAdmissionForm = () => {
           })}
         </div>
 
-        {/* Form Container */}
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
           
-          {/* Step 1: Personal Info */}
           {currentStep === 1 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
               <h2 className="text-lg font-bold text-gray-800 border-b border-gray-100 pb-3 mb-5">Personal Details</h2>
@@ -197,11 +207,9 @@ const PublicAdmissionForm = () => {
             </div>
           )}
 
-          {/* Step 2: Parents Details */}
           {currentStep === 2 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
               <h2 className="text-lg font-bold text-gray-800 border-b border-gray-100 pb-3 mb-5">Parents / Guardian Details</h2>
-              
               <h3 className="text-sm font-bold text-[#0A6C54] mt-2 mb-2">Father's Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-4">
                 <div>
@@ -232,12 +240,10 @@ const PublicAdmissionForm = () => {
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Occupation</label>
                   <input type="text" name="motherOccupation" value={formData.motherOccupation} onChange={handleChange} placeholder="Occupation" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all" />
                 </div>
-
               </div>
             </div>
           )}
 
-          {/* Step 3: Contact & Address */}
           {currentStep === 3 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
               <h2 className="text-lg font-bold text-gray-800 border-b border-gray-100 pb-3 mb-5">Contact & Address</h2>
@@ -266,32 +272,37 @@ const PublicAdmissionForm = () => {
             </div>
           )}
 
-          {/* Step 4: Academics & Course */}
           {currentStep === 4 && (
             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
               <h2 className="text-lg font-bold text-gray-800 border-b border-gray-100 pb-3 mb-5">Academics & Course</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Course Enrolled In <span className="text-red-500">*</span></label>
-                  <input type="text" name="course" required value={formData.course} onChange={handleChange} placeholder="e.g. B.Tech, BCA" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all" />
+                  <select name="course" required value={formData.course} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all">
+                    <option value="">Select Course</option>
+                    {formOptions.courses.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Branch / Specialization <span className="text-red-500">*</span></label>
-                  <input type="text" name="branch" required value={formData.branch} onChange={handleChange} placeholder="e.g. Computer Science" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all" />
+                  <select name="branch" required value={formData.branch} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all">
+                    <option value="">Select Branch</option>
+                    {formOptions.branches.map((b, i) => <option key={i} value={b}>{b}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Year <span className="text-red-500">*</span></label>
                   <select name="year" required value={formData.year} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all">
                     <option value="">Select Year</option>
-                    <option>1st Year</option>
-                    <option>2nd Year</option>
-                    <option>3rd Year</option>
-                    <option>4th Year</option>
+                    {formOptions.years.map((y, i) => <option key={i} value={y}>{y}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Session (Batch) <span className="text-red-500">*</span></label>
-                  <input type="text" name="session" required value={formData.session} onChange={handleChange} placeholder="e.g. 2026-2030" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all" />
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Session <span className="text-red-500">*</span></label>
+                  <select name="session" required value={formData.session} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all">
+                    <option value="">Select Session</option>
+                    {formOptions.sessions.map((s, i) => <option key={i} value={s}>{s}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Previous School/College</label>

@@ -19,7 +19,6 @@ import Notice from './pages/Notice';
 import Complaints from './pages/Complaints';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
-import InternalMarks from './pages/InternalMarks';
 import Assignments from './pages/Assignments';
 import StudyMaterials from './pages/StudyMaterials';
 
@@ -167,7 +166,6 @@ function App() {
                 <Route path="/complaints" element={<Complaints />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/notifications" element={<Notifications />} />
-                <Route path="/internal-marks" element={<InternalMarks />} />
                 <Route path="/assignments" element={<Assignments />} />
                 <Route path="/study-materials" element={<StudyMaterials />} />
 

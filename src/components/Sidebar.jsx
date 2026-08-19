@@ -65,7 +65,6 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         { name: 'Students', icon: Users, path: '/students' },
         { name: 'Assignments', icon: FileText, path: '/assignments' },
         { name: 'Study Materials', icon: BookOpen, path: '/study-materials' },
-        { name: 'Internal Marks', icon: FileText, path: '/internal-marks' },
       ]
     },
     {
