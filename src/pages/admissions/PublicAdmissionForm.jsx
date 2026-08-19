@@ -18,7 +18,7 @@ const PublicAdmissionForm = () => {
     motherName: '', motherMobile: '', motherOccupation: '',
     currentAddress: '', city: '', state: '', pincode: '',
     prevSchool: '', board: '', percentage: '',
-    course: '', admissionType: 'Regular',
+    course: '', branch: '', year: '', session: '', admissionType: 'Regular',
     documents: [],
   });
 
@@ -61,6 +61,10 @@ const PublicAdmissionForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (currentStep !== steps.length) {
+      return; // Prevent early submission if Enter is pressed on an earlier step
+    }
     
     if (!collegeId || collegeId === 'undefined') {
       toast.error('Invalid college ID. Please use the exact link provided by the college.');
@@ -272,6 +276,24 @@ const PublicAdmissionForm = () => {
                   <input type="text" name="course" required value={formData.course} onChange={handleChange} placeholder="e.g. B.Tech, BCA" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all" />
                 </div>
                 <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Branch / Specialization <span className="text-red-500">*</span></label>
+                  <input type="text" name="branch" required value={formData.branch} onChange={handleChange} placeholder="e.g. Computer Science" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all" />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Year <span className="text-red-500">*</span></label>
+                  <select name="year" required value={formData.year} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all">
+                    <option value="">Select Year</option>
+                    <option>1st Year</option>
+                    <option>2nd Year</option>
+                    <option>3rd Year</option>
+                    <option>4th Year</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Session (Batch) <span className="text-red-500">*</span></label>
+                  <input type="text" name="session" required value={formData.session} onChange={handleChange} placeholder="e.g. 2026-2030" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all" />
+                </div>
+                <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Previous School/College</label>
                   <input type="text" name="prevSchool" value={formData.prevSchool} onChange={handleChange} placeholder="School name" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all" />
                 </div>
@@ -338,6 +360,8 @@ const PublicAdmissionForm = () => {
                     <div><p className="text-[11px] text-gray-500">Mobile Number</p><p className="text-[13px] font-bold text-gray-800">{formData.mobile}</p></div>
                     <div><p className="text-[11px] text-gray-500">Aadhaar Number</p><p className="text-[13px] font-bold text-gray-800">{formData.aadhaar}</p></div>
                     <div><p className="text-[11px] text-gray-500">Course Applied</p><p className="text-[13px] font-bold text-emerald-700">{formData.course}</p></div>
+                    <div><p className="text-[11px] text-gray-500">Branch</p><p className="text-[13px] font-bold text-gray-800">{formData.branch}</p></div>
+                    <div><p className="text-[11px] text-gray-500">Year / Session</p><p className="text-[13px] font-bold text-gray-800">{formData.year} ({formData.session})</p></div>
                     <div><p className="text-[11px] text-gray-500">Father's Name</p><p className="text-[13px] font-bold text-gray-800">{formData.parentName}</p></div>
                     <div><p className="text-[11px] text-gray-500">Mother's Name</p><p className="text-[13px] font-bold text-gray-800">{formData.motherName}</p></div>
                     <div className="col-span-2"><p className="text-[11px] text-gray-500">Current Address</p><p className="text-[13px] font-bold text-gray-800">{formData.currentAddress || 'N/A'}, {formData.city}, {formData.state} - {formData.pincode}</p></div>
