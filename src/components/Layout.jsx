@@ -22,6 +22,16 @@ const Layout = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
+    // Apply dynamic theme based on role
+    const role = adminInfo.role || 'college_admin';
+    let theme = 'admin';
+    if (role === 'Student') theme = 'student';
+    else if (role === 'Teacher Role' || role === 'Teacher') theme = 'teacher';
+    else if (role === 'Security') theme = 'security';
+    else if (role === 'Hostel Warden') theme = 'hostel_warden';
+    
+    document.documentElement.setAttribute('data-theme', theme);
+
     // Fully dynamic location check via browser system API
     if (isStudent && navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
@@ -169,7 +179,7 @@ const Layout = ({ children }) => {
             <button 
               onClick={requestLocation}
               disabled={gettingLocation}
-              className="w-full py-3 px-4 bg-[#0A6C54] hover:bg-[#085a46] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all shadow-lg shadow-[#0A6C54]/20 flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
             >
               <Compass size={18} />
               {gettingLocation ? 'Detecting Location...' : 'Grant Location Access'}

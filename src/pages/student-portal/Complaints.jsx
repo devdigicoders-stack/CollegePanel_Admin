@@ -60,7 +60,7 @@ const Complaints = () => {
           <h2 className="text-[16px] font-bold text-gray-800">My Maintenance & IT Complaints</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Log room issues, academic grievances, or laboratory breakdowns, and check resolution updates</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+        <button onClick={() => setShowModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
           <Plus size={16} /> File Complaint Ticket
         </button>
       </div>
@@ -72,7 +72,7 @@ const Complaints = () => {
               <div>
                 <span className="text-[11px] font-semibold text-gray-400">{item.category} | {new Date(item.createdAt).toLocaleDateString()}</span>
                 <p className="font-bold text-gray-800 mt-1">{item.description}</p>
-                {item.adminReply && <p className="text-[11px] text-[#0A6C54] mt-2">Admin Reply: {item.adminReply}</p>}
+                {item.adminReply && <p className="text-[11px] text-primary mt-2">Admin Reply: {item.adminReply}</p>}
               </div>
               <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${
                 item.status === 'Resolved' ? 'bg-green-50 text-green-700 border border-green-100' :
@@ -133,7 +133,7 @@ const Complaints = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold"
                 >
                   File Complaint
                 </button>

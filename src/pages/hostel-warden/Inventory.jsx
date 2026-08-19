@@ -145,7 +145,7 @@ const Inventory = () => {
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={14} /> Export
           </button>
-          <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+          <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
             <Plus size={15} /> Add Asset
           </button>
         </div>
@@ -176,17 +176,17 @@ const Inventory = () => {
             placeholder="Search by asset name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <div className="grid grid-cols-2 sm:flex gap-3 w-full sm:w-auto">
           <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
-            className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2.5 px-3 sm:px-4 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+            className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2.5 px-3 sm:px-4 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
             <option value="All">All Categories</option>
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <select value={filterCondition} onChange={(e) => setFilterCondition(e.target.value)}
-            className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2.5 px-3 sm:px-4 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+            className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2.5 px-3 sm:px-4 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
             <option value="All">All Conditions</option>
             {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -244,7 +244,7 @@ const Inventory = () => {
                       <select
                         value={item.condition}
                         onChange={(e) => handleUpdateCondition(item._id, e.target.value)}
-                        className="text-[11px] border border-gray-200 rounded p-1 font-semibold text-gray-600 focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                        className="text-[11px] border border-gray-200 rounded p-1 font-semibold text-gray-600 focus:outline-none focus:ring-1 focus:ring-primary"
                       >
                         {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
@@ -289,7 +289,7 @@ const Inventory = () => {
                 <input type="text" required placeholder="e.g. Study Table, Ceiling Fan"
                   value={newAsset.itemName}
                   onChange={(e) => setNewAsset({ ...newAsset, itemName: e.target.value })}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary" />
               </div>
 
               {/* Category & Condition */}
@@ -297,14 +297,14 @@ const Inventory = () => {
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-600 mb-1">Category *</label>
                   <select required value={newAsset.category} onChange={(e) => setNewAsset({ ...newAsset, category: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]">
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary">
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-600 mb-1">Condition *</label>
                   <select required value={newAsset.condition} onChange={(e) => setNewAsset({ ...newAsset, condition: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]">
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary">
                     {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
@@ -317,12 +317,12 @@ const Inventory = () => {
                   <input type="number" required min="1"
                     value={newAsset.quantity}
                     onChange={(e) => setNewAsset({ ...newAsset, quantity: parseInt(e.target.value) || '' })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary" />
                 </div>
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-600 mb-1">Location / Room (Optional)</label>
                   <select value={newAsset.roomId} onChange={(e) => setNewAsset({ ...newAsset, roomId: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]">
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary">
                     <option value="">General Storage</option>
                     {rooms.map(r => (
                       <option key={r._id} value={r._id}>{r.blockName} - Room {r.roomNumber}</option>
@@ -337,14 +337,14 @@ const Inventory = () => {
                 <textarea rows={2} placeholder="Serial numbers, notes..."
                   value={newAsset.remarks}
                   onChange={(e) => setNewAsset({ ...newAsset, remarks: e.target.value })}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] resize-none focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] resize-none focus:outline-none focus:ring-1 focus:ring-primary" />
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowAddModal(false)}
                   className="flex-1 py-2.5 border border-gray-200 rounded-lg text-[13px] font-semibold text-gray-700 hover:bg-gray-50">Cancel</button>
                 <button type="submit" disabled={submitting}
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold">
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold">
                   {submitting ? 'Saving...' : 'Save Asset'}
                 </button>
               </div>

@@ -101,7 +101,7 @@ const Incidents = () => {
         showCancelButton: true,
         confirmButtonText: 'Yes, Close',
         cancelButtonText: 'Cancel',
-        confirmButtonColor: '#0A6C54',
+        confirmButtonColor: 'var(--color-primary)',
         cancelButtonColor: '#6b7280',
         reverseButtons: true
       });
@@ -270,7 +270,7 @@ const Incidents = () => {
                   <td className="py-3 px-6">
                     <div className="flex justify-end gap-1.5 items-center">
                       {item.status !== 'Closed' ? (
-                        <button onClick={() => handleStatusUpdate(item._id, 'Closed')} className="flex items-center gap-1 px-2.5 py-1.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[11px] font-bold transition-colors shadow-sm" title="Mark Closed/Resolved">
+                        <button onClick={() => handleStatusUpdate(item._id, 'Closed')} className="flex items-center gap-1 px-2.5 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[11px] font-bold transition-colors shadow-sm" title="Mark Closed/Resolved">
                           <CheckCircle size={12} /> Close
                         </button>
                       ) : (

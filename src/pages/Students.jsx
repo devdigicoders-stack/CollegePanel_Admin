@@ -322,7 +322,7 @@ const Students = () => {
             <select
               value={filters.branch}
               onChange={(e) => handleFilterChange('branch', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Branches</option>
               {filterOptions.branches.map(val => (
@@ -336,7 +336,7 @@ const Students = () => {
             <select
               value={filters.course}
               onChange={(e) => handleFilterChange('course', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Courses</option>
               {filterOptions.courses.map(val => (
@@ -350,7 +350,7 @@ const Students = () => {
             <select
               value={filters.year}
               onChange={(e) => handleFilterChange('year', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Years</option>
               {filterOptions.years.map(val => (
@@ -364,7 +364,7 @@ const Students = () => {
             <select
               value={filters.session}
               onChange={(e) => handleFilterChange('session', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Sessions</option>
               {filterOptions.sessions.map(val => (
@@ -378,7 +378,7 @@ const Students = () => {
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Status</option>
               {STATUS_OPTIONS.map(opt => (
@@ -392,7 +392,7 @@ const Students = () => {
         {checkPermission('Add Student') && (
           <button
             onClick={() => { setIsAddPanelOpen(true); resetForm(); }}
-            className="w-full lg:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
+            className="w-full lg:w-auto bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors"
           >
             <Plus size={16} strokeWidth={2.5} />
             Add Student
@@ -409,7 +409,7 @@ const Students = () => {
             placeholder="Search by name or enrollment no."
             defaultValue={filters.search}
             onKeyDown={handleSearch}
-            className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] placeholder:text-gray-400 shadow-sm"
+            className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-gray-400 shadow-sm"
           />
         </div>
 
@@ -417,7 +417,7 @@ const Students = () => {
           <select
             onChange={handleLimitChange}
             defaultValue={filters.limit}
-            className="appearance-none w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm"
+            className="appearance-none w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm"
           >
             <option value={10}>10 / page</option>
             <option value={25}>25 / page</option>
@@ -437,7 +437,7 @@ const Students = () => {
                 
                 e.target.value = 'Export'; // reset so it can be clicked again
               }}
-              className="appearance-none w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm"
+              className="appearance-none w-full sm:w-auto bg-white border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm"
             >
               <option>Export</option>
               <option value="csv">Export to CSV</option>
@@ -482,7 +482,7 @@ const Students = () => {
                 students.map((row, index) => (
                   <tr key={row._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                     <td className="py-4 px-6 text-[13px] text-gray-600">{index + 1}</td>
-                    <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54] cursor-pointer hover:underline">{row.studentId}</td>
+                    <td className="py-4 px-6 text-[13px] font-semibold text-primary cursor-pointer hover:underline">{row.studentId}</td>
                     <td className="py-4 px-6 text-[13px] text-gray-800 font-medium">{row.studentName}</td>
                     <td className="py-4 px-6 text-[13px] text-gray-600">{row.branch}</td>
                     <td className="py-4 px-6 text-[13px] text-gray-600">{row.course}</td>
@@ -497,7 +497,7 @@ const Students = () => {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => handleViewStudent(row)}
-                          className="text-gray-400 hover:text-[#0A6C54] transition-colors p-1"
+                          className="text-gray-400 hover:text-primary transition-colors p-1"
                           title="View"
                         >
                           <Eye size={18} strokeWidth={2} />
@@ -505,7 +505,7 @@ const Students = () => {
                         {checkPermission('Edit Student') && (
                           <button
                             onClick={() => handleEditStudent(row)}
-                            className="text-gray-400 hover:text-[#0A6C54] transition-colors p-1"
+                            className="text-gray-400 hover:text-primary transition-colors p-1"
                             title="Edit"
                           >
                             <Edit2 size={18} strokeWidth={2} />
@@ -551,7 +551,7 @@ const Students = () => {
                 onClick={() => handlePageChange(pageNum)}
                 className={`w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-semibold transition-colors ${
                   pageNum === pagination.page
-                    ? 'bg-[#0A6C54] text-white'
+                    ? 'bg-primary text-white'
                     : 'border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -590,25 +590,25 @@ const Students = () => {
               <form id="add-student-form" onSubmit={handleSaveStudent} className="space-y-8">
                 <div>
                   <h3 className="text-[14px] font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#0A6C54]"></span>Basic Details
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>Basic Details
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Student Full Name <span className="text-red-500">*</span></label>
-                      <input type="text" name="studentName" value={formData.studentName} onChange={handleInputChange} required placeholder="e.g. Rahul Sharma" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] placeholder:text-gray-400" />
+                      <input type="text" name="studentName" value={formData.studentName} onChange={handleInputChange} required placeholder="e.g. Rahul Sharma" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400" />
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Enrollment No. <span className="text-red-500">*</span></label>
-                      <input type="text" name="studentId" value={formData.studentId} onChange={handleInputChange} required placeholder="e.g. OP/23/CE/001" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] placeholder:text-gray-400" />
+                      <input type="text" name="studentId" value={formData.studentId} onChange={handleInputChange} required placeholder="e.g. OP/23/CE/001" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400" />
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Date of Birth</label>
-                      <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700" />
+                      <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700" />
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Gender</label>
                       <div className="relative">
-                        <select name="gender" value={formData.gender} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
+                        <select name="gender" value={formData.gender} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white">
                           <option value="">Select Gender</option>
                           <option value="Male">Male</option>
                           <option value="Female">Female</option>
@@ -621,32 +621,32 @@ const Students = () => {
                 </div>
                 <div>
                   <h3 className="text-[14px] font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#0A6C54]"></span>Contact Details
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>Contact Details
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Email Address</label>
-                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="student@example.com" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] placeholder:text-gray-400" />
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="student@example.com" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400" />
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Phone Number</label>
-                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+91 90000 00000" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] placeholder:text-gray-400" />
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+91 90000 00000" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400" />
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Full Address</label>
-                      <textarea rows="3" name="address" value={formData.address} onChange={handleInputChange} placeholder="Enter complete address..." className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] placeholder:text-gray-400 resize-none"></textarea>
+                      <textarea rows="3" name="address" value={formData.address} onChange={handleInputChange} placeholder="Enter complete address..." className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400 resize-none"></textarea>
                     </div>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-[14px] font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#0A6C54]"></span>Academic Details
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>Academic Details
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Course <span className="text-red-500">*</span></label>
                       <div className="relative">
-                        <select name="course" value={formData.course} onChange={handleInputChange} required className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
+                        <select name="course" value={formData.course} onChange={handleInputChange} required className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white">
                           <option value="">Select Course</option>
                           {filterOptions.courses.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
@@ -656,7 +656,7 @@ const Students = () => {
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Branch / Department</label>
                       <div className="relative">
-                        <select name="branch" value={formData.branch} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
+                        <select name="branch" value={formData.branch} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white">
                           <option value="">Select Branch</option>
                           {filterOptions.branches.map(b => <option key={b} value={b}>{b}</option>)}
                         </select>
@@ -666,7 +666,7 @@ const Students = () => {
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Academic Year / Semester</label>
                       <div className="relative">
-                        <select name="year" value={formData.year} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
+                        <select name="year" value={formData.year} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white">
                           <option value="">Select Year/Sem</option>
                           {filterOptions.years.map(y => (
                             <option key={y} value={y}>{y}</option>
@@ -681,7 +681,7 @@ const Students = () => {
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Session / Batch</label>
-                      <input type="text" name="session" list="session-options" value={formData.session} onChange={handleInputChange} placeholder="e.g. 2023-2027" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white placeholder:text-gray-400" />
+                      <input type="text" name="session" list="session-options" value={formData.session} onChange={handleInputChange} placeholder="e.g. 2023-2027" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white placeholder:text-gray-400" />
                       <datalist id="session-options">
                         {filterOptions.sessions.map(s => <option key={s} value={s} />)}
                       </datalist>
@@ -689,7 +689,7 @@ const Students = () => {
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Status</label>
                       <div className="relative">
-                        <select name="status" value={formData.status} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
+                        <select name="status" value={formData.status} onChange={handleInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white">
                           {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
@@ -697,7 +697,7 @@ const Students = () => {
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Enrollment Date <span className="text-red-500">*</span></label>
-                      <input type="date" name="enrollmentDate" value={formData.enrollmentDate} onChange={handleInputChange} required className="w-full md:w-1/2 border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700" />
+                      <input type="date" name="enrollmentDate" value={formData.enrollmentDate} onChange={handleInputChange} required className="w-full md:w-1/2 border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700" />
                     </div>
                   </div>
                 </div>
@@ -705,7 +705,7 @@ const Students = () => {
             </div>
             <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
               <button type="button" onClick={() => { setIsAddPanelOpen(false); resetForm(); }} className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-[13px] font-semibold hover:bg-gray-100 transition-colors">Cancel</button>
-              <button type="submit" form="add-student-form" disabled={saving} className="px-6 py-2.5 rounded-lg bg-[#0A6C54] hover:bg-[#085a46] disabled:bg-[#0A6C54]/70 text-white text-[13px] font-semibold transition-colors shadow-sm flex items-center">
+              <button type="submit" form="add-student-form" disabled={saving} className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-hover disabled:bg-primary/70 text-white text-[13px] font-semibold transition-colors shadow-sm flex items-center">
                 {saving ? 'Saving...' : 'Save Student'}
               </button>
             </div>
@@ -731,25 +731,25 @@ const Students = () => {
               <form id="edit-student-form" onSubmit={handleUpdateStudent} className="space-y-8">
                 <div>
                   <h3 className="text-[14px] font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#0A6C54]"></span>Basic Details
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>Basic Details
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Student Full Name <span className="text-red-500">*</span></label>
-                      <input type="text" name="studentName" value={editFormData.studentName} onChange={handleEditInputChange} required className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] placeholder:text-gray-400" />
+                      <input type="text" name="studentName" value={editFormData.studentName} onChange={handleEditInputChange} required className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400" />
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Enrollment No. <span className="text-red-500">*</span></label>
-                      <input type="text" name="studentId" value={editFormData.studentId} onChange={handleEditInputChange} required className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] placeholder:text-gray-400" />
+                      <input type="text" name="studentId" value={editFormData.studentId} onChange={handleEditInputChange} required className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400" />
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Date of Birth</label>
-                      <input type="date" name="dob" value={editFormData.dob} onChange={handleEditInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700" />
+                      <input type="date" name="dob" value={editFormData.dob} onChange={handleEditInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700" />
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Gender</label>
                       <div className="relative">
-                        <select name="gender" value={editFormData.gender} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
+                        <select name="gender" value={editFormData.gender} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white">
                           <option value="">Select Gender</option>
                           <option value="Male">Male</option>
                           <option value="Female">Female</option>
@@ -762,32 +762,32 @@ const Students = () => {
                 </div>
                 <div>
                   <h3 className="text-[14px] font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#0A6C54]"></span>Contact Details
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>Contact Details
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Email Address</label>
-                      <input type="email" name="email" value={editFormData.email} onChange={handleEditInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] placeholder:text-gray-400" />
+                      <input type="email" name="email" value={editFormData.email} onChange={handleEditInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400" />
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Phone Number</label>
-                      <input type="tel" name="phone" value={editFormData.phone} onChange={handleEditInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] placeholder:text-gray-400" />
+                      <input type="tel" name="phone" value={editFormData.phone} onChange={handleEditInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400" />
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Full Address</label>
-                      <textarea rows="3" name="address" value={editFormData.address} onChange={handleEditInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] placeholder:text-gray-400 resize-none"></textarea>
+                      <textarea rows="3" name="address" value={editFormData.address} onChange={handleEditInputChange} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400 resize-none"></textarea>
                     </div>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-[14px] font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#0A6C54]"></span>Academic Details
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>Academic Details
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Course</label>
                       <div className="relative">
-                        <select name="course" value={editFormData.course} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
+                        <select name="course" value={editFormData.course} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white">
                           <option value="">Select Course</option>
                           {filterOptions.courses.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
@@ -797,7 +797,7 @@ const Students = () => {
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Branch / Department</label>
                       <div className="relative">
-                        <select name="branch" value={editFormData.branch} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
+                        <select name="branch" value={editFormData.branch} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white">
                           <option value="">Select Branch</option>
                           {filterOptions.branches.map(b => <option key={b} value={b}>{b}</option>)}
                         </select>
@@ -807,7 +807,7 @@ const Students = () => {
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Academic Year / Semester</label>
                       <div className="relative">
-                        <select name="year" value={editFormData.year} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
+                        <select name="year" value={editFormData.year} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white">
                           <option value="">Select Year/Sem</option>
                           {filterOptions.years.map(y => (
                             <option key={y} value={y}>{y}</option>
@@ -822,12 +822,12 @@ const Students = () => {
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Session / Batch</label>
-                      <input type="text" name="session" list="session-options" value={editFormData.session} onChange={handleEditInputChange} placeholder="e.g. 2023-2027" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white placeholder:text-gray-400" />
+                      <input type="text" name="session" list="session-options" value={editFormData.session} onChange={handleEditInputChange} placeholder="e.g. 2023-2027" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white placeholder:text-gray-400" />
                     </div>
                     <div>
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Status</label>
                       <div className="relative">
-                        <select name="status" value={editFormData.status} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700 bg-white">
+                        <select name="status" value={editFormData.status} onChange={handleEditInputChange} className="appearance-none w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700 bg-white">
                           {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
@@ -835,7 +835,7 @@ const Students = () => {
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Enrollment Date</label>
-                      <input type="date" name="enrollmentDate" value={editFormData.enrollmentDate} onChange={handleEditInputChange} className="w-full md:w-1/2 border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] text-gray-700" />
+                      <input type="date" name="enrollmentDate" value={editFormData.enrollmentDate} onChange={handleEditInputChange} className="w-full md:w-1/2 border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-gray-700" />
                     </div>
                   </div>
                 </div>
@@ -843,7 +843,7 @@ const Students = () => {
             </div>
             <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
               <button type="button" onClick={() => { setIsEditPanelOpen(false); setSelectedStudent(null); }} className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-[13px] font-semibold hover:bg-gray-100 transition-colors">Cancel</button>
-              <button type="submit" form="edit-student-form" disabled={saving} className="px-6 py-2.5 rounded-lg bg-[#0A6C54] hover:bg-[#085a46] disabled:bg-[#0A6C54]/70 text-white text-[13px] font-semibold transition-colors shadow-sm flex items-center">
+              <button type="submit" form="edit-student-form" disabled={saving} className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-hover disabled:bg-primary/70 text-white text-[13px] font-semibold transition-colors shadow-sm flex items-center">
                 {saving ? 'Updating...' : 'Update Student'}
               </button>
             </div>
@@ -856,7 +856,7 @@ const Students = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-8">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-[#0A6C54] to-[#085a46]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-primary to-primary-hover">
               <h3 className="text-lg font-bold text-white">Student Details</h3>
               <button 
                 onClick={() => { setIsViewModalOpen(false); setSelectedStudent(null); }}
@@ -869,14 +869,14 @@ const Students = () => {
             {/* Content */}
             <div className="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
               {/* Basic Info Card */}
-              <div className="bg-gradient-to-br from-[#0A6C54]/5 to-[#0A6C54]/10 rounded-xl p-6 mb-8">
+              <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-6 mb-8">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-full bg-[#0A6C54] flex items-center justify-center text-white text-2xl font-bold border-2 border-[#0A6C54]/20 shadow-sm">
+                  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-bold border-2 border-primary/20 shadow-sm">
                     {selectedStudent.studentName?.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <h4 className="text-xl font-bold text-gray-800">{selectedStudent.studentName}</h4>
-                    <p className="text-sm text-[#0A6C54] font-medium">{selectedStudent.course} - {selectedStudent.branch}</p>
+                    <p className="text-sm text-primary font-medium">{selectedStudent.course} - {selectedStudent.branch}</p>
                   </div>
                   <div className="ml-auto">
                     <span className={`px-4 py-2 rounded-full text-xs font-bold tracking-wide inline-block ${getStatusColor(selectedStudent.status)}`}>
@@ -884,7 +884,7 @@ const Students = () => {
                     </span>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm mt-4 pt-4 border-t border-[#0A6C54]/10">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm mt-4 pt-4 border-t border-primary/10">
                   <div className="flex flex-col sm:flex-row sm:items-center">
                     <span className="text-gray-500 font-medium text-[11px] sm:text-sm">Enrollment No:</span>
                     <span className="sm:ml-2 font-bold text-gray-800 break-all">{selectedStudent.studentId}</span>
@@ -909,7 +909,7 @@ const Students = () => {
                 
                 {/* Personal Information */}
                 <div className="space-y-4">
-                  <h5 className="text-[13px] font-bold text-[#0A6C54] uppercase tracking-wider border-b border-gray-200 pb-2">Personal Information</h5>
+                  <h5 className="text-[13px] font-bold text-primary uppercase tracking-wider border-b border-gray-200 pb-2">Personal Information</h5>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -958,7 +958,7 @@ const Students = () => {
 
                   {/* Portal Credentials */}
                   <div className="pt-4 mt-4 border-t border-gray-100">
-                    <h6 className="text-[11px] font-semibold text-[#0A6C54] uppercase tracking-wider mb-3">Portal Credentials</h6>
+                    <h6 className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-3">Portal Credentials</h6>
                     <div className="flex flex-col sm:flex-row gap-4">
                       <div className="flex-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
                         <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">Username</label>
@@ -975,7 +975,7 @@ const Students = () => {
                 <div className="space-y-8">
                   {/* Parent / Guardian Information */}
                   <div className="space-y-4">
-                    <h5 className="text-[13px] font-bold text-[#0A6C54] uppercase tracking-wider border-b border-gray-200 pb-2">Parent & Guardian Details</h5>
+                    <h5 className="text-[13px] font-bold text-primary uppercase tracking-wider border-b border-gray-200 pb-2">Parent & Guardian Details</h5>
                     
                     <div className="grid grid-cols-2 gap-x-4 gap-y-4">
                       <div>
@@ -1015,7 +1015,7 @@ const Students = () => {
 
                   {/* Academic Information */}
                   <div className="space-y-4">
-                    <h5 className="text-[13px] font-bold text-[#0A6C54] uppercase tracking-wider border-b border-gray-200 pb-2">Previous Education</h5>
+                    <h5 className="text-[13px] font-bold text-primary uppercase tracking-wider border-b border-gray-200 pb-2">Previous Education</h5>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2">
@@ -1045,7 +1045,7 @@ const Students = () => {
 
               {/* Documents Section */}
               <div className="mt-8">
-                <h5 className="text-[13px] font-bold text-[#0A6C54] uppercase tracking-wider border-b border-gray-200 pb-2 mb-4">Uploaded Documents</h5>
+                <h5 className="text-[13px] font-bold text-primary uppercase tracking-wider border-b border-gray-200 pb-2 mb-4">Uploaded Documents</h5>
                 {(!selectedStudent.documents || selectedStudent.documents.length === 0) ? (
                   <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-100 border-dashed">
                     <p className="text-gray-500 text-[13px] font-medium">No documents uploaded for this student.</p>
@@ -1068,7 +1068,7 @@ const Students = () => {
                           </div>
                         </div>
                         {doc.url ? (
-                          <a href={doc.url.startsWith('http') ? doc.url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${doc.url.startsWith('/') ? doc.url : '/' + doc.url}`} target="_blank" rel="noopener noreferrer" className="mt-auto block w-full text-center px-3 py-2 text-[12px] font-bold text-[#0A6C54] bg-[#0A6C54]/5 border border-[#0A6C54]/20 rounded-lg hover:bg-[#0A6C54] hover:text-white transition-all">
+                          <a href={doc.url.startsWith('http') ? doc.url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${doc.url.startsWith('/') ? doc.url : '/' + doc.url}`} target="_blank" rel="noopener noreferrer" className="mt-auto block w-full text-center px-3 py-2 text-[12px] font-bold text-primary bg-primary/5 border border-primary/20 rounded-lg hover:bg-primary hover:text-white transition-all">
                             View Document
                           </a>
                         ) : (

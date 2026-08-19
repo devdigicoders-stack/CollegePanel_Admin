@@ -173,7 +173,7 @@ const Complaints = () => {
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={14} /> Export
           </button>
-          <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+          <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
             <Plus size={15} /> Raise Complaint
           </button>
         </div>
@@ -208,11 +208,11 @@ const Complaints = () => {
             placeholder="Search ticket no, subject, student name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
           <option value="All">All Statuses</option>
           <option value="Pending">Pending</option>
           <option value="In Progress">In Progress</option>
@@ -220,7 +220,7 @@ const Complaints = () => {
           <option value="Rejected">Rejected</option>
         </select>
         <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
           <option value="All">All Priorities</option>
           {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
@@ -246,7 +246,7 @@ const Complaints = () => {
             <tbody>
               {complaints.map(item => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-3 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.complaintId}</td>
+                  <td className="py-3 px-6 text-[13px] font-semibold text-primary">{item.complaintId}</td>
                   <td className="py-3 px-6 text-[13px] font-bold text-gray-800">{item.submittedBy}</td>
                   <td className="py-3 px-6">
                     <p className="text-[13px] font-semibold text-gray-700">{item.subject}</p>
@@ -283,7 +283,7 @@ const Complaints = () => {
                       {item.status === 'In Progress' && (
                         <button
                           onClick={() => handleUpdateStatus(item._id, 'Resolved')}
-                          className="flex items-center gap-1 px-2.5 py-1.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[11px] font-bold transition-colors"
+                          className="flex items-center gap-1 px-2.5 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[11px] font-bold transition-colors"
                           title="Mark Resolved">
                           <CheckCircle size={11} /> Resolve
                         </button>
@@ -333,7 +333,7 @@ const Complaints = () => {
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
               <div>
                 <h3 className="font-bold text-gray-800 text-[15px]">Raise New Complaint</h3>
-                <p className="text-[11px] text-gray-400 mt-0.5">Ticket ID: <span className="font-semibold text-[#0A6C54]">{newComplaint.complaintId}</span></p>
+                <p className="text-[11px] text-gray-400 mt-0.5">Ticket ID: <span className="font-semibold text-primary">{newComplaint.complaintId}</span></p>
               </div>
               <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
             </div>
@@ -342,14 +342,14 @@ const Complaints = () => {
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-600 mb-1">Category</label>
                   <select required value={newComplaint.category} onChange={(e) => setNewComplaint({ ...newComplaint, category: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]">
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary">
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-600 mb-1">Priority</label>
                   <select required value={newComplaint.priority} onChange={(e) => setNewComplaint({ ...newComplaint, priority: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]">
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary">
                     {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
@@ -359,14 +359,14 @@ const Complaints = () => {
                 <input required type="text" placeholder="e.g. Rahul Sharma / Room 201"
                   value={newComplaint.submittedBy}
                   onChange={(e) => setNewComplaint({ ...newComplaint, submittedBy: e.target.value })}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary" />
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-gray-600 mb-1">Subject *</label>
                 <input required type="text" placeholder="Brief complaint subject"
                   value={newComplaint.subject}
                   onChange={(e) => setNewComplaint({ ...newComplaint, subject: e.target.value })}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary" />
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-gray-600 mb-1">Description *</label>
@@ -374,13 +374,13 @@ const Complaints = () => {
                   placeholder="Describe the issue in detail..."
                   value={newComplaint.description}
                   onChange={(e) => setNewComplaint({ ...newComplaint, description: e.target.value })}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] resize-none focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] resize-none focus:outline-none focus:ring-1 focus:ring-primary" />
               </div>
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowAddModal(false)}
                   className="flex-1 py-2.5 border border-gray-200 rounded-lg text-[13px] font-semibold text-gray-700 hover:bg-gray-50">Cancel</button>
                 <button type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold">Submit Complaint</button>
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold">Submit Complaint</button>
               </div>
             </form>
           </div>
@@ -426,7 +426,7 @@ const Complaints = () => {
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     placeholder="Add a note or reply for this complaint..."
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[12px] resize-none focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[12px] resize-none focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               )}
@@ -450,7 +450,7 @@ const Complaints = () => {
               )}
               {viewItem.status === 'In Progress' && (
                 <button onClick={() => handleReplySubmit(viewItem._id, 'Resolved')}
-                  className="w-full py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold">
+                  className="w-full py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold">
                   Mark Resolved
                 </button>
               )}

@@ -23,13 +23,13 @@ const Notifications = () => {
             onClick={() => setActiveTab(tab)}
             className={`pb-4 text-[14px] font-medium transition-colors relative ${
               activeTab === tab 
-                ? 'text-[#0A6C54]' 
+                ? 'text-primary' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             {tab}
             {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#0A6C54] rounded-t-full"></div>
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full"></div>
             )}
           </button>
         ))}
@@ -39,7 +39,7 @@ const Notifications = () => {
         
         {/* Top Actions */}
         <div className="p-6 flex justify-end items-center border-b border-gray-100">
-          <button className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm">
+          <button className="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm">
             <Plus size={16} />
             New Announcement
           </button>
@@ -92,7 +92,7 @@ const Notifications = () => {
             <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors">
               <ChevronLeft size={16} />
             </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0A6C54] text-white font-medium text-[13px]">
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white font-medium text-[13px]">
               1
             </button>
             <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-[13px] font-medium">

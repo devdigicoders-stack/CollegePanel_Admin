@@ -86,7 +86,7 @@ export const Header = ({ onMenuClick }) => {
         </button>
         <div className="min-w-0">
           <h1 className="text-[16px] md:text-[20px] font-bold text-[#111827] font-['Outfit'] truncate">{title}</h1>
-          <p className={`text-[11px] md:text-[12px] font-['Inter'] mt-0.5 truncate ${isBreadcrumb ? 'text-[#0A6C54] font-semibold' : 'text-gray-500'}`}>
+          <p className={`text-[11px] md:text-[12px] font-['Inter'] mt-0.5 truncate ${isBreadcrumb ? 'text-primary font-semibold' : 'text-gray-500'}`}>
             {subtitle}
           </p>
         </div>
@@ -94,7 +94,7 @@ export const Header = ({ onMenuClick }) => {
       
       <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
         {actionButton && (
-          <button className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[12px] md:text-[13px] font-semibold flex items-center gap-1.5 transition-colors shadow-sm font-['Inter']">
+          <button className="bg-primary hover:bg-primary-hover text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[12px] md:text-[13px] font-semibold flex items-center gap-1.5 transition-colors shadow-sm font-['Inter']">
             <Plus size={16} />
             <span className="hidden sm:inline">{actionButton}</span>
           </button>
@@ -129,7 +129,7 @@ export const Header = ({ onMenuClick }) => {
             const initial = userName.charAt(0).toUpperCase();
             return (
               <>
-                <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#0A6C54] text-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm transition-transform group-hover:scale-105">
+                <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-primary text-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm transition-transform group-hover:scale-105">
                   <span className="font-bold text-[13px] font-['Outfit']">{initial}</span>
                 </div>
                 <div className="hidden md:block">

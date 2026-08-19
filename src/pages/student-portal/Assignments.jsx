@@ -104,17 +104,17 @@ const Assignments = () => {
                           const el = e.target;
                           setSelectedFiles(prev => ({ ...prev, [`${item._id}_remarks`]: el.value }));
                         }}
-                        className="w-full text-[13px] text-gray-700 border border-gray-200 px-3 py-2.5 rounded-xl bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all"
+                        className="w-full text-[13px] text-gray-700 border border-gray-200 px-3 py-2.5 rounded-xl bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       />
                       
-                      <div className="relative group/upload cursor-pointer border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:bg-gray-50 hover:border-[#0A6C54]/30 transition-all">
+                      <div className="relative group/upload cursor-pointer border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:bg-gray-50 hover:border-primary/30 transition-all">
                         <input 
                           type="file" 
                           onChange={(e) => handleFileChange(item._id, e.target.files[0])}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
                         <div className="flex flex-col items-center justify-center pointer-events-none">
-                          <div className={`p-2 rounded-full mb-2 ${selectedFiles[item._id] ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-400 group-hover/upload:bg-[#0A6C54]/10 group-hover/upload:text-[#0A6C54]'} transition-colors`}>
+                          <div className={`p-2 rounded-full mb-2 ${selectedFiles[item._id] ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-400 group-hover/upload:bg-primary/10 group-hover/upload:text-primary'} transition-colors`}>
                             {selectedFiles[item._id] ? <CheckCircle size={20} /> : <Upload size={20} />}
                           </div>
                           <p className="text-[12px] font-semibold text-gray-700">
@@ -127,7 +127,7 @@ const Assignments = () => {
                       <button 
                         onClick={() => handleUpload(item._id)} 
                         disabled={!selectedFiles[item._id]}
-                        className="w-full bg-[#0A6C54] hover:bg-[#085a46] text-white py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-primary hover:bg-primary-hover text-white py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Submit Assignment
                       </button>
@@ -136,7 +136,7 @@ const Assignments = () => {
                     <div className="bg-gray-50 rounded-xl p-4 text-[12px] space-y-2 border border-gray-100">
                       <div className="flex justify-between items-center pb-2 border-b border-gray-200/50">
                         <span className="text-gray-500 font-bold">Marks Awarded</span>
-                        <span className={`font-black text-[14px] ${item.marksAwarded !== null ? 'text-[#0A6C54]' : 'text-orange-500'}`}>
+                        <span className={`font-black text-[14px] ${item.marksAwarded !== null ? 'text-primary' : 'text-orange-500'}`}>
                           {item.marksAwarded !== null ? item.marksAwarded : 'Pending'}
                         </span>
                       </div>

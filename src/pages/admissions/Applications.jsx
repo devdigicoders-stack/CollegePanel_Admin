@@ -53,7 +53,7 @@ const Applications = () => {
       text: 'Are you sure you want to approve this application? This will register the student.',
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#0A6C54',
+      confirmButtonColor: 'var(--color-primary)',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, Approve'
     });
@@ -129,7 +129,7 @@ const Applications = () => {
             placeholder="Search name, phone, App No..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
         </div>
@@ -155,7 +155,7 @@ const Applications = () => {
                 {filteredApps.length > 0 ? filteredApps.map((app) => (
                   <tr key={app._id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="p-4">
-                      <p className="text-[13px] font-black text-[#0A6C54]">{app.appNo}</p>
+                      <p className="text-[13px] font-black text-primary">{app.appNo}</p>
                       <p className="text-[11px] text-gray-400 font-medium">{new Date(app.createdAt).toLocaleDateString('en-IN')}</p>
                     </td>
                     <td className="p-4">
@@ -181,7 +181,7 @@ const Applications = () => {
                     <td className="p-4 text-right">
                       <button 
                         onClick={() => { setSelectedApp(app); setShowViewModal(true); }}
-                        className="p-2 text-gray-400 hover:text-[#0A6C54] hover:bg-[#0A6C54]/10 rounded-lg transition-colors inline-flex"
+                        className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors inline-flex"
                         title="View Details"
                       >
                         <Eye size={18} />

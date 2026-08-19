@@ -45,7 +45,7 @@ const HostelMovement = () => {
       text: `Record hostel return for ${studentName}.`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#0A6C54',
+      confirmButtonColor: 'var(--color-primary)',
       cancelButtonColor: '#e5e7eb',
       confirmButtonText: 'Yes, Check-In',
       cancelButtonText: '<span style="color: black">Cancel</span>'
@@ -125,11 +125,11 @@ const HostelMovement = () => {
             placeholder="Search by student name or roll no..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <div className="text-[12px] font-semibold text-gray-500 bg-white px-4 py-2.5 border border-gray-200 rounded-lg shadow-sm">
-          Total Records Found: <span className="text-[#0A6C54]">{filtered.length}</span>
+          Total Records Found: <span className="text-primary">{filtered.length}</span>
         </div>
       </div>
 
@@ -152,7 +152,7 @@ const HostelMovement = () => {
             <tbody>
               {filtered.map(item => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] font-bold font-mono text-[#0A6C54] tracking-wide">
+                  <td className="py-4 px-6 text-[13px] font-bold font-mono text-primary tracking-wide">
                     {item.studentId?.rollNumber || item.studentId?.studentId || 'N/A'}
                   </td>
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.studentId?.studentName || 'Unknown'}</td>
@@ -179,7 +179,7 @@ const HostelMovement = () => {
                         <>
                           <button 
                             onClick={() => handleReturn(item.studentId?._id, item.studentId?.studentName)} 
-                            className="px-3 py-1.5 text-[12px] font-bold bg-[#0A6C54] text-white rounded-lg hover:bg-[#085a46] transition-colors flex items-center gap-1"
+                            className="px-3 py-1.5 text-[12px] font-bold bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors flex items-center gap-1"
                           >
                             Check-In
                           </button>

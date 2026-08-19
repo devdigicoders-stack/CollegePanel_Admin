@@ -149,7 +149,7 @@ const Allotment = () => {
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={15} /> Export Excel
           </button>
-          <button onClick={() => setShowAllotModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+          <button onClick={() => setShowAllotModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
             <Plus size={16} /> New Allotment
           </button>
         </div>
@@ -180,15 +180,15 @@ const Allotment = () => {
             placeholder="Search by student name or enrollment no..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <select value={filterBlock} onChange={(e) => setFilterBlock(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
           {blocks.map(b => <option key={b} value={b}>{b === 'All' ? 'All Blocks' : b}</option>)}
         </select>
         <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); }}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
           <option value="Active">Active Only</option>
           <option value="Vacated">Vacated Only</option>
           <option value="All">All Allotments</option>
@@ -215,11 +215,11 @@ const Allotment = () => {
             <tbody>
               {filtered.map(item => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.studentId?.studentId || 'N/A'}</td>
+                  <td className="py-4 px-6 text-[13px] font-semibold text-primary">{item.studentId?.studentId || 'N/A'}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.studentId?.studentName || 'Unknown'}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600">{item.studentId?.course || 'N/A'}</td>
                   <td className="py-4 px-6 text-[13px] font-medium text-gray-700">
-                    <span className="bg-[#0A6C54]/5 text-[#0A6C54] px-2 py-0.5 rounded font-semibold text-[12px]">{item.roomId?.blockName}</span>
+                    <span className="bg-primary/5 text-primary px-2 py-0.5 rounded font-semibold text-[12px]">{item.roomId?.blockName}</span>
                     <span className="text-gray-500 ml-1.5">Room {item.roomId?.roomNumber}</span>
                   </td>
                   <td className="py-4 px-6 text-[13px] text-gray-500">
@@ -297,7 +297,7 @@ const Allotment = () => {
                     required
                     value={newAllot.studentId}
                     onChange={(e) => setNewAllot({ ...newAllot, studentId: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select a student...</option>
                     {unallocatedStudents.map(s => (
@@ -322,7 +322,7 @@ const Allotment = () => {
                     required
                     value={newAllot.roomId}
                     onChange={(e) => setNewAllot({ ...newAllot, roomId: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select a room...</option>
                     {availableRooms.map(r => (
@@ -342,7 +342,7 @@ const Allotment = () => {
                 <button
                   type="submit"
                   disabled={unallocatedStudents.length === 0 || availableRooms.length === 0}
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-[13px] font-semibold"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-[13px] font-semibold"
                 >
                   Allot Bed
                 </button>

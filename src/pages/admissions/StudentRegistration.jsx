@@ -138,12 +138,12 @@ const StudentRegistration = () => {
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input type="text" placeholder="Search by name or app no..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
         <div className="flex gap-2">
           {['All', 'Pending Registration', 'Registered'].map(s => (
             <button key={s} onClick={() => setFilterStatus(s)}
-              className={`px-4 py-2.5 rounded-lg text-[12px] font-semibold transition-colors ${filterStatus === s ? 'bg-[#0A6C54] text-white' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+              className={`px-4 py-2.5 rounded-lg text-[12px] font-semibold transition-colors ${filterStatus === s ? 'bg-primary text-white' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
               {s}
             </button>
           ))}
@@ -177,7 +177,7 @@ const StudentRegistration = () => {
                 <tbody>
                   {filtered.map(r => (
                     <tr key={r._id} className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors">
-                      <td className="py-2 px-3 text-[12px] font-bold text-[#0A6C54] whitespace-nowrap">{r.appNo}</td>
+                      <td className="py-2 px-3 text-[12px] font-bold text-primary whitespace-nowrap">{r.appNo}</td>
                       <td className="py-2 px-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-[11px]">
@@ -215,7 +215,7 @@ const StudentRegistration = () => {
                         {r.registrationStatus !== 'Registered' ? (
                           <button
                             onClick={() => openRegisterModal(r)}
-                            className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-colors shadow-sm"
+                            className="bg-primary hover:bg-primary-hover text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-colors shadow-sm"
                           >
                             <CheckCircle size={12} /> Register
                           </button>
@@ -291,7 +291,7 @@ const StudentRegistration = () => {
                       value={regForm[f.name]}
                       onChange={e => setRegForm({ ...regForm, [f.name]: e.target.value })}
                       placeholder={f.placeholder}
-                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] transition-shadow placeholder:text-gray-300"
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary transition-shadow placeholder:text-gray-300"
                     />
                   </div>
                 ))}
@@ -302,7 +302,7 @@ const StudentRegistration = () => {
                   <select
                     value={regForm.semester}
                     onChange={e => setRegForm({ ...regForm, semester: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select Semester</option>
                     {semesters.map(s => <option key={s._id || s.semesterNumber} value={s.semesterNumber}>Semester {s.semesterNumber}</option>)}
@@ -315,7 +315,7 @@ const StudentRegistration = () => {
                   <select
                     value={regForm.section}
                     onChange={e => setRegForm({ ...regForm, section: e.target.value })}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select Section</option>
                     {sections.map(s => <option key={s._id || s.name} value={s.name}>{s.name}</option>)}
@@ -331,7 +331,7 @@ const StudentRegistration = () => {
               <button
                 onClick={handleRegister}
                 disabled={registering}
-                className="bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-[13px] font-bold flex items-center gap-2 transition-colors shadow-sm"
+                className="bg-primary hover:bg-primary-hover disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-[13px] font-bold flex items-center gap-2 transition-colors shadow-sm"
               >
                 <CheckCircle size={16} />
                 {registering ? 'Registering...' : 'Confirm Registration'}

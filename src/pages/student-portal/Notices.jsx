@@ -49,7 +49,7 @@ const StudentNotices = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 p-6 pb-0">
         <div>
           <h2 className="text-2xl font-black text-gray-800 flex items-center gap-2">
-            <Bell className="text-[#0A6C54]" size={28} />
+            <Bell className="text-primary" size={28} />
             Notice Board
           </h2>
           <p className="text-sm text-gray-500 mt-1 font-medium">Stay updated with the latest announcements</p>
@@ -61,7 +61,7 @@ const StudentNotices = () => {
             placeholder="Search notices..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all shadow-sm"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
           />
           <Search className="absolute left-3.5 top-2.5 text-gray-400" size={18} />
         </div>
@@ -70,7 +70,7 @@ const StudentNotices = () => {
       <div className="space-y-6 flex-1 overflow-y-auto px-6 pb-6">
         {filteredNotices.length > 0 ? filteredNotices.map((notice) => (
           <div key={notice._id} className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_2px_15px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-lg transition-all relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-[#0A6C54] group-hover:bg-[#085a46] transition-colors"></div>
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-primary group-hover:bg-primary-hover transition-colors"></div>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-start mb-4">
               <div>
@@ -137,7 +137,7 @@ const StudentNotices = () => {
                           href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${img}`} 
                           target="_blank" 
                           rel="noreferrer"
-                          className="block rounded-xl overflow-hidden border border-gray-200 hover:border-[#0A6C54] hover:shadow-lg transition-all group/img relative aspect-video sm:aspect-square"
+                          className="block rounded-xl overflow-hidden border border-gray-200 hover:border-primary hover:shadow-lg transition-all group/img relative aspect-video sm:aspect-square"
                         >
                           <img 
                             src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${img}`} 

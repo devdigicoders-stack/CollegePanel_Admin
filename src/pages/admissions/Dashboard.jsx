@@ -54,7 +54,7 @@ const AdmissionOfficerDashboard = () => {
     yAxis: { title: { text: '' }, gridLineDashStyle: 'Dash' },
     series: [
       { name: 'Applications', data: [stats.totalApplications], color: '#10B981' },
-      { name: 'Admissions', data: [stats.approvedAdmissions], color: '#0A6C54' }
+      { name: 'Admissions', data: [stats.approvedAdmissions], color: 'var(--color-primary)' }
     ],
     legend: { enabled: true },
     credits: { enabled: false },
@@ -128,7 +128,7 @@ const AdmissionOfficerDashboard = () => {
               <tbody className="divide-y divide-gray-50">
                 {latestPendingApps.map((app, idx) => (
                   <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-5 py-3.5 text-[13px] font-bold text-[#0A6C54]">{app.appNo}</td>
+                    <td className="px-5 py-3.5 text-[13px] font-bold text-primary">{app.appNo}</td>
                     <td className="px-5 py-3.5 text-[13px] font-bold text-gray-800">{app.name}</td>
                     <td className="px-5 py-3.5 text-[13px] text-gray-600 font-medium">{app.course}</td>
                     <td className="px-5 py-3.5 text-[13px] text-gray-600">{app.mobile}</td>

@@ -193,11 +193,11 @@ const IssueReturn = () => {
               setReturnDetails(null);
             }}
             className={`px-6 py-4 text-[14px] font-semibold relative ${
-              activeTab === tab ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'
+              activeTab === tab ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             {tab} Book
-            {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-md"></div>}
+            {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-md"></div>}
           </button>
         ))}
       </div>
@@ -213,9 +213,9 @@ const IssueReturn = () => {
                   placeholder="Enter Member Name or Enrollment No..." 
                   value={memberSearch}
                   onChange={(e) => setMemberSearch(e.target.value)}
-                  className="flex-1 p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  className="flex-1 p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                 />
-                <button type="submit" className="bg-[#0A6C54] text-white px-4 py-2.5 rounded-lg text-[13px] font-bold">Search</button>
+                <button type="submit" className="bg-primary text-white px-4 py-2.5 rounded-lg text-[13px] font-bold">Search</button>
               </form>
 
               {selectedMember && (
@@ -248,9 +248,9 @@ const IssueReturn = () => {
                   placeholder="Enter Accession No or Title..." 
                   value={bookSearch}
                   onChange={(e) => setBookSearch(e.target.value)}
-                  className="flex-1 p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  className="flex-1 p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                 />
-                <button type="submit" className="bg-[#0A6C54] text-white px-4 py-2.5 rounded-lg text-[13px] font-bold">Search</button>
+                <button type="submit" className="bg-primary text-white px-4 py-2.5 rounded-lg text-[13px] font-bold">Search</button>
               </form>
 
               {selectedBook && (
@@ -310,7 +310,7 @@ const IssueReturn = () => {
               onClick={handleIssueBook}
               disabled={!selectedMember || !selectedBook || isSubmitting}
               className={`w-full py-3 rounded-lg text-[13px] font-bold text-white transition-colors ${
-                selectedMember && selectedBook && !isSubmitting ? 'bg-[#0A6C54] hover:bg-[#085a46]' : 'bg-gray-300 cursor-not-allowed'
+                selectedMember && selectedBook && !isSubmitting ? 'bg-primary hover:bg-primary-hover' : 'bg-gray-300 cursor-not-allowed'
               }`}
             >
               {isSubmitting ? 'Issuing...' : 'Issue Book Copies'}
@@ -327,9 +327,9 @@ const IssueReturn = () => {
                 placeholder="Scan / Type Accession Number or TXN ID..." 
                 value={returnBarcode}
                 onChange={(e) => setReturnBarcode(e.target.value)}
-                className="flex-1 p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                className="flex-1 p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
               />
-              <button type="submit" className="bg-[#0A6C54] text-white px-4 py-2.5 rounded-lg text-[13px] font-bold flex items-center gap-1">
+              <button type="submit" className="bg-primary text-white px-4 py-2.5 rounded-lg text-[13px] font-bold flex items-center gap-1">
                 <Barcode size={15} /> Scan
               </button>
             </form>
@@ -398,7 +398,7 @@ const IssueReturn = () => {
                 onClick={handleCompleteReturn}
                 disabled={!returnDetails || isSubmitting}
                 className={`w-full py-3 rounded-lg text-[13px] font-bold text-white transition-colors ${
-                  returnDetails && !isSubmitting ? 'bg-[#0A6C54] hover:bg-[#085a46]' : 'bg-gray-300 cursor-not-allowed'
+                  returnDetails && !isSubmitting ? 'bg-primary hover:bg-primary-hover' : 'bg-gray-300 cursor-not-allowed'
                 }`}
               >
                 {isSubmitting ? 'Processing...' : 'Post Book Return'}

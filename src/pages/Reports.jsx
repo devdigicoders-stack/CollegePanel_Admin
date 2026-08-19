@@ -207,7 +207,7 @@ const Reports = () => {
               key={mod.id}
               onClick={() => handleModuleChange(mod)}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-left ${
-                isActive ? 'bg-[#0A6C54] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
+                isActive ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               <div className={`p-1.5 rounded-lg flex-shrink-0 ${isActive ? 'bg-white/20 text-white' : `${mod.bg} ${mod.color}`}`}>
@@ -244,7 +244,7 @@ const Reports = () => {
             <button
               disabled={!canExport}
               onClick={() => downloadCSV(reportData.columns, reportData.data, reportTitle.replace(/[^a-z0-9]/gi, '_'))}
-              className="px-3.5 py-2 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3.5 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <FileSpreadsheet size={13} /> Export CSV
             </button>
@@ -261,7 +261,7 @@ const Reports = () => {
             <select
               value={selectedReport}
               onChange={(e) => { setSelectedReport(e.target.value); setReportData(null); setHasGenerated(false); }}
-              className="w-full p-2 border border-gray-200 rounded-lg text-[12px] font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20"
+              className="w-full p-2 border border-gray-200 rounded-lg text-[12px] font-medium bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               {selectedModule.reports.map((r) => (
                 <option key={r} value={r}>{r}</option>
@@ -277,7 +277,7 @@ const Reports = () => {
             <select
               value={datePreset}
               onChange={(e) => setDatePreset(e.target.value)}
-              className="w-full p-2 border border-gray-200 rounded-lg text-[12px] font-medium bg-white focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20"
+              className="w-full p-2 border border-gray-200 rounded-lg text-[12px] font-medium bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               {['Today', 'Yesterday', 'This Week', 'This Month', 'Last Month', 'Custom'].map(d => (
                 <option key={d}>{d}</option>
@@ -329,7 +329,7 @@ const Reports = () => {
 
           {loading && (
             <div className="flex flex-col items-center justify-center h-full py-16 text-gray-400">
-              <Loader2 size={32} className="animate-spin mb-3 text-[#0A6C54]" />
+              <Loader2 size={32} className="animate-spin mb-3 text-primary" />
               <p className="text-[13px] font-medium">Fetching live data from database...</p>
             </div>
           )}
@@ -342,7 +342,7 @@ const Reports = () => {
                   <span className="font-bold text-gray-800">{reportData.data.length}</span> records found
                   {datePreset !== 'Custom' && <span className="ml-1">· {datePreset}</span>}
                 </p>
-                <button onClick={generate} className="text-[11px] text-[#0A6C54] font-semibold flex items-center gap-1 hover:underline">
+                <button onClick={generate} className="text-[11px] text-primary font-semibold flex items-center gap-1 hover:underline">
                   <RefreshCw size={11} /> Refresh
                 </button>
               </div>
@@ -386,7 +386,7 @@ const Reports = () => {
             <div className="flex flex-col items-center justify-center h-full py-16 text-red-400">
               <AlertCircle size={32} className="mb-3" />
               <p className="text-[14px] font-semibold">Failed to load report data</p>
-              <button onClick={generate} className="mt-3 text-[12px] text-[#0A6C54] font-semibold hover:underline flex items-center gap-1">
+              <button onClick={generate} className="mt-3 text-[12px] text-primary font-semibold hover:underline flex items-center gap-1">
                 <RefreshCw size={12} /> Try again
               </button>
             </div>

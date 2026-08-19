@@ -132,7 +132,7 @@ const AdmissionCancellation = () => {
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input type="text" placeholder="Search by name or app no..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
       </div>
 
@@ -153,7 +153,7 @@ const AdmissionCancellation = () => {
                 <tbody>
                   {filtered.length > 0 ? filtered.map(a => (
                     <tr key={a._id} className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors">
-                      <td className="py-3 px-4 text-[13px] font-bold text-[#0A6C54] whitespace-nowrap">{a.appNo}</td>
+                      <td className="py-3 px-4 text-[13px] font-bold text-primary whitespace-nowrap">{a.appNo}</td>
                       <td className="py-3 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-[12px]">
@@ -247,7 +247,7 @@ const AdmissionCancellation = () => {
                 {/* Personal Details */}
                 <div>
                   <h4 className="text-[13px] font-bold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
-                    <User size={14} className="text-[#0A6C54]" /> Personal Details
+                    <User size={14} className="text-primary" /> Personal Details
                   </h4>
                   <div className="space-y-3">
                     <div className="grid grid-cols-3 gap-2">
@@ -272,7 +272,7 @@ const AdmissionCancellation = () => {
                 {/* Academic Details */}
                 <div>
                   <h4 className="text-[13px] font-bold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
-                    <FileText size={14} className="text-[#0A6C54]" /> Academic Details
+                    <FileText size={14} className="text-primary" /> Academic Details
                   </h4>
                   <div className="space-y-3">
                     <div className="grid grid-cols-3 gap-2">

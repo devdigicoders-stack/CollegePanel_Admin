@@ -182,7 +182,7 @@ const Hods = () => {
             <select
               value={filterDepartment}
               onChange={(e) => handleFilterChange(e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Departments</option>
               {departments.map((dept) => (
@@ -197,7 +197,7 @@ const Hods = () => {
           {checkPermission('Add Department') && (
             <button 
               onClick={() => { fetchTeachersList(); setShowAddModal(true); }}
-              className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm"
+              className="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm"
             >
               <Plus size={16} /> Assign HOD
             </button>
@@ -217,7 +217,7 @@ const Hods = () => {
             placeholder="Search HOD by name or department..."
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] placeholder:text-gray-400 shadow-sm"
+            className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-gray-400 shadow-sm"
           />
         </div>
       </div>
@@ -251,7 +251,7 @@ const Hods = () => {
                 <tr key={hod._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{startIndex + index + 1}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-medium whitespace-nowrap">{hod.name}</td>
-                  <td className="py-4 px-6 text-[13px] text-[#0A6C54] font-medium whitespace-nowrap">{hod.department}</td>
+                  <td className="py-4 px-6 text-[13px] text-primary font-medium whitespace-nowrap">{hod.department}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{hod.email}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{hod.mobile}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{formatDate(hod.dateOfJoining)}</td>
@@ -316,7 +316,7 @@ const Hods = () => {
                   onClick={() => setPagination(prev => ({ ...prev, page: page }))}
                   className={`min-w-[32px] px-3 py-1.5 text-[13px] font-medium rounded border transition-colors ${
                     pagination.page === page
-                      ? 'bg-[#0A6C54] text-white border-[#0A6C54]'
+                      ? 'bg-primary text-white border-primary'
                       : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -344,7 +344,7 @@ const Hods = () => {
       {showAddModal && (
         <div className="fixed inset-0 bg-black/40 z-[9999] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-[#0A6C54]">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-primary">
               <h3 className="text-md font-bold text-white">Assign Teacher as HOD</h3>
               <button onClick={() => { setShowAddModal(false); setSelectedTeacherId(''); }} className="text-white hover:text-gray-200"><X size={18} /></button>
             </div>
@@ -356,7 +356,7 @@ const Hods = () => {
                     value={selectedTeacherId}
                     onChange={(e) => setSelectedTeacherId(e.target.value)}
                     required
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] appearance-none bg-white"
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary appearance-none bg-white"
                   >
                     <option value="">Choose a teacher</option>
                     {teachers.map(t => (
@@ -371,7 +371,7 @@ const Hods = () => {
                 <button type="button" onClick={() => { setShowAddModal(false); setSelectedTeacherId(''); }}
                   className="flex-1 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
                 <button type="submit" disabled={submitting}
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold transition-colors">
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold transition-colors">
                   {submitting ? 'Assigning...' : 'Assign as HOD'}
                 </button>
               </div>
@@ -384,7 +384,7 @@ const Hods = () => {
       {showViewModal && selectedHod && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-[#0A6C54]">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-primary">
               <h3 className="text-lg font-bold text-white">HOD Details</h3>
               <button
                 onClick={() => { setShowViewModal(false); setSelectedHod(null); }}
@@ -395,22 +395,22 @@ const Hods = () => {
             </div>
 
             <div className="p-6">
-              <div className="bg-gradient-to-br from-[#0A6C54]/5 to-[#0A6C54]/10 rounded-xl p-6 mb-6">
+              <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-6 mb-6">
                 <div className="flex items-center gap-4 mb-4">
                   {selectedHod.profileImage ? (
                     <img 
                       src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${selectedHod.profileImage}`} 
                       alt={selectedHod.name} 
-                      className="w-16 h-16 rounded-full object-cover border-2 border-[#0A6C54] bg-white shadow-sm"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-primary bg-white shadow-sm"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-[#0A6C54] flex items-center justify-center text-white text-2xl font-bold">
+                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-bold">
                       {selectedHod.name?.charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div>
                     <h4 className="text-xl font-bold text-gray-800">{selectedHod.name}</h4>
-                    <p className="text-sm text-[#0A6C54] font-medium">{selectedHod.designation} - {selectedHod.department}</p>
+                    <p className="text-sm text-primary font-medium">{selectedHod.designation} - {selectedHod.department}</p>
                     <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-bold tracking-wide mt-2 ${getStatusColor(selectedHod.status)}`}>
                       {selectedHod.status}
                     </span>

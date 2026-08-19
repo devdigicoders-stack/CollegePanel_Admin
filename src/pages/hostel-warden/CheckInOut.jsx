@@ -185,11 +185,11 @@ const CheckInOut = () => {
           <button
             key={key}
             onClick={() => { setActiveTab(key); setTargetStudent(null); }}
-            className={`flex items-center gap-2 px-4 sm:px-5 py-4 text-[13px] font-semibold relative transition-colors whitespace-nowrap flex-shrink-0 ${activeTab === key ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex items-center gap-2 px-4 sm:px-5 py-4 text-[13px] font-semibold relative transition-colors whitespace-nowrap flex-shrink-0 ${activeTab === key ? 'text-primary' : 'text-gray-500 hover:text-gray-700'}`}
           >
             <Icon size={14} />
             {label}
-            {activeTab === key && <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-md" />}
+            {activeTab === key && <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-md" />}
           </button>
         ))}
       </div>
@@ -207,17 +207,17 @@ const CheckInOut = () => {
                   placeholder="Enter Student Name / Enrollment No..."
                   value={studentSearch}
                   onChange={(e) => setStudentSearch(e.target.value)}
-                  className="flex-1 p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                  className="flex-1 p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                 />
-                <button type="submit" className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 rounded-lg text-[13px] font-bold transition-colors">
+                <button type="submit" className="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg text-[13px] font-bold transition-colors">
                   <Search size={15} />
                 </button>
               </form>
 
               {targetStudent ? (
-                <div className="bg-[#0A6C54]/5 border border-[#0A6C54]/20 p-4 rounded-xl space-y-2.5">
+                <div className="bg-primary/5 border border-primary/20 p-4 rounded-xl space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-bold text-[#0A6C54] uppercase tracking-wider">Student Found</span>
+                    <span className="text-[12px] font-bold text-primary uppercase tracking-wider">Student Found</span>
                     <button onClick={() => setTargetStudent(null)} className="text-gray-400 hover:text-red-500 text-lg">&times;</button>
                   </div>
                   <div className="space-y-1.5 text-[13px]">
@@ -235,7 +235,7 @@ const CheckInOut = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Allotted Room</span>
-                      <span className="font-bold text-[#0A6C54]">{targetStudent.roomId?.blockName} — Room {targetStudent.roomId?.roomNumber}</span>
+                      <span className="font-bold text-primary">{targetStudent.roomId?.blockName} — Room {targetStudent.roomId?.roomNumber}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Status</span>
@@ -265,18 +265,18 @@ const CheckInOut = () => {
                   { state: mattressIssued, setter: setMattressIssued, label: 'Mattress & Pillow', desc: 'Standard single mattress with pillow cover issued' },
                   { state: chairIssued, setter: setChairIssued, label: 'Study Chair Issued', desc: 'Plastic study chair tagged under student bed ID' }
                 ].map(({ state, setter, label, desc }) => (
-                  <label key={label} className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-colors text-[13px] ${state ? 'border-[#0A6C54]/30 bg-[#0A6C54]/5' : 'border-gray-100 hover:bg-gray-50'}`}>
+                  <label key={label} className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-colors text-[13px] ${state ? 'border-primary/30 bg-primary/5' : 'border-gray-100 hover:bg-gray-50'}`}>
                     <input
                       type="checkbox"
                       checked={state}
                       onChange={(e) => setter(e.target.checked)}
-                      className="w-4 h-4 accent-[#0A6C54] cursor-pointer"
+                      className="w-4 h-4 accent-primary cursor-pointer"
                     />
                     <div>
-                      <p className={`font-bold ${state ? 'text-[#0A6C54]' : 'text-gray-800'}`}>{label}</p>
+                      <p className={`font-bold ${state ? 'text-primary' : 'text-gray-800'}`}>{label}</p>
                       <p className="text-[11px] text-gray-500">{desc}</p>
                     </div>
-                    {state && <CheckCircle2 size={16} className="ml-auto text-[#0A6C54]" />}
+                    {state && <CheckCircle2 size={16} className="ml-auto text-primary" />}
                   </label>
                 ))}
 
@@ -286,7 +286,7 @@ const CheckInOut = () => {
                     value={checkInRemarks}
                     onChange={(e) => setCheckInRemarks(e.target.value)}
                     placeholder="Any special notes about the room condition..."
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] h-16 resize-none focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] h-16 resize-none focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -299,7 +299,7 @@ const CheckInOut = () => {
               <button
                 onClick={handleCompleteCheckIn}
                 disabled={!checkInReady}
-                className={`w-full py-3 rounded-xl text-[13px] font-bold text-white transition-colors ${checkInReady ? 'bg-[#0A6C54] hover:bg-[#085a46]' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                className={`w-full py-3 rounded-xl text-[13px] font-bold text-white transition-colors ${checkInReady ? 'bg-primary hover:bg-primary-hover' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
               >
                 {!targetStudent ? 'Search a student first' : !checkInReady ? `Complete all ${3 - [keyIssued, mattressIssued, chairIssued].filter(Boolean).length} remaining items` : '✓ Complete Check-In'}
               </button>
@@ -319,10 +319,10 @@ const CheckInOut = () => {
                   { state: keyReturned, setter: setKeyReturned, label: 'Room Key Returned' },
                   { state: mattressReturned, setter: setMattressReturned, label: 'Mattress & Items Returned' }
                 ].map(({ state, setter, label }) => (
-                  <label key={label} className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-colors text-[13px] ${state ? 'border-[#0A6C54]/30 bg-[#0A6C54]/5' : 'border-gray-100 hover:bg-gray-50'}`}>
-                    <input type="checkbox" checked={state} onChange={(e) => setter(e.target.checked)} className="w-4 h-4 accent-[#0A6C54]" />
-                    <p className={`font-bold ${state ? 'text-[#0A6C54]' : 'text-gray-800'}`}>{label}</p>
-                    {state && <CheckCircle2 size={16} className="ml-auto text-[#0A6C54]" />}
+                  <label key={label} className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-colors text-[13px] ${state ? 'border-primary/30 bg-primary/5' : 'border-gray-100 hover:bg-gray-50'}`}>
+                    <input type="checkbox" checked={state} onChange={(e) => setter(e.target.checked)} className="w-4 h-4 accent-primary" />
+                    <p className={`font-bold ${state ? 'text-primary' : 'text-gray-800'}`}>{label}</p>
+                    {state && <CheckCircle2 size={16} className="ml-auto text-primary" />}
                   </label>
                 ))}
 
@@ -333,7 +333,7 @@ const CheckInOut = () => {
                     min="0"
                     value={damageCharges}
                     onChange={(e) => setDamageCharges(e.target.value)}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
 
@@ -343,7 +343,7 @@ const CheckInOut = () => {
                     value={checkOutRemarks}
                     onChange={(e) => setCheckOutRemarks(e.target.value)}
                     placeholder="e.g. All items returned, minor paint damage noted..."
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] h-16 resize-none focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] h-16 resize-none focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -369,7 +369,7 @@ const CheckInOut = () => {
                 <button
                   key={f}
                   onClick={() => setLogFilter(f)}
-                  className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${logFilter === f ? 'bg-[#0A6C54] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                  className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${logFilter === f ? 'bg-primary text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
                 >
                   {f}
                 </button>
@@ -403,7 +403,7 @@ const CheckInOut = () => {
                   {logs.map(log => (
                     <tr key={log._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="py-3 px-6 text-[13px] font-bold text-gray-800">{log.studentId?.studentName || 'N/A'}</td>
-                      <td className="py-3 px-6 text-[13px] font-semibold text-[#0A6C54]">{log.studentId?.studentId || 'N/A'}</td>
+                      <td className="py-3 px-6 text-[13px] font-semibold text-primary">{log.studentId?.studentId || 'N/A'}</td>
                       <td className="py-3 px-6 text-center">
                         <span className={`flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold w-fit mx-auto ${log.type === 'Check-In' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
                           {log.type === 'Check-In' ? <LogIn size={11} /> : <LogOut size={11} />}

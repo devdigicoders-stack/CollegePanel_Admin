@@ -92,7 +92,7 @@ const MealMenu = () => {
           <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Plus size={15} /> Add Special Meal
           </button>
-          <button onClick={handlePublish} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+          <button onClick={handlePublish} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
             <Save size={16} /> Publish & Broadcast
           </button>
         </div>
@@ -211,7 +211,7 @@ const MealMenu = () => {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold"
                 >
                   {isSubmitting ? 'Saving...' : 'Save Banquet Menu'}
                 </button>

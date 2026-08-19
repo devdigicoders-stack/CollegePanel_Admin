@@ -49,7 +49,7 @@ const NewAdmission = () => {
       ctx.fillRect(0, 0, width, height);
       
       // Header: College Name
-      ctx.fillStyle = '#0A6C54';
+      ctx.fillStyle = 'var(--color-primary)';
       ctx.font = 'bold 24px Inter, Arial, sans-serif';
       ctx.textAlign = 'center';
       
@@ -145,7 +145,7 @@ const NewAdmission = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-3xl mx-auto text-center mt-10">
         
         <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Share2 className="text-[#0A6C54]" size={36} strokeWidth={1.5} />
+          <Share2 className="text-primary" size={36} strokeWidth={1.5} />
         </div>
         
         <h2 className="text-xl font-bold text-gray-800 mb-2">Automated Student Registration</h2>
@@ -191,7 +191,7 @@ const NewAdmission = () => {
         {/* QR Code Section */}
         <div className="border-t border-gray-100 pt-8 mt-4 flex flex-col items-center">
           <h3 className="text-sm font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <QrCode size={18} className="text-[#0A6C54]" /> Scan QR Code to Apply
+            <QrCode size={18} className="text-primary" /> Scan QR Code to Apply
           </h3>
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 inline-block mb-6">
             <QRCodeCanvas 
@@ -199,7 +199,7 @@ const NewAdmission = () => {
               value={publicUrl} 
               size={180} 
               bgColor={"#ffffff"}
-              fgColor={"#022A36"}
+              fgColor={"var(--color-sidebar)"}
               level={"H"}
               includeMargin={false}
             />

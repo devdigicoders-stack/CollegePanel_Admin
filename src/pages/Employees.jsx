@@ -153,7 +153,7 @@ const Employees = () => {
           showCancelButton: true,
           confirmButtonText: 'Copy Credentials',
           cancelButtonText: 'Close',
-          confirmButtonColor: '#0A6C54'
+          confirmButtonColor: 'var(--color-primary)'
         }).then((result) => {
           if (result.isConfirmed) {
             navigator.clipboard.writeText(`Login Details for ${newEmp.name}\nUsername: ${newEmp.username}\nPassword: ${newEmp.password}\nPortal URL: ${window.location.origin}`);
@@ -209,7 +209,7 @@ const Employees = () => {
       
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-2">
-        <h2 className="text-[20px] font-bold text-[#022A36] font-['Outfit']">All Employees List</h2>
+        <h2 className="text-[20px] font-bold text-sidebar font-['Outfit']">All Employees List</h2>
       </div>
 
       {/* Filters Top Row */}
@@ -220,7 +220,7 @@ const Employees = () => {
             <select 
               value={filters.role}
               onChange={(e) => handleFilterChange('role', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Roles</option>
               {roles.map(role => (
@@ -235,7 +235,7 @@ const Employees = () => {
             <select 
               value={filters.department}
               onChange={(e) => handleFilterChange('department', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Departments</option>
               {departments.map(dept => (
@@ -250,7 +250,7 @@ const Employees = () => {
             <select 
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Status</option>
               <option>Active</option>
@@ -264,7 +264,7 @@ const Employees = () => {
         {checkPermission('Add Employee') && (
           <button 
             onClick={handleAddClick}
-            className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
+            className="w-full md:w-auto bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
           >
             <Plus size={16} strokeWidth={2.5} />
             Add Employee
@@ -281,7 +281,7 @@ const Employees = () => {
             placeholder="Search by name or employee ID" 
             value={filters.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] placeholder:text-gray-400 shadow-sm"
+            className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-gray-400 shadow-sm"
           />
         </div>
       </div>
@@ -312,7 +312,7 @@ const Employees = () => {
               {employees.map((employee, index) => (
                 <tr key={employee._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{(pagination.page - 1) * pagination.limit + index + 1}</td>
-                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{employee.empId}</td>
+                  <td className="py-4 px-6 text-[13px] font-semibold text-primary">{employee.empId}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-medium whitespace-nowrap">{employee.name}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-medium whitespace-nowrap">{employee.role}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{employee.department}</td>
@@ -386,7 +386,7 @@ const Employees = () => {
                   onClick={() => setPagination(prev => ({ ...prev, page }))}
                   className={`min-w-[32px] px-3 py-1.5 text-[13px] font-medium rounded border transition-colors ${
                     pagination.page === page
-                      ? 'bg-[#0A6C54] text-white border-[#0A6C54]'
+                      ? 'bg-primary text-white border-primary'
                       : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -470,7 +470,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
                 value={formData.name || ''}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0A6C54] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm"
               />
             </div>
 
@@ -484,7 +484,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
                 value={formData.email || ''}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0A6C54] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm"
               />
             </div>
 
@@ -498,7 +498,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
                 value={formData.mobile || ''}
                 onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0A6C54] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm"
               />
             </div>
 
@@ -511,7 +511,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
                 value={formData.role || ''}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0A6C54] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm"
               >
                 <option value="">Select Role</option>
                 {roles.map(role => (
@@ -529,7 +529,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
                 value={formData.department || ''}
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0A6C54] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm"
               >
                 <option value="">Select Department</option>
                 {departments.map(dept => (
@@ -547,7 +547,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
                 type="date"
                 value={formData.dateOfJoining ? formData.dateOfJoining.split('T')[0] : ''}
                 onChange={(e) => setFormData({ ...formData, dateOfJoining: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0A6C54] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm"
               />
             </div>
 
@@ -560,7 +560,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
                 type="date"
                 value={formData.dateOfBirth ? formData.dateOfBirth.split('T')[0] : ''}
                 onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0A6C54] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm"
               />
             </div>
 
@@ -572,7 +572,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
               <select
                 value={formData.gender || ''}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0A6C54] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm"
               >
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
@@ -589,7 +589,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
               <select
                 value={formData.status || 'Active'}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0A6C54] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm"
               >
                 <option value="Active">Active</option>
                 <option value="On Leave">On Leave</option>
@@ -633,7 +633,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
                 value={formData.address || ''}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0A6C54] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-sm"
               />
             </div>
           </div>
@@ -682,7 +682,7 @@ const EmployeeModal = ({ title, formData, setFormData, roles, departments, onSub
           <div className="flex gap-3 mt-6">
             <button
               type="submit"
-              className="flex-1 bg-[#0A6C54] text-white py-2 rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm"
+              className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm"
             >
               {formData._id ? 'Update' : 'Create'}
             </button>
@@ -724,7 +724,7 @@ const ViewEmployeeModal = ({ employee, onClose }) => {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         {/* Header with Gradient */}
-        <div className="bg-gradient-to-r from-[#0A6C54] to-[#0d8566] p-6 relative">
+        <div className="bg-gradient-to-r from-primary to-[#0d8566] p-6 relative">
           <button 
             onClick={onClose}
             className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
@@ -738,12 +738,12 @@ const ViewEmployeeModal = ({ employee, onClose }) => {
         {/* Profile Section */}
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#0A6C54] to-[#0d8566] flex items-center justify-center flex-shrink-0">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-[#0d8566] flex items-center justify-center flex-shrink-0">
               <User size={40} className="text-white" />
             </div>
             <div className="flex-1">
               <h4 className="text-lg font-bold text-gray-800">{employee.name}</h4>
-              <p className="text-sm text-[#0A6C54] font-medium">{employee.role} - {employee.department}</p>
+              <p className="text-sm text-primary font-medium">{employee.role} - {employee.department}</p>
               <p className="text-xs text-gray-500 mt-1">Employee ID: {employee.empId}</p>
               <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-bold tracking-wide mt-2 ${getStatusColor(employee.status)}`}>
                 {employee.status}
@@ -766,8 +766,8 @@ const ViewEmployeeModal = ({ employee, onClose }) => {
             {/* Login Credentials */}
             <h5 className="text-sm font-bold text-gray-700 mt-6 mb-4 pb-2 border-b border-gray-200">Login Credentials</h5>
             <div className="space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
-              <InfoRow label="Username" value={<span className="font-semibold text-[#0A6C54]">{employee.username || 'Not Generated'}</span>} />
-              <InfoRow label="Password" value={<span className="font-semibold text-[#0A6C54]">{employee.password || 'Not Generated'}</span>} />
+              <InfoRow label="Username" value={<span className="font-semibold text-primary">{employee.username || 'Not Generated'}</span>} />
+              <InfoRow label="Password" value={<span className="font-semibold text-primary">{employee.password || 'Not Generated'}</span>} />
             </div>
           </div>
 

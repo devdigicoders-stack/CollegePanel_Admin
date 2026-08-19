@@ -451,13 +451,13 @@ const handleSavePermissions = async () => {
     <div className="flex flex-col h-full font-['Inter'] bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-[20px] font-bold text-[#022A36] font-['Outfit']">Users & Roles</h2>
+          <h2 className="text-[20px] font-bold text-sidebar font-['Outfit']">Users & Roles</h2>
           <p className="text-[13px] text-gray-500 mt-1">Manage system roles and assign them to users</p>
         </div>
         {activeTab === 'roles' && (
           <button
             onClick={handleAddRole}
-            className="flex items-center gap-2 bg-[#022A36] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#022a36]/90 transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-sidebar text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-sidebar/90 transition-colors shadow-sm"
           >
             <Plus size={18} />
             Add New Role
@@ -470,23 +470,23 @@ const handleSavePermissions = async () => {
         <button
           onClick={() => setActiveTab('roles')}
           className={`px-6 py-3 text-[14px] font-semibold transition-all relative ${
-            activeTab === 'roles' ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'
+            activeTab === 'roles' ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
           }`}
         >
           Manage Roles
           {activeTab === 'roles' && (
-            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-full"></div>
+            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-full"></div>
           )}
         </button>
         <button
           onClick={() => setActiveTab('users')}
           className={`px-6 py-3 text-[14px] font-semibold transition-all relative ${
-            activeTab === 'users' ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'
+            activeTab === 'users' ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
           }`}
         >
           Assign Roles to Users
           {activeTab === 'users' && (
-            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-full"></div>
+            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-full"></div>
           )}
         </button>
       </div>
@@ -501,7 +501,7 @@ const handleSavePermissions = async () => {
                 placeholder="Search users by name or ID..."
                 value={userSearchQuery}
                 onChange={(e) => setUserSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-[#022A36] focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-sidebar focus:border-transparent"
               />
             </div>
           </div>
@@ -524,7 +524,7 @@ const handleSavePermissions = async () => {
                     <tr key={user._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[#0A6C54] text-white flex items-center justify-center font-bold">
+                          <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">
                             {user.name.charAt(0)}
                           </div>
                           <div>
@@ -545,7 +545,7 @@ const handleSavePermissions = async () => {
                         <select
                           value={user.role || ''}
                           onChange={(e) => handleAssignRole(user._id, e.target.value)}
-                          className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+                          className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
                         >
                           <option value="">Select Role...</option>
                           {roles.map(r => (
@@ -577,7 +577,7 @@ const handleSavePermissions = async () => {
             placeholder="Search roles by name, description, or department..."
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-[#022A36] focus:border-transparent"
+            className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-sidebar focus:border-transparent"
           />
         </div>
       </div>
@@ -668,7 +668,7 @@ const handleSavePermissions = async () => {
                   onClick={() => setPagination(prev => ({ ...prev, page: page }))}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-medium ${
                     pagination.page === page
-                      ? 'bg-[#022A36] text-white'
+                      ? 'bg-sidebar text-white'
                       : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -695,7 +695,7 @@ const handleSavePermissions = async () => {
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 rounded-t-2xl">
               <div className="flex items-center justify-between">
-                <h3 className="text-[17px] font-bold text-[#022A36]">
+                <h3 className="text-[17px] font-bold text-sidebar">
                   {isEditing ? 'Edit Role' : 'Add New Role'}
                 </h3>
                 <button onClick={() => setShowRoleModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -714,7 +714,7 @@ const handleSavePermissions = async () => {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., HOD, Teacher, Accountant"
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#022A36] focus:border-transparent"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-sidebar focus:border-transparent"
                 />
               </div>
 
@@ -727,7 +727,7 @@ const handleSavePermissions = async () => {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Describe the role and its responsibilities"
                   rows={3}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#022A36] focus:border-transparent resize-none"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-sidebar focus:border-transparent resize-none"
                 />
               </div>
 
@@ -738,7 +738,7 @@ const handleSavePermissions = async () => {
                 <select
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#022A36] focus:border-transparent"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-2 focus:ring-sidebar focus:border-transparent"
                 >
                   <option value="">Select Department</option>
                   <option value="Administration">Administration</option>
@@ -760,7 +760,7 @@ const handleSavePermissions = async () => {
                       value="Active"
                       checked={formData.status === 'Active'}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-4 h-4 text-[#022A36] focus:ring-[#022A36]"
+                      className="w-4 h-4 text-sidebar focus:ring-sidebar"
                     />
                     <span className="text-[13px] text-gray-700">Active</span>
                   </label>
@@ -771,7 +771,7 @@ const handleSavePermissions = async () => {
                       value="Inactive"
                       checked={formData.status === 'Inactive'}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                      className="w-4 h-4 text-[#022A36] focus:ring-[#022A36]"
+                      className="w-4 h-4 text-sidebar focus:ring-sidebar"
                     />
                     <span className="text-[13px] text-gray-700">Inactive</span>
                   </label>
@@ -789,7 +789,7 @@ const handleSavePermissions = async () => {
               <button
                 onClick={handleSaveRole}
                 disabled={formLoading}
-                className="px-6 py-2.5 text-[13px] font-semibold text-white bg-[#022A36] hover:bg-[#022a36]/90 rounded-lg transition-colors shadow-sm disabled:opacity-50"
+                className="px-6 py-2.5 text-[13px] font-semibold text-white bg-sidebar hover:bg-sidebar/90 rounded-lg transition-colors shadow-sm disabled:opacity-50"
               >
                 {formLoading ? 'Saving...' : (isEditing ? 'Update Role' : 'Create Role')}
               </button>

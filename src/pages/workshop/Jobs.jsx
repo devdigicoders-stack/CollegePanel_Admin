@@ -54,7 +54,7 @@ const Jobs = () => {
           <h2 className="text-[16px] font-bold text-gray-800">Workshop Exercises & Job Cards</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium font-semibold">Assign new carpentry, welding, or turning jobs, and track submissions</p>
         </div>
-        <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+        <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
           <Plus size={16} /> Assign Job Card
         </button>
       </div>
@@ -68,7 +68,7 @@ const Jobs = () => {
             placeholder="Search by job title or trade section..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -89,7 +89,7 @@ const Jobs = () => {
           <tbody>
             {filtered.map(item => (
               <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.jobNo}</td>
+                <td className="py-4 px-6 text-[13px] font-semibold text-primary">{item.jobNo}</td>
                 <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.title}</td>
                 <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{item.trade}</td>
                 <td className="py-4 px-6 text-[13px] text-gray-500 font-medium">{item.tools}</td>
@@ -174,7 +174,7 @@ const Jobs = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold"
                 >
                   Assign Job
                 </button>

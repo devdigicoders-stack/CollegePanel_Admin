@@ -62,7 +62,7 @@ const Applications = () => {
             placeholder="Search by student name or recruiting company..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -102,7 +102,7 @@ const Applications = () => {
                   <td className="py-4 px-6 flex gap-2">
                     <button className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors" title="View Details"><Eye size={15} /></button>
                     {item.status === 'Applied' && (
-                      <button onClick={() => handleForward(item._id)} className="px-2.5 py-1 text-[11px] font-bold bg-[#0A6C54] text-white rounded hover:bg-[#085a46]">Forward HR</button>
+                      <button onClick={() => handleForward(item._id)} className="px-2.5 py-1 text-[11px] font-bold bg-primary text-white rounded hover:bg-primary-hover">Forward HR</button>
                     )}
                   </td>
                 </tr>

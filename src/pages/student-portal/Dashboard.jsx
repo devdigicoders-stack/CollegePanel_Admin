@@ -73,7 +73,7 @@ const StudentDashboard = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3">
-        <div className="w-10 h-10 border-4 border-[#0A6C54]/20 border-t-[#0A6C54] rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
         <SkeletonLoader type="table" rows={5} cols={5} />
       </div>
     );
@@ -83,7 +83,7 @@ const StudentDashboard = () => {
     <div className="space-y-5 font-['Inter'] pb-4">
 
       {/* ── Welcome Banner ─────────────────────────────── */}
-      <div className="bg-gradient-to-r from-[#0A6C54] to-[#0d8a6b] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+      <div className="bg-gradient-to-r from-primary to-[#0d8a6b] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10 flex items-start justify-between gap-4">
           <div>
             <p className="text-green-200 text-[12px] font-semibold mb-1">{today}</p>
@@ -156,7 +156,7 @@ const StudentDashboard = () => {
             <h3 className="text-[13px] font-black text-gray-800 uppercase tracking-wider flex items-center gap-2">
               <FileText size={14} className="text-amber-500" /> Pending Assignments
             </h3>
-            <Link to="/student/assignments" className="text-[11px] text-[#0A6C54] font-bold flex items-center gap-1 hover:underline">
+            <Link to="/student/assignments" className="text-[11px] text-primary font-bold flex items-center gap-1 hover:underline">
               View All <ChevronRight size={12} />
             </Link>
           </div>

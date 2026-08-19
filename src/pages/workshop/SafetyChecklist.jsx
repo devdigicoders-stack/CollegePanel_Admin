@@ -36,7 +36,7 @@ const SafetyChecklist = () => {
           <h2 className="text-[16px] font-bold text-gray-800">Weekly Workshop Safety Audit Checklist</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Perform weekly inspections on machine shields, emergency power cuts, and PPE tools</p>
         </div>
-        <button onClick={handleSaveLogs} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+        <button onClick={handleSaveLogs} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
           <Save size={16} /> Log Audit Report
         </button>
       </div>

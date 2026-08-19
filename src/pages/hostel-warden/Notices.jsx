@@ -133,11 +133,11 @@ const Notices = () => {
       <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-[16px] font-bold text-gray-800 flex items-center gap-2">
-            <Bell size={18} className="text-[#0A6C54]" /> Hostel Notice Board
+            <Bell size={18} className="text-primary" /> Hostel Notice Board
           </h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Broadcast mess updates, curfew logs, or maintenance alerts to residents</p>
         </div>
-        <button onClick={openAdd} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm shadow-[#0A6C54]/20">
+        <button onClick={openAdd} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm shadow-primary/20">
           <Plus size={16} /> Broadcast Notice
         </button>
       </div>
@@ -151,11 +151,11 @@ const Notices = () => {
             placeholder="Search notices by content or title..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <div className="text-[12px] font-semibold text-gray-500 bg-white px-4 py-2.5 border border-gray-200 rounded-lg shadow-sm">
-          Total Broadcasts: <span className="text-[#0A6C54]">{notices.length}</span>
+          Total Broadcasts: <span className="text-primary">{notices.length}</span>
         </div>
       </div>
 
@@ -170,7 +170,7 @@ const Notices = () => {
               <div 
                 key={notice._id} 
                 onClick={() => setViewNotice(notice)}
-                className={`p-5 border rounded-xl cursor-pointer transition-all duration-200 ${viewNotice?._id === notice._id ? 'border-[#0A6C54] bg-[#0A6C54]/5 ring-4 ring-[#0A6C54]/5' : 'border-gray-100 hover:border-[#0A6C54]/50 hover:shadow-md bg-gradient-to-br from-white to-gray-50/50'}`}
+                className={`p-5 border rounded-xl cursor-pointer transition-all duration-200 ${viewNotice?._id === notice._id ? 'border-primary bg-primary/5 ring-4 ring-primary/5' : 'border-gray-100 hover:border-primary/50 hover:shadow-md bg-gradient-to-br from-white to-gray-50/50'}`}
               >
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1">
@@ -188,7 +188,7 @@ const Notices = () => {
                         </span>
                       )}
                     </div>
-                    <h3 className="font-bold text-gray-800 text-[15px] group-hover:text-[#0A6C54] transition-colors">{notice.title}</h3>
+                    <h3 className="font-bold text-gray-800 text-[15px] group-hover:text-primary transition-colors">{notice.title}</h3>
                     <p className="text-[12px] text-gray-500 font-medium flex items-center gap-1.5 mt-2">
                       <Calendar size={12} /> {fmtDate(notice.dateOfPublishing)}
                     </p>
@@ -215,7 +215,7 @@ const Notices = () => {
         {viewNotice && (
           <div className="flex-1 flex flex-col bg-gray-50/30 overflow-hidden relative animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="p-5 border-b border-gray-100 bg-white flex justify-between items-center shrink-0">
-              <h3 className="font-bold text-gray-800 text-[14px] flex items-center gap-2"><Eye size={16} className="text-[#0A6C54]" /> Reading Notice</h3>
+              <h3 className="font-bold text-gray-800 text-[14px] flex items-center gap-2"><Eye size={16} className="text-primary" /> Reading Notice</h3>
               <button onClick={() => setViewNotice(null)} className="md:hidden text-gray-500 text-[12px] font-semibold bg-gray-100 px-3 py-1.5 rounded-lg">Close</button>
             </div>
             <div className="flex-1 overflow-y-auto p-6 md:p-8">
@@ -244,7 +244,7 @@ const Notices = () => {
           <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-xl animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
               <h3 className="font-bold text-gray-800 text-[15px] flex items-center gap-2">
-                {isEditing ? <Edit3 size={16} className="text-blue-600" /> : <Bell size={16} className="text-[#0A6C54]" />}
+                {isEditing ? <Edit3 size={16} className="text-blue-600" /> : <Bell size={16} className="text-primary" />}
                 {isEditing ? 'Edit Notice' : 'Broadcast Hostel Notice'}
               </h3>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 text-lg font-semibold">&times;</button>
@@ -256,7 +256,7 @@ const Notices = () => {
                   type="text" required placeholder="e.g. Curfew Timing Change during Exams"
                   value={currentNotice.title}
                   onChange={(e) => setCurrentNotice({...currentNotice, title: e.target.value})}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] font-semibold focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] font-semibold focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -266,7 +266,7 @@ const Notices = () => {
                   required rows={6} placeholder="Type your notice content here..."
                   value={currentNotice.details}
                   onChange={(e) => setCurrentNotice({...currentNotice, details: e.target.value})}
-                  className="w-full p-3 border border-gray-200 rounded-lg text-[13px] resize-none focus:outline-none focus:ring-1 focus:ring-[#0A6C54] leading-relaxed"
+                  className="w-full p-3 border border-gray-200 rounded-lg text-[13px] resize-none focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed"
                 />
               </div>
 
@@ -279,7 +279,7 @@ const Notices = () => {
                 </button>
                 <button 
                   type="submit" disabled={submitting}
-                  className={`flex-1 py-2.5 text-white rounded-lg text-[13px] font-semibold transition-colors shadow-sm ${isEditing ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[#0A6C54] hover:bg-[#085a46]'}`}
+                  className={`flex-1 py-2.5 text-white rounded-lg text-[13px] font-semibold transition-colors shadow-sm ${isEditing ? 'bg-blue-600 hover:bg-blue-700' : 'bg-primary hover:bg-primary-hover'}`}
                 >
                   {submitting ? 'Saving...' : (isEditing ? 'Update Notice' : 'Post Broadcast')}
                 </button>

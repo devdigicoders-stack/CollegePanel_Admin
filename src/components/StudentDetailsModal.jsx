@@ -107,7 +107,7 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
                 </h4>
                 <div className="space-y-6">
                   <div>
-                    <h5 className="text-[12px] font-bold text-[#0A6C54] mb-3">Father's Information</h5>
+                    <h5 className="text-[12px] font-bold text-primary mb-3">Father's Information</h5>
                     <div className="grid grid-cols-2 gap-y-4 gap-x-4">
                       <div className="col-span-2 sm:col-span-1">
                         <p className="text-[12px] text-gray-500 mb-1 font-medium">Name</p>
@@ -124,7 +124,7 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
                     </div>
                   </div>
                   <div className="pt-4 border-t border-gray-50">
-                    <h5 className="text-[12px] font-bold text-[#0A6C54] mb-3">Mother's Information</h5>
+                    <h5 className="text-[12px] font-bold text-primary mb-3">Mother's Information</h5>
                     <div className="grid grid-cols-2 gap-y-4 gap-x-4">
                       <div className="col-span-2 sm:col-span-1">
                         <p className="text-[12px] text-gray-500 mb-1 font-medium">Name</p>
@@ -190,7 +190,7 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
             <div className="space-y-8">
               
               {/* Course & Academics */}
-              <div className="bg-gradient-to-br from-[#0A6C54] to-[#064e3b] p-6 rounded-2xl shadow-lg relative overflow-hidden">
+              <div className="bg-gradient-to-br from-primary to-[#064e3b] p-6 rounded-2xl shadow-lg relative overflow-hidden">
                 {/* Decorative circle */}
                 <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
                 

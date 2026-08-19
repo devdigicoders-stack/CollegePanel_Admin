@@ -53,7 +53,7 @@ const DailyConsumption = () => {
           <h2 className="text-[16px] font-bold text-gray-800">Daily Kitchen Consumption Logs</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Verify raw food wastage counts, log quantity used, and review students served</p>
         </div>
-        <button onClick={() => setShowLogModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+        <button onClick={() => setShowLogModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
           <Plus size={16} /> Log Usage
         </button>
       </div>
@@ -75,7 +75,7 @@ const DailyConsumption = () => {
             {logs.map(item => (
               <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                 <td className="py-4 px-6 text-[13px] text-gray-500">{item.date}</td>
-                <td className="py-4 px-6 text-[13px] text-[#0A6C54] font-bold">{item.meal}</td>
+                <td className="py-4 px-6 text-[13px] text-primary font-bold">{item.meal}</td>
                 <td className="py-4 px-6 text-[13px] text-gray-800 font-semibold">{item.itemUsed}</td>
                 <td className="py-4 px-6 text-[13px] text-center font-bold text-gray-900">{item.qtyUsed} {item.unit}</td>
                 <td className="py-4 px-6 text-[13px] text-center font-semibold text-gray-700">{item.servedCount} Students</td>
@@ -179,7 +179,7 @@ const DailyConsumption = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold"
                 >
                   Post Usage
                 </button>

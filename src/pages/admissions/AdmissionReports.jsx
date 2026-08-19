@@ -142,7 +142,7 @@ const AdmissionReports = () => {
           <button onClick={exportPDF} disabled={loading || reportData.data.length === 0} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
             <Download size={15} /> Export PDF
           </button>
-          <button onClick={exportExcel} disabled={loading || reportData.data.length === 0} className="flex items-center gap-2 px-4 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-50">
+          <button onClick={exportExcel} disabled={loading || reportData.data.length === 0} className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-50">
             <Download size={15} /> Export Excel
           </button>
         </div>
@@ -153,7 +153,7 @@ const AdmissionReports = () => {
         <div className="relative w-full md:w-auto md:flex-1">
           <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Report Type</label>
           <select value={selectedReport} onChange={e => setSelectedReport(e.target.value)}
-            className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer md:min-w-[220px]">
+            className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer md:min-w-[220px]">
             {reportTypes.map(r => <option key={r}>{r}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-9 text-gray-400 pointer-events-none" size={14} />
@@ -163,7 +163,7 @@ const AdmissionReports = () => {
           <div className="relative w-full md:w-auto md:flex-1">
             <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Status</label>
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-              className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+              className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-9 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
               <option value="All">All Statuses</option>
               <option value="Pending">Pending</option>
               <option value="Approved">Approved</option>
@@ -177,15 +177,15 @@ const AdmissionReports = () => {
           <div className="flex-1">
             <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">From Date</label>
             <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary" />
           </div>
           <div className="flex-1">
             <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">To Date</label>
             <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary" />
           </div>
         </div>
-        <button onClick={generateReport} disabled={loading} className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold disabled:opacity-70">
+        <button onClick={generateReport} disabled={loading} className="w-full md:w-auto bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold disabled:opacity-70">
           {loading ? 'Generating...' : 'Generate Report'}
         </button>
       </div>
@@ -209,7 +209,7 @@ const AdmissionReports = () => {
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <h3 className="text-[14px] font-bold text-gray-800 flex items-center gap-2">
-              <BarChart3 size={16} className="text-[#0A6C54]" /> 
+              <BarChart3 size={16} className="text-primary" /> 
               {selectedReport} Results
             </h3>
             <span className="text-[11px] bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-semibold">

@@ -62,7 +62,7 @@ const Complaints = () => {
             placeholder="Search by student name or subject..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -89,7 +89,7 @@ const Complaints = () => {
             <tbody>
               {filtered.map(item => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.complaintId}</td>
+                  <td className="py-4 px-6 text-[13px] font-semibold text-primary">{item.complaintId}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.submittedBy}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{item.subject}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-500">{item.description}</td>
@@ -103,7 +103,7 @@ const Complaints = () => {
                   </td>
                   <td className="py-4 px-6">
                     {item.status !== 'Resolved' ? (
-                      <button onClick={() => handleResolve(item._id)} className="px-2 py-1 text-[11px] font-bold bg-[#0A6C54] text-white rounded hover:bg-[#085a46] flex items-center gap-1">
+                      <button onClick={() => handleResolve(item._id)} className="px-2 py-1 text-[11px] font-bold bg-primary text-white rounded hover:bg-primary-hover flex items-center gap-1">
                         <CheckCircle size={12} /> Resolve
                       </button>
                     ) : (

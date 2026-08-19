@@ -2,6 +2,53 @@
 
 @import "tailwindcss";
 
+@theme {
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-sidebar: var(--color-sidebar);
+  --color-accent: var(--color-accent);
+}
+
+:root {
+  /* Default Admin (Teal) */
+  --color-primary: #0A6C54;
+  --color-primary-hover: #085a46;
+  --color-sidebar: #022a36;
+  --color-accent: #2DD4BF;
+}
+
+[data-theme="student"] {
+  /* Premium Blue Theme */
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-sidebar: #0F172A;
+  --color-accent: #38BDF8;
+}
+
+[data-theme="teacher"] {
+  /* Premium Purple Theme */
+  --color-primary: #6366F1;
+  --color-primary-hover: #4F46E5;
+  --color-sidebar: #312E81;
+  --color-accent: #A78BFA;
+}
+
+[data-theme="security"] {
+  /* Premium Slate/Red Theme */
+  --color-primary: #DC2626;
+  --color-primary-hover: #B91C1C;
+  --color-sidebar: #171717;
+  --color-accent: #FB7185;
+}
+
+[data-theme="hostel_warden"] {
+  /* Premium Amber Theme */
+  --color-primary: #EA580C;
+  --color-primary-hover: #C2410C;
+  --color-sidebar: #431407;
+  --color-accent: #FBBF24;
+}
+
 @layer base {
   body {
     @apply font-['Inter',sans-serif] bg-gray-50 text-slate-800 antialiased;

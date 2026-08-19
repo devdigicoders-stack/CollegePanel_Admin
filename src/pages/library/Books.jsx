@@ -223,17 +223,17 @@ const Books = () => {
       <div className="flex border-b border-gray-100 px-6 pt-2">
         <button
           onClick={() => setActiveSubTab('inventory')}
-          className={`px-6 py-4 text-[14px] font-semibold relative ${activeSubTab === 'inventory' ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'}`}
+          className={`px-6 py-4 text-[14px] font-semibold relative ${activeSubTab === 'inventory' ? 'text-primary' : 'text-gray-500 hover:text-gray-700'}`}
         >
           Book Inventory
-          {activeSubTab === 'inventory' && <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-md"></div>}
+          {activeSubTab === 'inventory' && <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-md"></div>}
         </button>
         <button
           onClick={() => setActiveSubTab('categories')}
-          className={`px-6 py-4 text-[14px] font-semibold relative ${activeSubTab === 'categories' ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'}`}
+          className={`px-6 py-4 text-[14px] font-semibold relative ${activeSubTab === 'categories' ? 'text-primary' : 'text-gray-500 hover:text-gray-700'}`}
         >
           Book Categories & Setup
-          {activeSubTab === 'categories' && <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-md"></div>}
+          {activeSubTab === 'categories' && <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-md"></div>}
         </button>
       </div>
 
@@ -253,7 +253,7 @@ const Books = () => {
                 {isSubmitting ? 'Importing...' : 'Excel Import'}
                 <input type="file" accept=".xlsx, .xls, .csv" className="hidden" onChange={handleFileUpload} disabled={isSubmitting} />
               </label>
-              <button onClick={handleAddBookClick} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+              <button onClick={handleAddBookClick} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
                 <span>+</span> New Book
               </button>
             </div>
@@ -267,7 +267,7 @@ const Books = () => {
                 placeholder="Search by title, author or accession number..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
@@ -275,7 +275,7 @@ const Books = () => {
               <select 
                 value={filterCategory} 
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+                className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
               >
                 {categories.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -304,7 +304,7 @@ const Books = () => {
                 <tbody>
                   {books.map(item => (
                     <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.accessionNo}</td>
+                      <td className="py-4 px-6 text-[13px] font-semibold text-primary">{item.accessionNo}</td>
                       <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.title}</td>
                       <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.author}</td>
                       <td className="py-4 px-6 text-[13px] text-gray-500 font-medium">{item.isbn}</td>
@@ -401,45 +401,45 @@ const Books = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Accession No *</label>
-                  <input type="text" value={formData.accessionNo} onChange={(e) => setFormData({...formData, accessionNo: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0A6C54] focus:ring-1 focus:ring-[#0A6C54]" placeholder="e.g. ACC-1001" />
+                  <input type="text" value={formData.accessionNo} onChange={(e) => setFormData({...formData, accessionNo: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="e.g. ACC-1001" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">ISBN</label>
-                  <input type="text" value={formData.isbn} onChange={(e) => setFormData({...formData, isbn: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0A6C54] focus:ring-1 focus:ring-[#0A6C54]" placeholder="e.g. 978-3-16-148410-0" />
+                  <input type="text" value={formData.isbn} onChange={(e) => setFormData({...formData, isbn: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="e.g. 978-3-16-148410-0" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Book Title *</label>
-                  <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0A6C54] focus:ring-1 focus:ring-[#0A6C54]" placeholder="Enter title" />
+                  <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Enter title" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Author *</label>
-                  <input type="text" value={formData.author} onChange={(e) => setFormData({...formData, author: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0A6C54] focus:ring-1 focus:ring-[#0A6C54]" placeholder="Enter author" />
+                  <input type="text" value={formData.author} onChange={(e) => setFormData({...formData, author: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Enter author" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Category *</label>
-                  <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0A6C54] focus:ring-1 focus:ring-[#0A6C54]">
+                  <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
                     {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Total Copies *</label>
-                  <input type="number" min="1" value={formData.totalCopies} onChange={(e) => setFormData({...formData, totalCopies: Number(e.target.value)})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0A6C54] focus:ring-1 focus:ring-[#0A6C54]" />
+                  <input type="number" min="1" value={formData.totalCopies} onChange={(e) => setFormData({...formData, totalCopies: Number(e.target.value)})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Shelf</label>
-                  <input type="text" value={formData.shelf} onChange={(e) => setFormData({...formData, shelf: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0A6C54] focus:ring-1 focus:ring-[#0A6C54]" placeholder="e.g. Shelf A" />
+                  <input type="text" value={formData.shelf} onChange={(e) => setFormData({...formData, shelf: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="e.g. Shelf A" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Rack</label>
-                  <input type="text" value={formData.rack} onChange={(e) => setFormData({...formData, rack: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0A6C54] focus:ring-1 focus:ring-[#0A6C54]" placeholder="e.g. Rack 1" />
+                  <input type="text" value={formData.rack} onChange={(e) => setFormData({...formData, rack: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="e.g. Rack 1" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Price (₹)</label>
-                  <input type="number" min="0" value={formData.price} onChange={(e) => setFormData({...formData, price: Number(e.target.value)})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0A6C54] focus:ring-1 focus:ring-[#0A6C54]" />
+                  <input type="number" min="0" value={formData.price} onChange={(e) => setFormData({...formData, price: Number(e.target.value)})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
-                  <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0A6C54] focus:ring-1 focus:ring-[#0A6C54]">
+                  <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
                     <option value="Available">Available</option>
                     <option value="Issued">Issued</option>
                     <option value="Lost">Lost</option>
@@ -452,7 +452,7 @@ const Books = () => {
               <button onClick={() => {setShowAddModal(false); setShowEditModal(false);}} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
                 Cancel
               </button>
-              <button onClick={handleSaveBook} disabled={isSubmitting} className="px-5 py-2 text-sm font-bold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors disabled:opacity-50">
+              <button onClick={handleSaveBook} disabled={isSubmitting} className="px-5 py-2 text-sm font-bold text-white bg-primary hover:bg-primary-hover rounded-lg transition-colors disabled:opacity-50">
                 {isSubmitting ? 'Saving...' : 'Save Book'}
               </button>
             </div>

@@ -90,7 +90,7 @@ const HostelWardenDashboard = () => {
     yAxis: { title: { text: 'Beds' } },
     plotOptions: { series: { stacking: 'normal' } },
     series: [
-      { name: 'Occupied Beds', data: blockOccupied.length ? blockOccupied : [0], color: '#0A6C54' },
+      { name: 'Occupied Beds', data: blockOccupied.length ? blockOccupied : [0], color: 'var(--color-primary)' },
       { name: 'Available Beds', data: blockAvailable.length ? blockAvailable : [0], color: '#E5E7EB' }
     ],
     credits: { enabled: false }
@@ -184,7 +184,7 @@ const HostelWardenDashboard = () => {
             ].map((item, idx) => (
               <div key={idx} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg text-[13px] border border-gray-100">
                 <span className="font-semibold text-gray-700">{item.role}</span>
-                <span className="font-bold text-[#0A6C54]">{item.contact}</span>
+                <span className="font-bold text-primary">{item.contact}</span>
               </div>
             ))}
           </div>

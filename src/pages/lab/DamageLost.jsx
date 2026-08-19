@@ -79,7 +79,7 @@ const DamageLost = () => {
                 </td>
                 <td className="py-4 px-6">
                   {item.status === 'Pending Fine' ? (
-                    <button onClick={() => handleRecover(item.id)} className="px-2 py-1 text-[11px] font-bold bg-[#0A6C54] text-white rounded hover:bg-[#085a46] flex items-center gap-1">
+                    <button onClick={() => handleRecover(item.id)} className="px-2 py-1 text-[11px] font-bold bg-primary text-white rounded hover:bg-primary-hover flex items-center gap-1">
                       <Check size={12} /> Clear Dues
                     </button>
                   ) : (

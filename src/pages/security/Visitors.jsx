@@ -96,7 +96,7 @@ const Visitors = () => {
       text: `Confirm exit for ${visitorName} from the campus.`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#0A6C54',
+      confirmButtonColor: 'var(--color-primary)',
       cancelButtonColor: '#e5e7eb',
       confirmButtonText: 'Yes, Checkout',
       cancelButtonText: '<span style="color: black">Cancel</span>'
@@ -149,7 +149,7 @@ const Visitors = () => {
             <Download size={15} /> Export Registry
           </button>
           {canEdit && (
-            <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+            <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
               <Plus size={16} /> Register Visitor
             </button>
           )}
@@ -165,11 +165,11 @@ const Visitors = () => {
             placeholder="Search by visitor name, mobile or purpose..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <div className="text-[12px] font-semibold text-gray-500 bg-white px-4 py-2.5 border border-gray-200 rounded-lg shadow-sm">
-          Total Visitors Found: <span className="text-[#0A6C54]">{filtered.length}</span>
+          Total Visitors Found: <span className="text-primary">{filtered.length}</span>
         </div>
       </div>
 
@@ -234,7 +234,7 @@ const Visitors = () => {
                     {canEdit && !item.exitTime ? (
                       <button 
                         onClick={() => handleCheckout(item._id, item.visitorName)} 
-                        className="px-3 py-1.5 text-[12px] font-bold bg-[#0A6C54]/10 text-[#0A6C54] rounded-lg hover:bg-[#0A6C54] hover:text-white transition-colors flex items-center gap-1.5 mx-auto"
+                        className="px-3 py-1.5 text-[12px] font-bold bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors flex items-center gap-1.5 mx-auto"
                       >
                         <LogOut size={14} /> Checkout
                       </button>
@@ -278,7 +278,7 @@ const Visitors = () => {
                     placeholder="e.g. Ramesh Kumar"
                     value={newVisitor.name}
                     onChange={(e) => setNewVisitor({...newVisitor, name: e.target.value})}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -290,7 +290,7 @@ const Visitors = () => {
                     placeholder="10-digit mobile number"
                     value={newVisitor.mobile}
                     onChange={(e) => setNewVisitor({...newVisitor, mobile: e.target.value.replace(/\D/g, '')})}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -301,7 +301,7 @@ const Visitors = () => {
                   <select 
                     value={newVisitor.idProof} 
                     onChange={(e) => setNewVisitor({...newVisitor, idProof: e.target.value})}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="Aadhaar Card">Aadhaar Card</option>
                     <option value="Voter ID">Voter ID</option>
@@ -317,7 +317,7 @@ const Visitors = () => {
                     placeholder="e.g. Admission Cell, Mr. Sharma"
                     value={newVisitor.meetPerson}
                     onChange={(e) => setNewVisitor({...newVisitor, meetPerson: e.target.value})}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -369,7 +369,7 @@ const Visitors = () => {
                 <button 
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
                 >
                   <Barcode size={16} /> {submitting ? 'Registering...' : 'Register & Print Pass'}
                 </button>

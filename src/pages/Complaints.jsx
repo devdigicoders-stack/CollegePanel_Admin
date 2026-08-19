@@ -168,7 +168,7 @@ const Complaints = () => {
       {/* Title Area */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-[20px] font-bold text-[#022A36] font-['Outfit']">
+          <h2 className="text-[20px] font-bold text-sidebar font-['Outfit']">
             {selectedComplaint ? 'Complaint Details' : 'Complaints'}
           </h2>
           <p className="text-[13px] text-gray-500 mt-1">
@@ -190,14 +190,14 @@ const Complaints = () => {
                   placeholder="Search complaints by subject, ID, or description..." 
                   value={filters.search}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm"
+                  className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
                 />
               </div>
               <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
                 <select 
                   value={filters.status}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="All">All Status</option>
                   <option value="Pending">Pending</option>
@@ -208,7 +208,7 @@ const Complaints = () => {
                 <select 
                   value={filters.category}
                   onChange={(e) => handleFilterChange('category', e.target.value)}
-                  className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="All">All Categories</option>
                   <option value="Hostel">Hostel</option>
@@ -223,7 +223,7 @@ const Complaints = () => {
                 <select 
                   value={filters.priority}
                   onChange={(e) => handleFilterChange('priority', e.target.value)}
-                  className="w-full sm:w-auto bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] col-span-2 sm:col-span-1"
+                  className="w-full sm:w-auto bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2 px-3 rounded-lg text-[12px] sm:text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary col-span-2 sm:col-span-1"
                 >
                   <option value="All">All Priority</option>
                   <option value="Urgent">Urgent</option>
@@ -253,8 +253,8 @@ const Complaints = () => {
                     <tr><td colSpan="7" className="py-8"><SkeletonLoader type="table" rows={3} cols="7" /></td></tr>
                   ) : complaints.length > 0 ? complaints.map((comp) => (
                     <tr key={comp._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 px-6 text-[13px] font-bold text-[#0A6C54]">{comp.complaintId || comp._id}</td>
-                      <td className="py-4 px-6 text-[13px] font-medium text-[#022A36]">{comp.subject}</td>
+                      <td className="py-4 px-6 text-[13px] font-bold text-primary">{comp.complaintId || comp._id}</td>
+                      <td className="py-4 px-6 text-[13px] font-medium text-sidebar">{comp.subject}</td>
                       <td className="py-4 px-6 text-[13px] font-medium text-gray-600">{getCategoryIcon(comp.category)} {comp.category}</td>
                       <td className="py-4 px-6 text-[13px] font-medium text-gray-600">{comp.submittedBy}</td>
                       <td className="py-4 px-6">
@@ -270,7 +270,7 @@ const Complaints = () => {
                       <td className="py-4 px-6 text-center">
                         <button 
                           onClick={() => handleViewComplaint(comp)}
-                          className="p-1.5 bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-[#0A6C54] rounded-md transition-colors"
+                          className="p-1.5 bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-primary rounded-md transition-colors"
                           title="View Details"
                         >
                           <Eye size={16} />
@@ -308,7 +308,7 @@ const Complaints = () => {
                       onClick={() => setPagination(prev => ({ ...prev, page: page }))}
                       className={`w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-medium ${
                         pagination.page === page
-                          ? 'bg-[#0A6C54] text-white'
+                          ? 'bg-primary text-white'
                           : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
                       }`}
                     >
@@ -332,9 +332,9 @@ const Complaints = () => {
             <div className="max-w-3xl mx-auto">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8">
                 <div>
-                  <h3 className="text-[18px] font-bold text-[#022A36]">{selectedComplaint.subject}</h3>
+                  <h3 className="text-[18px] font-bold text-sidebar">{selectedComplaint.subject}</h3>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
-                    <span className="text-[12px] sm:text-[13px] text-gray-500 font-medium">Ticket: <span className="text-[#0A6C54] font-bold">{selectedComplaint.complaintId || selectedComplaint._id}</span></span>
+                    <span className="text-[12px] sm:text-[13px] text-gray-500 font-medium">Ticket: <span className="text-primary font-bold">{selectedComplaint.complaintId || selectedComplaint._id}</span></span>
                     <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                     <span className="text-[12px] sm:text-[13px] text-gray-500 font-medium">Date: {new Date(selectedComplaint.createdAt).toLocaleDateString('en-IN')}</span>
                     <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
@@ -349,15 +349,15 @@ const Complaints = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-6">
                   <div>
                     <div className="text-[12px] font-semibold text-gray-400 mb-1">Submitted By</div>
-                    <div className="text-[14px] font-medium text-[#022A36]">{selectedComplaint.submittedBy}</div>
+                    <div className="text-[14px] font-medium text-sidebar">{selectedComplaint.submittedBy}</div>
                   </div>
                   <div>
                     <div className="text-[12px] font-semibold text-gray-400 mb-1">Category</div>
-                    <div className="text-[14px] font-medium text-[#022A36]">{selectedComplaint.category}</div>
+                    <div className="text-[14px] font-medium text-sidebar">{selectedComplaint.category}</div>
                   </div>
                   <div>
                     <div className="text-[12px] font-semibold text-gray-400 mb-1">Priority</div>
-                    <div className="text-[14px] font-medium text-[#022A36]">
+                    <div className="text-[14px] font-medium text-sidebar">
                       <span className={`px-2 py-1 rounded text-[11px] font-bold ${getPriorityColor(selectedComplaint.priority)}`}>
                         {selectedComplaint.priority}
                       </span>
@@ -365,7 +365,7 @@ const Complaints = () => {
                   </div>
                   <div>
                     <div className="text-[12px] font-semibold text-gray-400 mb-1">Status</div>
-                    <div className="text-[14px] font-medium text-[#022A36]">
+                    <div className="text-[14px] font-medium text-sidebar">
                       <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold ${getStatusColor(selectedComplaint.status)}`}>
                         {selectedComplaint.status}
                       </span>
@@ -425,7 +425,7 @@ const Complaints = () => {
                     value={adminReplyText}
                     onChange={(e) => setAdminReplyText(e.target.value)}
                     placeholder="Write your response here..." 
-                    className="w-full bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm min-h-[120px] resize-none"
+                    className="w-full bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary shadow-sm min-h-[120px] resize-none"
                   ></textarea>
                 </div>
               )}
@@ -449,7 +449,7 @@ const Complaints = () => {
                       </button>
                       <button 
                         onClick={handleAdminReply}
-                        className="w-full sm:w-auto px-6 sm:px-8 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm flex justify-center items-center gap-2 whitespace-nowrap"
+                        className="w-full sm:w-auto px-6 sm:px-8 py-2.5 text-[13px] font-semibold text-white bg-primary hover:bg-primary-hover rounded-lg transition-colors shadow-sm flex justify-center items-center gap-2 whitespace-nowrap"
                       >
                         <Send size={14} /> Submit Update
                       </button>
@@ -474,7 +474,7 @@ const Complaints = () => {
             </div>
             <div className="px-6 py-6">
               <p className="text-gray-600 text-sm">
-                Are you sure you want to delete complaint <span className="font-bold text-[#022A36]">{deleteTarget?.complaintId || deleteTarget?._id}</span>? This action cannot be undone.
+                Are you sure you want to delete complaint <span className="font-bold text-sidebar">{deleteTarget?.complaintId || deleteTarget?._id}</span>? This action cannot be undone.
               </p>
             </div>
             <div className="flex gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">

@@ -285,12 +285,12 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
   };
 
   return (
-    <div className={`${isOpen ? 'w-[240px]' : 'w-[64px]'} bg-[#022A36] text-white flex flex-col h-full overflow-hidden flex-shrink-0 transition-all duration-300`}>
+    <div className={`${isOpen ? 'w-[240px]' : 'w-[64px]'} bg-sidebar text-white flex flex-col h-full overflow-hidden flex-shrink-0 transition-all duration-300`}>
       
       {/* Logo */}
       <div className={`flex items-center ${isOpen ? 'justify-start px-4' : 'justify-center'} pt-5 pb-4 gap-3 flex-shrink-0`}>
         <div className="flex items-center justify-center w-10 h-10 bg-white/10 rounded-xl flex-shrink-0">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 12l10-6 10 6-10 6-10-6z" />
             <path d="M22 12v6" />
             <path d="M6 14.5V20c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-5.5" />
@@ -299,7 +299,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         {isOpen && (
           <div className="flex flex-col overflow-hidden">
             <span className="text-[14px] font-bold tracking-wider font-['Inter'] text-white leading-tight whitespace-nowrap">POLYTECHNIC</span>
-            <span className="text-[11px] text-[#2DD4BF] font-medium">College ERP</span>
+            <span className="text-[11px] text-accent font-medium">College ERP</span>
           </div>
         )}
       </div>
@@ -311,7 +311,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
             {/* Section Heading — hidden for 'Main' group */}
             {isOpen && group.name !== 'Main' && (
               <div className="px-3 pt-3 pb-1">
-                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#2DD4BF]/70">
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-accent/70">
                   {group.name}
                 </span>
               </div>
@@ -329,18 +329,18 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
                     onClick={() => { if (window.innerWidth < 768 && setIsSidebarOpen) setIsSidebarOpen(false); }}
                     className={`relative flex items-center ${isOpen ? 'gap-3 px-3' : 'justify-center px-0'} py-2.5 rounded-xl transition-all text-[13.5px] font-medium ${
                       active
-                        ? 'bg-[#0A6C54] text-white font-semibold shadow-lg shadow-[#0A6C54]/20'
+                        ? 'bg-primary text-white font-semibold shadow-lg shadow-primary/20'
                         : 'text-gray-300 hover:bg-white/10 hover:text-white'
                     }`}
                   >
-                    <Icon size={20} className={active ? 'text-white' : 'text-[#2DD4BF] opacity-80'} strokeWidth={active ? 2.5 : 2} />
+                    <Icon size={20} className={active ? 'text-white' : 'text-accent opacity-80'} strokeWidth={active ? 2.5 : 2} />
                     {isOpen && (
                       <>
                         <span className="flex-1 truncate">{item.name}</span>
                         {item.badge > 0 && (
                           <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
                             active 
-                              ? 'bg-white text-[#0A6C54]' 
+                              ? 'bg-white text-primary' 
                               : 'bg-red-500 text-white shadow-sm'
                           }`}>
                             {item.badge}
@@ -357,7 +357,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
                     )}
                     {/* Dot for collapsed sidebar */}
                     {((item.path === '/admissions/applications' && pendingAdmissionsCount > 0) || (item.badge > 0)) && !isOpen && (
-                      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-[#022A36]"></span>
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-sidebar"></span>
                     )}
                   </Link>
                 );

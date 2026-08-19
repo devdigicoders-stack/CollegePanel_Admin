@@ -344,7 +344,7 @@ const Assignments = () => {
         {canEdit && (
           <button
             onClick={handleAddAssignment}
-            className="flex items-center gap-2 bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#085a46] transition-colors"
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-hover transition-colors"
           >
             <Plus size={16} />
             Create Assignment
@@ -359,15 +359,15 @@ const Assignments = () => {
             key={tab.name}
             onClick={() => { setActiveTab(tab.name); setPagination(prev => ({ ...prev, page: 1 })); }}
             className={`whitespace-nowrap px-4 py-4 text-[14px] font-semibold transition-all relative flex items-center gap-2 ${
-              activeTab === tab.name ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'
+              activeTab === tab.name ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             {tab.name}
             <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-              activeTab === tab.name ? 'bg-[#0A6C54] text-white' : 'bg-gray-100 text-gray-600'
+              activeTab === tab.name ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'
             }`}>{tabCounts[tab.name] || 0}</span>
             {activeTab === tab.name && (
-              <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-full"></div>
+              <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-full"></div>
             )}
           </button>
         ))}
@@ -437,7 +437,7 @@ const Assignments = () => {
             ) : (
               assignments.map((assignment) => (
                 <tr key={assignment._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{assignment.assignmentId}</td>
+                  <td className="py-4 px-6 text-[13px] font-semibold text-primary">{assignment.assignmentId}</td>
                   <td className="py-4 px-6">
                     <div className="flex flex-col">
                       <span className="text-[13px] text-gray-800 font-medium">{assignment.title}</span>
@@ -454,7 +454,7 @@ const Assignments = () => {
                       </span>
                       <div className="w-full bg-gray-200 rounded-full h-1.5">
                         <div
-                          className="bg-[#0A6C54] h-1.5 rounded-full"
+                          className="bg-primary h-1.5 rounded-full"
                           style={{ width: `${getSubmissionProgress(assignment.submittedCount, assignment.totalStudents)}%` }}
                         ></div>
                       </div>
@@ -469,7 +469,7 @@ const Assignments = () => {
                     <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={() => handleViewAssignment(assignment)}
-                        className="w-8 h-8 rounded-full border border-green-100 flex items-center justify-center text-[#0A6C54] hover:bg-green-50 transition-colors"
+                        className="w-8 h-8 rounded-full border border-green-100 flex items-center justify-center text-primary hover:bg-green-50 transition-colors"
                         title="View Details"
                       >
                         <Eye size={14} />
@@ -521,7 +521,7 @@ const Assignments = () => {
           >
             <ChevronLeft size={16} />
           </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0A6C54] text-white text-[13px] font-medium">
+          <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white text-[13px] font-medium">
             {pagination.page}
           </button>
           <button
@@ -554,7 +554,7 @@ const Assignments = () => {
                     value={formData.assignmentId}
                     onChange={(e) => setFormData({ ...formData, assignmentId: e.target.value })}
                     placeholder="e.g., ASN2024001"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -564,7 +564,7 @@ const Assignments = () => {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="e.g., Binary Trees Implementation"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -575,7 +575,7 @@ const Assignments = () => {
                   <select
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select Subject</option>
                     {subjects.map((subj) => (
@@ -588,7 +588,7 @@ const Assignments = () => {
                   <select
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select Department</option>
                     {departments.map((dept) => (
@@ -604,7 +604,7 @@ const Assignments = () => {
                   <select
                     value={formData.semester}
                     onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
                     <option value="">Select Semester</option>
                     {semesters.map(s => (
@@ -617,7 +617,7 @@ const Assignments = () => {
                   <select
                     value={formData.section}
                     onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
                     <option value="">Select Section</option>
                     {sections.map(s => (
@@ -631,7 +631,7 @@ const Assignments = () => {
                     type="date"
                     value={formData.dueDate}
                     onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -644,7 +644,7 @@ const Assignments = () => {
                     value={formData.totalMarks}
                     onChange={(e) => setFormData({ ...formData, totalMarks: e.target.value })}
                     placeholder="25"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -659,7 +659,7 @@ const Assignments = () => {
                         teacherName: teacher ? teacher.name : ''
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select Teacher</option>
                     {teachers.map((teacher) => (
@@ -676,7 +676,7 @@ const Assignments = () => {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Enter assignment description and instructions..."
                   rows={4}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] resize-none"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                 />
               </div>
             </div>
@@ -685,7 +685,7 @@ const Assignments = () => {
               <button
                 onClick={handleSaveAssignment}
                 disabled={formLoading}
-                className="flex-1 bg-[#0A6C54] text-white py-2.5 rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm disabled:opacity-50"
+                className="flex-1 bg-primary text-white py-2.5 rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm disabled:opacity-50"
               >
                 {formLoading ? 'Saving...' : 'Create Assignment'}
               </button>
@@ -719,7 +719,7 @@ const Assignments = () => {
                     type="text"
                     value={formData.assignmentId}
                     onChange={(e) => setFormData({ ...formData, assignmentId: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -728,7 +728,7 @@ const Assignments = () => {
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -739,7 +739,7 @@ const Assignments = () => {
                   <select
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select Subject</option>
                     {subjects.map((subj) => (
@@ -752,7 +752,7 @@ const Assignments = () => {
                   <select
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select Department</option>
                     {departments.map((dept) => (
@@ -768,7 +768,7 @@ const Assignments = () => {
                   <select
                     value={formData.semester}
                     onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
                     <option value="">Select Semester</option>
                     {semesters.map(s => (
@@ -781,7 +781,7 @@ const Assignments = () => {
                   <select
                     value={formData.section}
                     onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-white"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
                     <option value="">Select Section</option>
                     {sections.map(s => (
@@ -795,7 +795,7 @@ const Assignments = () => {
                     type="date"
                     value={formData.dueDate}
                     onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -807,7 +807,7 @@ const Assignments = () => {
                     type="number"
                     value={formData.totalMarks}
                     onChange={(e) => setFormData({ ...formData, totalMarks: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -822,7 +822,7 @@ const Assignments = () => {
                         teacherName: teacher ? teacher.name : ''
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select Teacher</option>
                     {teachers.map((teacher) => (
@@ -838,7 +838,7 @@ const Assignments = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={4}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] resize-none"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                 />
               </div>
             </div>
@@ -847,7 +847,7 @@ const Assignments = () => {
               <button
                 onClick={handleSaveAssignment}
                 disabled={formLoading}
-                className="flex-1 bg-[#0A6C54] text-white py-2.5 rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm disabled:opacity-50"
+                className="flex-1 bg-primary text-white py-2.5 rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm disabled:opacity-50"
               >
                 {formLoading ? 'Updating...' : 'Update Assignment'}
               </button>
@@ -909,11 +909,11 @@ const Assignments = () => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-gray-600">Submitted: <strong>{selectedAssignment.submittedCount}</strong> / {selectedAssignment.totalStudents}</span>
-                    <span className="text-sm font-bold text-[#0A6C54]">{getSubmissionProgress(selectedAssignment.submittedCount, selectedAssignment.totalStudents)}%</span>
+                    <span className="text-sm font-bold text-primary">{getSubmissionProgress(selectedAssignment.submittedCount, selectedAssignment.totalStudents)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-[#0A6C54] h-2 rounded-full transition-all"
+                      className="bg-primary h-2 rounded-full transition-all"
                       style={{ width: `${getSubmissionProgress(selectedAssignment.submittedCount, selectedAssignment.totalStudents)}%` }}
                     ></div>
                   </div>
@@ -981,7 +981,7 @@ const Assignments = () => {
                                 toast.error('No file uploaded by student');
                               }
                             }}
-                            className="px-3 py-2 bg-[#0A6C54]/10 text-[#0A6C54] hover:bg-[#0A6C54] hover:text-white rounded-lg flex items-center gap-2 text-[13px] font-bold transition-colors"
+                            className="px-3 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg flex items-center gap-2 text-[13px] font-bold transition-colors"
                           >
                             <FileText size={14} /> View File
                           </button>
@@ -995,7 +995,7 @@ const Assignments = () => {
                             type="text" 
                             defaultValue={sub.grade || ''}
                             id={`grade-${sub._id}`}
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]"
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                             placeholder={`e.g. ${selectedAssignment.totalMarks}`}
                           />
                         </div>
@@ -1005,7 +1005,7 @@ const Assignments = () => {
                             type="text" 
                             defaultValue={sub.remarks || ''}
                             id={`remarks-${sub._id}`}
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]"
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                             placeholder="Add your feedback..."
                           />
                         </div>
@@ -1016,7 +1016,7 @@ const Assignments = () => {
                               const remarks = document.getElementById(`remarks-${sub._id}`).value;
                               handleSaveGrade(sub._id, grade, remarks);
                             }}
-                            className="w-full bg-[#0A6C54] hover:bg-[#085a46] text-white py-2 rounded-lg text-[13px] font-bold transition-colors"
+                            className="w-full bg-primary hover:bg-primary-hover text-white py-2 rounded-lg text-[13px] font-bold transition-colors"
                           >
                             Save Grade
                           </button>

@@ -58,7 +58,7 @@ const Placement = () => {
           <h4 className="font-bold text-gray-800 text-[13px]">My Verification Placement Resume</h4>
           <form onSubmit={handleResumeUpload} className="flex gap-2">
             <input type="file" required className="flex-1 text-[12px] bg-white border border-gray-200 p-2 rounded-lg" />
-            <button type="submit" className="bg-[#0A6C54] text-white px-4 py-2 rounded-lg text-[12px] font-bold">Upload Resume</button>
+            <button type="submit" className="bg-primary text-white px-4 py-2 rounded-lg text-[12px] font-bold">Upload Resume</button>
           </form>
         </div>
 
@@ -68,14 +68,14 @@ const Placement = () => {
             <div key={item._id} className="p-4 border border-gray-100 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/20 shadow-sm text-[13px]">
               <div>
                 <h4 className="font-bold text-gray-800">{item.title}</h4>
-                <p className="text-[12px] text-gray-700 font-semibold mt-0.5">{item.company} | <span className="text-[#0A6C54]">{item.reward}</span></p>
+                <p className="text-[12px] text-gray-700 font-semibold mt-0.5">{item.company} | <span className="text-primary">{item.reward}</span></p>
                 <p className="text-[11px] text-gray-500 mt-2 font-medium">Criteria: {item.eligibility}</p>
                 <p className="text-[11px] text-red-500 font-semibold mt-1 flex items-center gap-1"><Calendar size={13} /> Last Date: {new Date(item.deadline).toLocaleDateString()}</p>
               </div>
 
               <div className="md:self-center self-start">
                 {(item.status || 'Apply').includes('Apply') ? (
-                  <button onClick={() => handleApply(item._id)} className="px-3 py-1.5 text-[12px] font-bold bg-[#0A6C54] text-white rounded hover:bg-[#085a46]">Apply Now</button>
+                  <button onClick={() => handleApply(item._id)} className="px-3 py-1.5 text-[12px] font-bold bg-primary text-white rounded hover:bg-primary-hover">Apply Now</button>
                 ) : (
                   <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-100">{item.status}</span>
                 )}

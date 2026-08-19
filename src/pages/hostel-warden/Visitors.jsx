@@ -101,7 +101,7 @@ const Visitors = () => {
       showCancelButton: true,
       confirmButtonText: 'Yes, Checkout',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#0A6C54',
+      confirmButtonColor: 'var(--color-primary)',
       cancelButtonColor: '#6b7280',
       reverseButtons: true
     });
@@ -152,7 +152,7 @@ const Visitors = () => {
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={14} /> Export
           </button>
-          <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+          <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
             <Plus size={15} /> Record Entry
           </button>
         </div>
@@ -183,13 +183,13 @@ const Visitors = () => {
             placeholder="Search visitor, student name, enrollment or relation..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
         >
           <option value="All">All Visitors</option>
           <option value="inside">Currently Inside</option>
@@ -225,7 +225,7 @@ const Visitors = () => {
                   <td className="py-3 px-6 text-[13px] text-gray-600">{item.contactNumber || '—'}</td>
                   <td className="py-3 px-6">
                     <p className="text-[13px] font-semibold text-gray-800">{item.studentId?.studentName || 'N/A'}</p>
-                    <p className="text-[11px] text-[#0A6C54] font-semibold">{item.studentId?.studentId}</p>
+                    <p className="text-[11px] text-primary font-semibold">{item.studentId?.studentId}</p>
                   </td>
                   <td className="py-3 px-6">
                     <span className="text-[12px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-semibold">{item.relation || '—'}</span>
@@ -244,7 +244,7 @@ const Visitors = () => {
                     {!item.outTime ? (
                       <button
                         onClick={() => handleCheckout(item)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[12px] font-semibold transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[12px] font-semibold transition-colors"
                       >
                         <LogOut size={12} /> Checkout
                       </button>
@@ -293,7 +293,7 @@ const Visitors = () => {
                   placeholder="e.g. Ramesh Kumar"
                   value={newVisitor.visitorName}
                   onChange={(e) => setNewVisitor({ ...newVisitor, visitorName: e.target.value })}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -305,7 +305,7 @@ const Visitors = () => {
                   placeholder="10-digit mobile number"
                   value={newVisitor.contactNumber}
                   onChange={(e) => setNewVisitor({ ...newVisitor, contactNumber: e.target.value })}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -320,7 +320,7 @@ const Visitors = () => {
                       required
                       value={newVisitor.studentId}
                       onChange={(e) => setNewVisitor({ ...newVisitor, studentId: e.target.value })}
-                      className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                      className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                       <option value="">Select student...</option>
                       {allocatedStudents.map(a => (
@@ -336,7 +336,7 @@ const Visitors = () => {
                   <select
                     value={newVisitor.relation}
                     onChange={(e) => setNewVisitor({ ...newVisitor, relation: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     {RELATIONS.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
@@ -351,7 +351,7 @@ const Visitors = () => {
                   onChange={(e) => setNewVisitor({ ...newVisitor, purpose: e.target.value })}
                   placeholder="e.g. Family visit, delivery of items..."
                   rows={2}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] resize-none focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] resize-none focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -363,7 +363,7 @@ const Visitors = () => {
                 <button
                   type="submit"
                   disabled={submitting || allocatedStudents.length === 0}
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-[13px] font-semibold"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-[13px] font-semibold"
                 >
                   {submitting ? 'Recording...' : 'Log Gate Entry'}
                 </button>

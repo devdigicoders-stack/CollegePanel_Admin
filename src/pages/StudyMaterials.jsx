@@ -137,7 +137,7 @@ const StudyMaterials = () => {
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="w-full sm:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-4 py-2.5 sm:py-2 rounded-xl text-[13px] font-semibold transition-colors flex justify-center sm:justify-start items-center gap-2 whitespace-nowrap shadow-sm"
+          className="w-full sm:w-auto bg-primary hover:bg-primary-hover text-white px-4 py-2.5 sm:py-2 rounded-xl text-[13px] font-semibold transition-colors flex justify-center sm:justify-start items-center gap-2 whitespace-nowrap shadow-sm"
         >
           <Plus size={16} /> Add Material
         </button>
@@ -164,7 +164,7 @@ const StudyMaterials = () => {
                 <p><span className="font-semibold text-gray-700">Subject:</span> {mat.subject}</p>
               </div>
               <div className="mt-4 pt-4 border-t border-gray-50">
-                <a href={mat.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-[#0A6C54] text-[13px] font-semibold transition-colors">
+                <a href={mat.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-primary text-[13px] font-semibold transition-colors">
                   <LinkIcon size={14} /> View File
                 </a>
               </div>
@@ -188,14 +188,14 @@ const StudyMaterials = () => {
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div>
                 <label className="block text-[12px] font-semibold text-gray-700 mb-1">Title</label>
-                <input required type="text" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]" 
+                <input required type="text" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                   value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="e.g. Chapter 1 Notes" />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1">Course/Branch</label>
-                  <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]" 
+                  <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                     value={formData.course} onChange={e => setFormData({...formData, course: e.target.value})}>
                     <option value="">Select Course</option>
                     {courses.map(c => (
@@ -205,7 +205,7 @@ const StudyMaterials = () => {
                 </div>
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1">Subject</label>
-                  <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]" 
+                  <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                     value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})}>
                     <option value="">Select Subject</option>
                     {filteredSubjects.map(s => (
@@ -218,7 +218,7 @@ const StudyMaterials = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1">Type</label>
-                  <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]" 
+                  <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                     value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
                     <option value="Document">Document (PDF/Doc)</option>
                     <option value="Video">Video Link</option>
@@ -226,7 +226,7 @@ const StudyMaterials = () => {
                 </div>
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1">Size (Optional)</label>
-                  <input type="text" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]" 
+                  <input type="text" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                     value={formData.size} onChange={e => setFormData({...formData, size: e.target.value})} placeholder="e.g. 2.5 MB" />
                 </div>
               </div>
@@ -235,11 +235,11 @@ const StudyMaterials = () => {
                 <label className="block text-[12px] font-semibold text-gray-700 mb-2">Upload Method</label>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 text-[13px] cursor-pointer">
-                    <input type="radio" name="uploadMode" checked={uploadMode === 'file'} onChange={() => setUploadMode('file')} className="text-[#0A6C54] focus:ring-[#0A6C54]" />
+                    <input type="radio" name="uploadMode" checked={uploadMode === 'file'} onChange={() => setUploadMode('file')} className="text-primary focus:ring-primary" />
                     Upload File
                   </label>
                   <label className="flex items-center gap-2 text-[13px] cursor-pointer">
-                    <input type="radio" name="uploadMode" checked={uploadMode === 'link'} onChange={() => setUploadMode('link')} className="text-[#0A6C54] focus:ring-[#0A6C54]" />
+                    <input type="radio" name="uploadMode" checked={uploadMode === 'link'} onChange={() => setUploadMode('link')} className="text-primary focus:ring-primary" />
                     Provide URL Link
                   </label>
                 </div>
@@ -248,7 +248,7 @@ const StudyMaterials = () => {
               {uploadMode === 'link' ? (
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1">External URL / Google Drive Link</label>
-                  <input required type="url" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54]" 
+                  <input required type="url" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                     value={formData.fileUrl} onChange={e => setFormData({...formData, fileUrl: e.target.value})} placeholder="https://..." />
                 </div>
               ) : (
@@ -266,7 +266,7 @@ const StudyMaterials = () => {
               )}
 
               <div className="pt-2">
-                <button disabled={uploading} type="submit" className="w-full flex justify-center items-center gap-2 bg-[#0A6C54] hover:bg-[#085a46] text-white py-2.5 rounded-xl text-[13px] font-semibold transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
+                <button disabled={uploading} type="submit" className="w-full flex justify-center items-center gap-2 bg-primary hover:bg-primary-hover text-white py-2.5 rounded-xl text-[13px] font-semibold transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
                   {uploading ? <Loader2 size={16} className="animate-spin" /> : 'Save Material'}
                 </button>
               </div>

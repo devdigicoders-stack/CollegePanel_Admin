@@ -89,7 +89,7 @@ const Incidents = () => {
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={15} /> Export Registry
           </button>
-          <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm">
+          <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors shadow-sm">
             <Plus size={16} /> File Incident Ticket
           </button>
         </div>
@@ -175,7 +175,7 @@ const Incidents = () => {
                   <select 
                     value={newIncident.type} 
                     onChange={(e) => setNewIncident({...newIncident, type: e.target.value})}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="Property Damage">Property Damage</option>
                     <option value="Lost Item">Lost Item</option>
@@ -190,7 +190,7 @@ const Incidents = () => {
                   <select 
                     value={newIncident.priority} 
                     onChange={(e) => setNewIncident({...newIncident, priority: e.target.value})}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
@@ -206,7 +206,7 @@ const Incidents = () => {
                   placeholder="Describe the incident, involved parties, location, etc."
                   value={newIncident.desc}
                   onChange={(e) => setNewIncident({...newIncident, desc: e.target.value})}
-                  className="w-full p-3 border border-gray-200 rounded-lg text-[13px] h-28 resize-none focus:outline-none focus:ring-1 focus:ring-[#0A6C54] bg-gray-50/50"
+                  className="w-full p-3 border border-gray-200 rounded-lg text-[13px] h-28 resize-none focus:outline-none focus:ring-1 focus:ring-primary bg-gray-50/50"
                 />
               </div>
 
@@ -226,7 +226,7 @@ const Incidents = () => {
                 <button 
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold shadow-sm transition-colors"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-lg text-[13px] font-semibold shadow-sm transition-colors"
                 >
                   {submitting ? 'Logging...' : 'File Incident Ticket'}
                 </button>

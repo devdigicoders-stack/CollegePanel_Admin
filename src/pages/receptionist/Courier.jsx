@@ -62,7 +62,7 @@ const Courier = () => {
           <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={15} /> Export Registry
           </button>
-          <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+          <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
             <Plus size={16} /> Log Parcel
           </button>
         </div>
@@ -77,7 +77,7 @@ const Courier = () => {
             placeholder="Search by receiver name or tracking ID..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -99,7 +99,7 @@ const Courier = () => {
           <tbody>
             {filtered.map(item => (
               <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.trackingNo}</td>
+                <td className="py-4 px-6 text-[13px] font-semibold text-primary">{item.trackingNo}</td>
                 <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.sender}</td>
                 <td className="py-4 px-6 text-[13px] text-gray-700 font-semibold">{item.receiver}</td>
                 <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.type}</td>
@@ -113,7 +113,7 @@ const Courier = () => {
                 </td>
                 <td className="py-4 px-6">
                   {item.status === 'Pending Delivery' ? (
-                    <button onClick={() => handleDeliver(item.id)} className="px-2.5 py-1 text-[11px] font-bold bg-[#0A6C54] text-white rounded hover:bg-[#085a46] flex items-center gap-1">
+                    <button onClick={() => handleDeliver(item.id)} className="px-2.5 py-1 text-[11px] font-bold bg-primary text-white rounded hover:bg-primary-hover flex items-center gap-1">
                       <Check size={12} /> Mark Delivered
                     </button>
                   ) : (
@@ -192,7 +192,7 @@ const Courier = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold"
                 >
                   Log Parcel
                 </button>

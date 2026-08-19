@@ -64,7 +64,7 @@ const MessStudents = () => {
             placeholder="Search by student name or roll number..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -91,7 +91,7 @@ const MessStudents = () => {
             <tbody>
               {filtered.map(item => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.studentId?.rollNo || '-'}</td>
+                  <td className="py-4 px-6 text-[13px] font-semibold text-primary">{item.studentId?.rollNo || '-'}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.studentId?.name || '-'}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.plan}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600">{item.preference}</td>

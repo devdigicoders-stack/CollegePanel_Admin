@@ -325,7 +325,7 @@ const InternalMarks = () => {
           <button 
             onClick={handleBulkSubmit}
             disabled={students.length === 0}
-            className="flex items-center gap-2 bg-[#0A6C54] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#085a46] disabled:opacity-50 transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary-hover disabled:opacity-50 transition-colors shadow-sm"
           >
             <Save size={16} />
             Submit All Marks
@@ -350,12 +350,12 @@ const InternalMarks = () => {
             key={tabName}
             onClick={() => setActiveTab(tabName)}
             className={`whitespace-nowrap px-5 py-4 text-[14px] font-semibold transition-all relative flex items-center gap-2 ${
-              activeTab === tabName ? 'text-[#0A6C54]' : 'text-gray-500 hover:text-gray-700'
+              activeTab === tabName ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             {tabName}
             {activeTab === tabName && (
-              <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-full"></div>
+              <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-full"></div>
             )}
           </button>
         ))}
@@ -460,7 +460,7 @@ const InternalMarks = () => {
             <tbody>
               {students.map((student) => (
                 <tr key={student._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{student.rollNo}</td>
+                  <td className="py-4 px-6 text-[13px] font-semibold text-primary">{student.rollNo}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-semibold">{student.studentName}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">Semester {student.semester} - Sec {student.section}</td>
                   <td className="py-4 px-6">
@@ -472,7 +472,7 @@ const InternalMarks = () => {
                           max={student.maxMarks}
                           value={marks[student._id] !== undefined ? marks[student._id] : ''}
                           onChange={(e) => handleMarksChange(student._id, e.target.value)}
-                          className="w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] font-semibold"
+                          className="w-20 border border-gray-300 rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary font-semibold"
                           placeholder={`0-${student.maxMarks}`}
                         />
                         <span className="text-[13px] text-gray-500">/ {student.maxMarks}</span>
@@ -548,7 +548,7 @@ const InternalMarks = () => {
             <div className="flex gap-3">
               <button 
                 onClick={handleSubmitConfirm}
-                className="flex-1 bg-[#0A6C54] hover:bg-[#085a46] text-white py-2.5 rounded-lg transition-colors font-semibold text-sm shadow-sm"
+                className="flex-1 bg-primary hover:bg-primary-hover text-white py-2.5 rounded-lg transition-colors font-semibold text-sm shadow-sm"
               >
                 Submit Marks
               </button>

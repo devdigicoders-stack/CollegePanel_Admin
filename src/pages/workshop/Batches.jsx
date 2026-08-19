@@ -38,7 +38,7 @@ const StudentBatches = () => {
             placeholder="Search by batch name or department..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -62,7 +62,7 @@ const StudentBatches = () => {
                 <td className="py-4 px-6 text-[13px] font-bold text-gray-900">{item.name}</td>
                 <td className="py-4 px-6 text-[13px] text-gray-800 font-semibold">{item.dept}</td>
                 <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.semester} - {item.section}</td>
-                <td className="py-4 px-6 text-[13px] text-center font-bold text-[#0A6C54]">{item.studentsCount} Studs</td>
+                <td className="py-4 px-6 text-[13px] text-center font-bold text-primary">{item.studentsCount} Studs</td>
                 <td className="py-4 px-6 text-[13px] text-gray-700 font-semibold">{item.sectionName}</td>
                 <td className="py-4 px-6 text-[13px] text-gray-500 font-semibold">{item.timing}</td>
               </tr>

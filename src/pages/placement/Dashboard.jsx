@@ -45,7 +45,7 @@ const PlacementDashboard = () => {
     xAxis: { categories: ['CSE', 'ECE', 'ME', 'CE', 'IT'] },
     yAxis: { title: { text: 'Placement Rate (%)' }, max: 100 },
     series: [
-      { name: 'Placement Percentage', data: [88, 72, 55, 48, 82], color: '#0A6C54' }
+      { name: 'Placement Percentage', data: [88, 72, 55, 48, 82], color: 'var(--color-primary)' }
     ],
     credits: { enabled: false }
   };

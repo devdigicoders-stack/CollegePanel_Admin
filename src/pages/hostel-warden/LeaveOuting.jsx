@@ -151,7 +151,7 @@ const LeaveOuting = () => {
             <Download size={15} /> Export
           </button>
           {canEdit && (
-            <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+            <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
               <Plus size={15} /> Add Request
             </button>
           )}
@@ -183,17 +183,17 @@ const LeaveOuting = () => {
             placeholder="Search by student name or enrollment no..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
           <option value="All">All Types</option>
           <option value="Leave">Leave Only</option>
           <option value="Outing">Outing Only</option>
         </select>
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
           <option value="All">All Statuses</option>
           <option value="Pending">Pending</option>
           <option value="Approved">Approved</option>
@@ -224,7 +224,7 @@ const LeaveOuting = () => {
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                   <td className="py-3 px-6">
                     <p className="text-[13px] font-bold text-gray-800">{item.studentId?.studentName || 'Unknown'}</p>
-                    <p className="text-[11px] text-[#0A6C54] font-semibold">{item.studentId?.studentId}</p>
+                    <p className="text-[11px] text-primary font-semibold">{item.studentId?.studentId}</p>
                   </td>
                   <td className="py-3 px-6">
                     <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${item.type === 'Leave' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}`}>
@@ -303,7 +303,7 @@ const LeaveOuting = () => {
                     required
                     value={newLeave.studentId}
                     onChange={(e) => setNewLeave({ ...newLeave, studentId: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">Select student...</option>
                     {allocatedStudents.map(a => (
@@ -323,7 +323,7 @@ const LeaveOuting = () => {
                     <button
                       key={t} type="button"
                       onClick={() => setNewLeave({ ...newLeave, type: t })}
-                      className={`flex-1 py-2.5 rounded-lg text-[13px] font-semibold border transition-colors ${newLeave.type === t ? 'bg-[#0A6C54] text-white border-[#0A6C54]' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                      className={`flex-1 py-2.5 rounded-lg text-[13px] font-semibold border transition-colors ${newLeave.type === t ? 'bg-primary text-white border-primary' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
                     >
                       {t}
                     </button>
@@ -339,7 +339,7 @@ const LeaveOuting = () => {
                     type="date" required
                     value={newLeave.fromDate}
                     onChange={(e) => setNewLeave({ ...newLeave, fromDate: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -349,7 +349,7 @@ const LeaveOuting = () => {
                     min={newLeave.fromDate}
                     value={newLeave.toDate}
                     onChange={(e) => setNewLeave({ ...newLeave, toDate: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -363,7 +363,7 @@ const LeaveOuting = () => {
                   onChange={(e) => setNewLeave({ ...newLeave, reason: e.target.value })}
                   placeholder="Enter the reason for leave/outing..."
                   rows={3}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] resize-none focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] resize-none focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -372,7 +372,7 @@ const LeaveOuting = () => {
                   className="flex-1 py-2.5 border border-gray-200 rounded-lg text-[13px] font-semibold text-gray-700 hover:bg-gray-50">
                   Cancel
                 </button>
-                <button type="submit" className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold">
+                <button type="submit" className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold">
                   Submit Request
                 </button>
               </div>
@@ -415,7 +415,7 @@ const LeaveOuting = () => {
                     Reject
                   </button>
                   <button onClick={() => { handleStatusUpdate(viewItem._id, 'Approved'); setViewItem(null); }}
-                    className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold">
+                    className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold">
                     Approve
                   </button>
                 </div>

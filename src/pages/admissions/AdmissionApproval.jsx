@@ -101,7 +101,7 @@ const AdmissionApproval = () => {
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input type="text" placeholder="Search by name or app no..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
       </div>
 
@@ -223,7 +223,7 @@ const AdmissionApproval = () => {
                 {/* Personal Details */}
                 <div>
                   <h4 className="text-[13px] font-bold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
-                    <User size={14} className="text-[#0A6C54]" /> Personal Details
+                    <User size={14} className="text-primary" /> Personal Details
                   </h4>
                   <div className="space-y-3">
                     <div className="grid grid-cols-3 gap-2">
@@ -248,7 +248,7 @@ const AdmissionApproval = () => {
                 {/* Academic Details */}
                 <div>
                   <h4 className="text-[13px] font-bold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
-                    <FileText size={14} className="text-[#0A6C54]" /> Academic Details
+                    <FileText size={14} className="text-primary" /> Academic Details
                   </h4>
                   <div className="space-y-3">
                     <div className="grid grid-cols-3 gap-2">
@@ -274,7 +274,7 @@ const AdmissionApproval = () => {
               {/* Documents Status */}
               <div className="mt-8">
                  <h4 className="text-[13px] font-bold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
-                    <CheckCircle size={14} className="text-[#0A6C54]" /> Uploaded Documents
+                    <CheckCircle size={14} className="text-primary" /> Uploaded Documents
                   </h4>
                   {selectedApp.documents && selectedApp.documents.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -310,7 +310,7 @@ const AdmissionApproval = () => {
                   <button 
                     disabled={!allDocVerified(selectedApp)}
                     onClick={() => updateStage(selectedApp._id, 'Admitted', 'Confirmed')}
-                    className="px-4 py-2 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title={!allDocVerified(selectedApp) ? 'All documents must be verified first' : 'Approve Application'}>
                     Approve & Admit
                   </button>

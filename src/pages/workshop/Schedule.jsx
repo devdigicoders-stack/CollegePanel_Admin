@@ -24,9 +24,9 @@ const WorkshopSchedule = () => {
             <div key={item.id} className="p-5 border border-gray-100 rounded-xl shadow-sm space-y-4 bg-gradient-to-br from-white to-gray-50/50">
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#0A6C54] bg-[#0A6C54]/5 px-2 py-0.5 rounded border border-[#0A6C54]/10">{item.code}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10">{item.code}</span>
                   <h3 className="font-bold text-gray-800 text-[15px] mt-2">{item.subject}</h3>
-                  <p className="text-[12px] text-[#0A6C54] font-bold mt-1">{item.batch}</p>
+                  <p className="text-[12px] text-primary font-bold mt-1">{item.batch}</p>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-gray-400 font-bold uppercase tracking-wider">
                   <Clock size={13} />

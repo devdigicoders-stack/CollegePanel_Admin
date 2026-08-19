@@ -79,14 +79,14 @@ const Hostel = () => {
           <h2 className="text-[16px] font-bold text-gray-800">My Hostel Room & Outings</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Verify your allocated room details, view warden notice boards, and apply for outing passes</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+        <button onClick={() => setShowModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
           <Plus size={16} /> Apply for Outing Pass
         </button>
       </div>
 
       <div className="p-6 space-y-6 flex-1 overflow-y-auto">
         <div className="p-5 border border-gray-100 rounded-xl bg-gray-50/50 flex items-center gap-4 shadow-sm">
-          <div className="w-12 h-12 rounded-xl bg-[#0A6C54]/10 text-[#0A6C54] flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
             <Home size={24} />
           </div>
           <div>
@@ -145,7 +145,7 @@ const Hostel = () => {
                 <select 
                   value={newOuting.type} 
                   onChange={(e) => setNewOuting({...newOuting, type: e.target.value})}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="Outing">Temporary Outing (Hours)</option>
                   <option value="Leave">Night Outing Pass / Leave (Days)</option>
@@ -160,7 +160,7 @@ const Hostel = () => {
                     required
                     value={newOuting.fromDate}
                     onChange={(e) => setNewOuting({...newOuting, fromDate: e.target.value})}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -170,7 +170,7 @@ const Hostel = () => {
                     required
                     value={newOuting.toDate}
                     onChange={(e) => setNewOuting({...newOuting, toDate: e.target.value})}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -195,7 +195,7 @@ const Hostel = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold"
                 >
                   Submit Request
                 </button>

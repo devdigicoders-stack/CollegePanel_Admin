@@ -69,13 +69,13 @@ const Fees = () => {
             onClick={() => setActiveTab(tab)}
             className={`px-6 py-4 text-[14px] font-semibold transition-colors relative ${
               activeTab === tab 
-                ? 'text-[#0A6C54]' 
+                ? 'text-primary' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             {tab}
             {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-md"></div>
+              <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-md"></div>
             )}
           </button>
         ))}
@@ -89,22 +89,22 @@ const Fees = () => {
             {/* Card 1 */}
             <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Total Fee Demand</div>
-              <div className="text-[22px] font-bold text-[#022A36]">{formatCurrency(stats.demand)}</div>
+              <div className="text-[22px] font-bold text-sidebar">{formatCurrency(stats.demand)}</div>
             </div>
             {/* Card 2 */}
             <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Total Collections</div>
-              <div className="text-[22px] font-bold text-[#0A6C54]">{formatCurrency(stats.collection)}</div>
+              <div className="text-[22px] font-bold text-primary">{formatCurrency(stats.collection)}</div>
             </div>
             {/* Card 3 */}
             <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Pending Dues</div>
-              <div className="text-[22px] font-bold text-[#022A36]">{formatCurrency(stats.pending)}</div>
+              <div className="text-[22px] font-bold text-sidebar">{formatCurrency(stats.pending)}</div>
             </div>
             {/* Card 4 */}
             <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Total Students</div>
-              <div className="text-[22px] font-bold text-[#0A6C54]">{studentFees.length}</div>
+              <div className="text-[22px] font-bold text-primary">{studentFees.length}</div>
             </div>
           </div>
 
@@ -112,7 +112,7 @@ const Fees = () => {
           <div className="px-6 pb-4 flex flex-col md:flex-row gap-4 justify-between items-center">
             <div className="flex flex-wrap gap-3 w-full md:w-auto">
               <div className="relative flex-1 md:flex-none">
-                <select className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm">
+                <select className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm">
                   <option>All Courses</option>
                   <option>Diploma in CE</option>
                   <option>Diploma in EE</option>
@@ -122,7 +122,7 @@ const Fees = () => {
               </div>
 
               <div className="relative flex-1 md:flex-none">
-                <select className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm">
+                <select className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm">
                   <option>All Semesters</option>
                   <option>1st Semester</option>
                   <option>2nd Semester</option>
@@ -135,7 +135,7 @@ const Fees = () => {
               </div>
 
               <div className="relative flex-1 md:flex-none">
-                <select className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer shadow-sm">
+                <select className="appearance-none w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm">
                   <option>All Status</option>
                   <option>Paid</option>
                   <option>Partial</option>
@@ -150,7 +150,7 @@ const Fees = () => {
               <input 
                 type="text" 
                 placeholder="Search by name or enrollment no." 
-                className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] placeholder:text-gray-400 shadow-sm"
+                className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-gray-400 shadow-sm"
               />
             </div>
           </div>
@@ -186,7 +186,7 @@ const Fees = () => {
                     return (
                       <tr key={row._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                         <td className="py-4 px-4 text-[13px] text-gray-600 font-medium">{index + 1}</td>
-                        <td className="py-4 px-4 text-[13px] font-semibold text-[#0A6C54] cursor-pointer hover:underline">{row.enrollNo || 'N/A'}</td>
+                        <td className="py-4 px-4 text-[13px] font-semibold text-primary cursor-pointer hover:underline">{row.enrollNo || 'N/A'}</td>
                         <td className="py-4 px-4 text-[13px] font-medium text-gray-800">{row.studentName}</td>
                         <td className="py-4 px-4 text-[13px] text-gray-600 font-medium">{row.course}</td>
                         <td className="py-4 px-4 text-[13px] text-gray-800 font-semibold">{formatCurrency(row.totalFee)}</td>
@@ -219,7 +219,7 @@ const Fees = () => {
               <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors">
                 <ChevronLeft size={16} />
               </button>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0A6C54] text-white font-semibold text-[13px] transition-colors">
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white font-semibold text-[13px] transition-colors">
                 1
               </button>
               <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent text-gray-600 hover:bg-gray-50 font-medium text-[13px] transition-colors">

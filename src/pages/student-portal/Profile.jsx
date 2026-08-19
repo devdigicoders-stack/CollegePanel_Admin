@@ -89,7 +89,7 @@ const Profile = () => {
               type="text" 
               readOnly 
               value={profile.enrollNo}
-              className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-[#0A6C54] font-bold font-mono"
+              className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-[13px] text-primary font-bold font-mono"
             />
           </div>
 
@@ -164,7 +164,7 @@ const Profile = () => {
           />
         </div>
 
-        <button type="submit" className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+        <button type="submit" className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
           <Save size={15} /> Save Profile Changes
         </button>
       </form>

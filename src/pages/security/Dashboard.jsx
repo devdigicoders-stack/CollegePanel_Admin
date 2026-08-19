@@ -51,7 +51,7 @@ const SecurityDashboard = () => {
   };
 
   const stats = [
-    { label: 'Students Inside Campus', value: `${logStats.studentsInside}`, icon: ShieldCheck, color: 'border-b-[#0A6C54]', iconBg: 'bg-[#0A6C54]/10', iconColor: 'text-[#0A6C54]', badge: 'Live', badgeBg: 'bg-[#0A6C54]/10 text-[#0A6C54] border-[#0A6C54]/20' },
+    { label: 'Students Inside Campus', value: `${logStats.studentsInside}`, icon: ShieldCheck, color: 'border-b-primary', iconBg: 'bg-primary/10', iconColor: 'text-primary', badge: 'Live', badgeBg: 'bg-primary/10 text-primary border-primary/20' },
     { label: 'Students Outside', value: `${logStats.studentsOutside}`, icon: Users, color: 'border-b-orange-400', iconBg: 'bg-orange-50', iconColor: 'text-orange-500', badge: 'Live', badgeBg: 'bg-orange-50 text-orange-600 border-orange-100' },
     { label: 'Visitors Inside Campus', value: `${logStats.visitorsInside}`, icon: Clock, color: 'border-b-blue-500', iconBg: 'bg-blue-50', iconColor: 'text-blue-600', badge: 'Active', badgeBg: 'bg-blue-50 text-blue-600 border-blue-100' },
     { label: 'Total Visitors Today', value: `${logStats.totalVisitors}`, icon: FileText, color: 'border-b-indigo-500', iconBg: 'bg-indigo-50', iconColor: 'text-indigo-500', badge: 'Today', badgeBg: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
@@ -69,7 +69,7 @@ const SecurityDashboard = () => {
       <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/30">
         <div>
           <h2 className="text-[18px] font-bold text-gray-800 flex items-center gap-2">
-            <ShieldAlert className="text-[#0A6C54]" size={20} />
+            <ShieldAlert className="text-primary" size={20} />
             Command Center Dashboard
           </h2>
           <p className="text-[12px] text-gray-500 mt-1 font-medium">Real-time overview of campus security, movements, and active emergency alerts</p>

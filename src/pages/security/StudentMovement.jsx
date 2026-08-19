@@ -98,7 +98,7 @@ const StudentMovement = () => {
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={15} /> Export Movement Logs
           </button>
-          <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+          <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
             <Plus size={16} /> Log Manual Movement
           </button>
         </div>
@@ -113,11 +113,11 @@ const StudentMovement = () => {
             placeholder="Search movement logs by student name or roll number..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <div className="text-[12px] font-semibold text-gray-500 bg-white px-4 py-2.5 border border-gray-200 rounded-lg shadow-sm">
-          Total Logs Found: <span className="text-[#0A6C54]">{filtered.length}</span>
+          Total Logs Found: <span className="text-primary">{filtered.length}</span>
         </div>
       </div>
 
@@ -139,7 +139,7 @@ const StudentMovement = () => {
             <tbody>
               {filtered.map(item => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] font-bold font-mono text-[#0A6C54]">{item.studentId?.studentId || 'N/A'}</td>
+                  <td className="py-4 px-6 text-[13px] font-bold font-mono text-primary">{item.studentId?.studentId || 'N/A'}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.studentId?.studentName || 'Unknown Student'}</td>
                   <td className="py-4 px-6 text-center">
                     <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold ${
@@ -205,7 +205,7 @@ const StudentMovement = () => {
                   placeholder="e.g. CS2023001"
                   value={newMove.enrollNo}
                   onChange={(e) => setNewMove({...newMove, enrollNo: e.target.value.toUpperCase()})}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] font-mono focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -234,7 +234,7 @@ const StudentMovement = () => {
                   value={newMove.remark}
                   onChange={(e) => setNewMove({...newMove, remark: e.target.value})}
                   placeholder="e.g. Late entry - medical slip, Approved weekend outing"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] h-20 resize-none focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] h-20 resize-none focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -249,7 +249,7 @@ const StudentMovement = () => {
                 <button 
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-[13px] font-semibold transition-colors shadow-sm"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-[13px] font-semibold transition-colors shadow-sm"
                 >
                   {submitting ? 'Saving...' : 'Save Log'}
                 </button>

@@ -46,7 +46,7 @@ const StudyMaterials = () => {
                   <div className={`p-3 rounded-xl transition-colors duration-300 ${
                     (item.type || '').includes('Video') 
                       ? 'bg-red-50 text-red-500 group-hover:bg-red-500 group-hover:text-white' 
-                      : 'bg-[#0A6C54]/10 text-[#0A6C54] group-hover:bg-[#0A6C54] group-hover:text-white'
+                      : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white'
                   }`}>
                     {(item.type || '').includes('Video') ? <Video size={24} /> : <FileText size={24} />}
                   </div>
@@ -75,7 +75,7 @@ const StudyMaterials = () => {
                       toast.error('File link not available');
                     }
                   }} 
-                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 hover:bg-[#0A6C54] hover:text-white text-gray-700 rounded-xl text-[13px] font-bold transition-colors duration-300 group-hover:bg-[#0A6C54]/10 group-hover:text-[#0A6C54]"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 hover:bg-primary hover:text-white text-gray-700 rounded-xl text-[13px] font-bold transition-colors duration-300 group-hover:bg-primary/10 group-hover:text-primary"
                 >
                   {(item.type || '').includes('Video') ? 'Watch Video' : 'Download File'} 
                   <Download size={16} />

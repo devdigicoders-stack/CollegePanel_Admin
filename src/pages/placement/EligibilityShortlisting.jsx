@@ -36,7 +36,7 @@ const EligibilityShortlisting = () => {
           <h2 className="text-[16px] font-bold text-gray-800">Eligibility Filter & Shortlisting</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Verify CGPA margins, backlog parameters, and generate candidate lists</p>
         </div>
-        <button onClick={() => toast.success('Shortlist roster published!')} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-colors">
+        <button onClick={() => toast.success('Shortlist roster published!')} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-colors">
           Publish Shortlist
         </button>
       </div>
@@ -101,7 +101,7 @@ const EligibilityShortlisting = () => {
                   </span>
                 </td>
                 <td className="py-4 px-6">
-                  <button onClick={() => handleManualToggle(item.id)} className="px-2 py-1 text-[11px] font-bold bg-[#0A6C54] text-white rounded hover:bg-[#085a46] flex items-center gap-1">
+                  <button onClick={() => handleManualToggle(item.id)} className="px-2 py-1 text-[11px] font-bold bg-primary text-white rounded hover:bg-primary-hover flex items-center gap-1">
                     {item.shortlisted ? 'Exclude' : 'Shortlist'}
                   </button>
                 </td>

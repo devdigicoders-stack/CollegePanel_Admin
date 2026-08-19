@@ -93,7 +93,7 @@ const SecurityReports = () => {
       <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/30">
         <div>
           <h2 className="text-[18px] font-bold text-gray-800 flex items-center gap-2">
-            <PieChart className="text-[#0A6C54]" size={20} />
+            <PieChart className="text-primary" size={20} />
             Gate Security Audits & Reports
           </h2>
           <p className="text-[12px] text-gray-500 mt-1 font-medium">Generate vehicle checklogs, student outing logs, and dynamic gate count reports</p>
@@ -116,7 +116,7 @@ const SecurityReports = () => {
               XLSX.utils.book_append_sheet(wb, ws, 'Security Report');
               XLSX.writeFile(wb, `Security_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
             }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-bold transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-bold transition-colors shadow-sm"
           >
             <Download size={15} /> Generate Excel
           </button>
@@ -130,7 +130,7 @@ const SecurityReports = () => {
           <select 
             value={reportType} 
             onChange={(e) => setReportType(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 text-gray-800 py-3 px-4 rounded-xl text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] cursor-pointer transition-all shadow-sm"
+            className="w-full bg-gray-50 border border-gray-200 text-gray-800 py-3 px-4 rounded-xl text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer transition-all shadow-sm"
           >
             {reportOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </select>
@@ -142,7 +142,7 @@ const SecurityReports = () => {
             type="date" 
             value={dateRange.start}
             onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
-            className="w-full bg-gray-50 border border-gray-200 text-gray-800 py-3 px-4 rounded-xl text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all shadow-sm"
+            className="w-full bg-gray-50 border border-gray-200 text-gray-800 py-3 px-4 rounded-xl text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
           />
         </div>
 
@@ -152,7 +152,7 @@ const SecurityReports = () => {
             type="date" 
             value={dateRange.end}
             onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
-            className="w-full bg-gray-50 border border-gray-200 text-gray-800 py-3 px-4 rounded-xl text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/20 focus:border-[#0A6C54] transition-all shadow-sm"
+            className="w-full bg-gray-50 border border-gray-200 text-gray-800 py-3 px-4 rounded-xl text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
           />
         </div>
       </div>
@@ -175,12 +175,12 @@ const SecurityReports = () => {
                 <span className="text-[13px] text-gray-500 font-medium">Total Visitors Logged</span>
               </div>
 
-              <div className="bg-white border-b-4 border-b-[#0A6C54] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-white border-b-4 border-b-primary rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#0A6C54]/10 flex items-center justify-center text-[#0A6C54]">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                     <BarChart3 size={24} />
                   </div>
-                  <span className="text-[11px] font-bold text-[#0A6C54] bg-[#0A6C54]/10 px-2.5 py-1 rounded-full border border-[#0A6C54]/20">Today</span>
+                  <span className="text-[11px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20">Today</span>
                 </div>
                 <h4 className="text-[28px] font-black text-gray-800">{stats.vehiclesChecked}</h4>
                 <span className="text-[13px] text-gray-500 font-medium">Vehicles Authenticated</span>

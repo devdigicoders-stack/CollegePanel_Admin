@@ -46,7 +46,7 @@ const MessDashboard = () => {
     series: [
       { name: 'Breakfast', data: [310, 315, 305, 320, 312, 280, 290], color: '#3B82F6' },
       { name: 'Lunch', data: [340, 335, 345, 330, 342, 300, 310], color: '#10B981' },
-      { name: 'Dinner', data: [320, 325, 315, 330, 320, 290, 300], color: '#0A6C54' }
+      { name: 'Dinner', data: [320, 325, 315, 330, 320, 290, 300], color: 'var(--color-primary)' }
     ],
     credits: { enabled: false }
   };

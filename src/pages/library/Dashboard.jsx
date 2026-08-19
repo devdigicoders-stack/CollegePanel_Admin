@@ -75,7 +75,7 @@ const LibraryDashboard = () => {
     xAxis: { categories: reportData?.dailyTransactions?.map(t => t.date) || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'] },
     yAxis: { title: { text: '' } },
     series: [
-      { name: 'Books Issued', data: reportData?.dailyTransactions?.map(t => t.issues) || [0, 0, 0, 0, 0, 0], color: '#0A6C54', fillOpacity: 0.1 },
+      { name: 'Books Issued', data: reportData?.dailyTransactions?.map(t => t.issues) || [0, 0, 0, 0, 0, 0], color: 'var(--color-primary)', fillOpacity: 0.1 },
       { name: 'Books Returned', data: reportData?.dailyTransactions?.map(d => d.returns) || [0, 0, 0, 0, 0, 0], color: '#3B82F6', fillOpacity: 0.1 }
     ],
     credits: { enabled: false }

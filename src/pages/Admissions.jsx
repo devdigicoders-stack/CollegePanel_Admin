@@ -72,13 +72,13 @@ const Admissions = () => {
             onClick={() => setActiveTab(tab)}
             className={`px-4 md:px-6 py-4 whitespace-nowrap text-[13px] md:text-[14px] font-semibold transition-colors relative ${
               activeTab === tab 
-                ? 'text-[#0A6C54]' 
+                ? 'text-primary' 
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             {tab}
             {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-md"></div>
+              <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-md"></div>
             )}
           </button>
         ))}
@@ -110,7 +110,7 @@ const Admissions = () => {
         <div className="flex-1 overflow-y-auto p-6">
           <div className="mb-4 flex gap-4">
             <input type="text" placeholder="Search..." className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px]" />
-            <button className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2">
+            <button className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2">
               <Plus size={18} /> Add Enquiry
             </button>
           </div>
@@ -130,7 +130,7 @@ const Admissions = () => {
               <tbody>
                 {enquiries.map(enquiry => (
                   <tr key={enquiry.id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                    <td className="py-3 px-4 text-[13px] font-semibold text-[#0A6C54]">{enquiry.enquiryNo}</td>
+                    <td className="py-3 px-4 text-[13px] font-semibold text-primary">{enquiry.enquiryNo}</td>
                     <td className="py-3 px-4 text-[13px] font-medium text-gray-800">{enquiry.name}</td>
                     <td className="py-3 px-4 text-[13px] text-gray-600">{enquiry.mobile}</td>
                     <td className="py-3 px-4 text-[13px] text-gray-600">{enquiry.course}</td>
@@ -157,7 +157,7 @@ const Admissions = () => {
         <div className="flex-1 overflow-y-auto p-6">
           <div className="mb-4 flex gap-4">
             <input type="text" placeholder="Search..." className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px]" />
-            <button className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2">
+            <button className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2">
               <Plus size={18} /> Add Follow-up
             </button>
           </div>
@@ -177,7 +177,7 @@ const Admissions = () => {
               <tbody>
                 {followUps.map(followUp => (
                   <tr key={followUp.id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                    <td className="py-3 px-4 text-[13px] font-semibold text-[#0A6C54]">{followUp.followUpNo}</td>
+                    <td className="py-3 px-4 text-[13px] font-semibold text-primary">{followUp.followUpNo}</td>
                     <td className="py-3 px-4 text-[13px] font-medium text-gray-800">{followUp.studentName}</td>
                     <td className="py-3 px-4 text-[13px] text-gray-600">{followUp.course}</td>
                     <td className="py-3 px-4">
@@ -204,7 +204,7 @@ const Admissions = () => {
         <div className="flex-1 overflow-y-auto p-6">
           <div className="mb-4 flex gap-4">
             <input type="text" placeholder="Search..." className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px]" />
-            <button className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2">
+            <button className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2">
               <Plus size={18} /> New Application
             </button>
           </div>
@@ -224,7 +224,7 @@ const Admissions = () => {
               <tbody>
                 {applications.map(app => (
                   <tr key={app.id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                    <td className="py-3 px-4 text-[13px] font-semibold text-[#0A6C54]">{app.appNo}</td>
+                    <td className="py-3 px-4 text-[13px] font-semibold text-primary">{app.appNo}</td>
                     <td className="py-3 px-4 text-[13px] font-medium text-gray-800">{app.studentName}</td>
                     <td className="py-3 px-4 text-[13px] text-gray-600">{app.course}</td>
                     <td className="py-3 px-4 text-[13px] font-semibold text-green-600">{app.appFee}</td>

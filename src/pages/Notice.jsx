@@ -266,7 +266,7 @@ const Notice = () => {
         {canManageNotices && (
           <button
             onClick={handleCreate}
-            className="bg-[#0A6C54] text-white px-4 py-2 rounded-xl hover:bg-[#085a46] transition-colors font-semibold text-[13px] shadow-sm flex items-center gap-2"
+            className="bg-primary text-white px-4 py-2 rounded-xl hover:bg-primary-hover transition-colors font-semibold text-[13px] shadow-sm flex items-center gap-2"
           >
             <Plus size={16} />
             New Notice
@@ -335,7 +335,7 @@ const Notice = () => {
               <tr><td colSpan="5" className="py-8"><SkeletonLoader type="table" rows={3} cols={5} /></td></tr>
             ) : notices.length > 0 ? notices.map((notice) => (
               <tr key={notice._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                <td className="py-4 px-6 text-[13px] font-medium text-[#022A36]">{notice.title}</td>
+                <td className="py-4 px-6 text-[13px] font-medium text-sidebar">{notice.title}</td>
                 <td className="py-4 px-6 text-[13px] font-medium text-gray-600">{notice.targetAudience}</td>
                 <td className="py-4 px-6 text-[13px] font-medium text-gray-600">{notice.postedBy}</td>
                 <td className="py-4 px-6 text-[13px] font-medium text-gray-600">{formatDate(notice.dateOfPublishing)}</td>
@@ -405,7 +405,7 @@ const Notice = () => {
           >
             <ChevronLeft size={16} />
           </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0A6C54] text-white text-[13px] font-medium">
+          <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white text-[13px] font-medium">
             {pagination.page}
           </button>
           <button
@@ -437,7 +437,7 @@ const Notice = () => {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Enter notice title"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -447,7 +447,7 @@ const Notice = () => {
                   <select
                     value={formData.targetAudience}
                     onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value, department: '' })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="All Students">All Students</option>
                     <option value="All Staff">All Staff</option>
@@ -463,7 +463,7 @@ const Notice = () => {
                     <select
                       value={formData.department}
                       onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                       <option value="">-- Select Department --</option>
                       {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
@@ -475,7 +475,7 @@ const Notice = () => {
                     <select
                       value={formData.department}
                       onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                       <option value="">-- Select Course --</option>
                       {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
@@ -489,7 +489,7 @@ const Notice = () => {
                       value={formData.postedBy}
                       onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
                       placeholder="e.g., Admin, Principal"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 )}
@@ -503,7 +503,7 @@ const Notice = () => {
                     value={formData.postedBy}
                     onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
                     placeholder="e.g., Admin, Principal"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               )}
@@ -514,7 +514,7 @@ const Notice = () => {
                   <select
                     value={formData.postedByRole}
                     onChange={(e) => setFormData({ ...formData, postedByRole: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">-- Select Role --</option>
                     {roles.map((r, i) => <option key={i} value={r}>{r}</option>)}
@@ -526,7 +526,7 @@ const Notice = () => {
                     type="date"
                     value={formData.dateOfPublishing}
                     onChange={(e) => setFormData({ ...formData, dateOfPublishing: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -538,7 +538,7 @@ const Notice = () => {
                   onChange={(e) => setFormData({ ...formData, details: e.target.value })}
                   placeholder="Enter notice details and message..."
                   rows={4}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] resize-none"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                 />
               </div>
 
@@ -550,7 +550,7 @@ const Notice = () => {
                   placeholder="https://..."
                   value={formData.link}
                   onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -599,7 +599,7 @@ const Notice = () => {
               <button
                 onClick={handleSave}
                 disabled={formLoading}
-                className="flex-1 bg-[#0A6C54] text-white py-2.5 rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 bg-primary text-white py-2.5 rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Send size={14} />
                 {formLoading ? 'Saving...' : 'Publish Notice'}
@@ -633,7 +633,7 @@ const Notice = () => {
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -643,7 +643,7 @@ const Notice = () => {
                   <select
                     value={formData.targetAudience}
                     onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value, department: '' })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="All Students">All Students</option>
                     <option value="All Staff">All Staff</option>
@@ -659,7 +659,7 @@ const Notice = () => {
                     <select
                       value={formData.department}
                       onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                       <option value="">-- Select Department --</option>
                       {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
@@ -671,7 +671,7 @@ const Notice = () => {
                     <select
                       value={formData.department}
                       onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                       <option value="">-- Select Course --</option>
                       {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
@@ -684,7 +684,7 @@ const Notice = () => {
                       type="text"
                       value={formData.postedBy}
                       onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 )}
@@ -697,7 +697,7 @@ const Notice = () => {
                     type="text"
                     value={formData.postedBy}
                     onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               )}
@@ -709,7 +709,7 @@ const Notice = () => {
                     type="date"
                     value={formData.dateOfPublishing}
                     onChange={(e) => setFormData({ ...formData, dateOfPublishing: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -717,7 +717,7 @@ const Notice = () => {
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="Draft">Draft</option>
                     <option value="Published">Published</option>
@@ -731,7 +731,7 @@ const Notice = () => {
                   value={formData.details}
                   onChange={(e) => setFormData({ ...formData, details: e.target.value })}
                   rows={4}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54] resize-none"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                 />
               </div>
               {/* Link */}
@@ -742,7 +742,7 @@ const Notice = () => {
                   placeholder="https://..."
                   value={formData.link}
                   onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -790,7 +790,7 @@ const Notice = () => {
               <button
                 onClick={handleSave}
                 disabled={formLoading}
-                className="flex-1 bg-[#0A6C54] text-white py-2.5 rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm disabled:opacity-50"
+                className="flex-1 bg-primary text-white py-2.5 rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm disabled:opacity-50"
               >
                 {formLoading ? 'Updating...' : 'Update Notice'}
               </button>
@@ -902,7 +902,7 @@ const Notice = () => {
               setShowViewModal(false);
               handleEdit(selectedNotice);
             }}
-            className="flex-1 bg-[#0A6C54] text-white py-2 rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm"
+            className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm"
           >
             Edit Notice
           </button>

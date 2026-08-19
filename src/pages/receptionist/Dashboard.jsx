@@ -46,7 +46,7 @@ const ReceptionistDashboard = () => {
                   <h4 className="font-bold text-gray-800">{appt.visitor}</h4>
                   <p className="text-[12px] text-gray-500 mt-0.5">Meeting: {appt.person} | Purpose: {appt.purpose}</p>
                 </div>
-                <span className="text-[11px] font-bold text-[#0A6C54] bg-[#0A6C54]/5 px-2.5 py-1 rounded border border-[#0A6C54]/10">{appt.time}</span>
+                <span className="text-[11px] font-bold text-primary bg-primary/5 px-2.5 py-1 rounded border border-primary/10">{appt.time}</span>
               </div>
             ))}
           </div>

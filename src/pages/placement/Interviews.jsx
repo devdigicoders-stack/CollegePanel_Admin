@@ -60,7 +60,7 @@ const Interviews = () => {
           <h2 className="text-[16px] font-bold text-gray-800">Interview Rounds Schedule</h2>
           <p className="text-[12px] text-gray-500 mt-0.5 font-medium">Create online meeting links, log technical rounds, and coordinate GD rooms</p>
         </div>
-        <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+        <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
           <Plus size={16} /> Schedule Interview
         </button>
       </div>
@@ -74,7 +74,7 @@ const Interviews = () => {
             placeholder="Search by student name or company name..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -215,7 +215,7 @@ const Interviews = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold"
                 >
                   Save Schedule
                 </button>

@@ -212,7 +212,7 @@ const Teachers = () => {
           showCancelButton: true,
           confirmButtonText: 'Copy Credentials',
           cancelButtonText: 'Close',
-          confirmButtonColor: '#0A6C54'
+          confirmButtonColor: 'var(--color-primary)'
         }).then((result) => {
           if (result.isConfirmed) {
             navigator.clipboard.writeText(`Login Details for ${newTeacher.name}\nUsername: ${newTeacher.username}\nPassword: ${newTeacher.password}\nPortal URL: ${window.location.origin}`);
@@ -272,7 +272,7 @@ const Teachers = () => {
             
             {/* Left Column: Personal Information */}
             <div className="lg:col-span-3 bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 p-6 sm:p-8 h-fit">
-              <h3 className="text-[15px] font-bold text-[#0A6C54] mb-6">Personal Information</h3>
+              <h3 className="text-[15px] font-bold text-primary mb-6">Personal Information</h3>
               
               <div className="space-y-5">
                 {/* Profile Image Upload */}
@@ -286,7 +286,7 @@ const Teachers = () => {
                         <img 
                           src={imagePreview} 
                           alt="Preview" 
-                          className="w-24 h-24 rounded-full object-cover border-2 border-[#0A6C54]"
+                          className="w-24 h-24 rounded-full object-cover border-2 border-primary"
                         />
                         <button
                           type="button"
@@ -308,7 +308,7 @@ const Teachers = () => {
                         onChange={handleImageChange}
                         className="hidden"
                       />
-                      <div className="px-4 py-2 bg-[#0A6C54] text-white rounded-lg hover:bg-[#085a46] transition-colors text-xs font-semibold">
+                      <div className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-xs font-semibold">
                         {imagePreview ? 'Change Image' : 'Upload Image'}
                       </div>
                     </label>
@@ -326,7 +326,7 @@ const Teachers = () => {
                     value={formData.name || ''}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     required
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                   />
                 </div>
 
@@ -341,7 +341,7 @@ const Teachers = () => {
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     required
                     disabled={isEditing}
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
                 </div>
 
@@ -355,7 +355,7 @@ const Teachers = () => {
                     value={formData.mobile || ''}
                     onChange={(e) => handleInputChange('mobile', e.target.value)}
                     required
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                   />
                 </div>
 
@@ -367,7 +367,7 @@ const Teachers = () => {
                     value={formData.department || ''}
                     onChange={(e) => handleInputChange('department', e.target.value)}
                     required
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] appearance-none bg-white"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary appearance-none bg-white"
                   >
                     <option value="">Select Department</option>
                     {departments.map(dept => (
@@ -388,7 +388,7 @@ const Teachers = () => {
                       value={formData.dateOfBirth ? formData.dateOfBirth.split('T')[0] : ''}
                       onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                       required
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                     />
                   </div>
                   <div>
@@ -399,7 +399,7 @@ const Teachers = () => {
                       value={formData.gender || ''}
                       onChange={(e) => handleInputChange('gender', e.target.value)}
                       required
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] appearance-none bg-white"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary appearance-none bg-white"
                     >
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
@@ -418,7 +418,7 @@ const Teachers = () => {
                     placeholder="e.g., Ph.D., M.Tech"
                     value={formData.qualification || ''}
                     onChange={(e) => handleInputChange('qualification', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                   />
                 </div>
 
@@ -431,7 +431,7 @@ const Teachers = () => {
                     placeholder="e.g., 5 Years"
                     value={formData.experience || ''}
                     onChange={(e) => handleInputChange('experience', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                   />
                 </div>
               </div>
@@ -453,7 +453,7 @@ const Teachers = () => {
                       value={formData.designation || ''}
                       onChange={(e) => handleInputChange('designation', e.target.value)}
                       required
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] appearance-none bg-white"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary appearance-none bg-white"
                     >
                       <option value="">Select Designation</option>
                       {designations.map(desig => (
@@ -471,7 +471,7 @@ const Teachers = () => {
                       value={formData.dateOfJoining ? formData.dateOfJoining.split('T')[0] : ''}
                       onChange={(e) => handleInputChange('dateOfJoining', e.target.value)}
                       required
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                     />
                   </div>
 
@@ -497,7 +497,7 @@ const Teachers = () => {
                       placeholder="e.g. Level 10"
                       value={formData.payScale || ''}
                       onChange={(e) => handleInputChange('payScale', e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54]"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                     />
                   </div>
 
@@ -508,7 +508,7 @@ const Teachers = () => {
                     <select 
                       value={formData.status || 'Active'}
                       onChange={(e) => handleInputChange('status', e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] appearance-none bg-white"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary appearance-none bg-white"
                     >
                       <option value="Active">Active</option>
                       <option value="On Leave">On Leave</option>
@@ -521,8 +521,8 @@ const Teachers = () => {
               {/* Login Credentials */}
               <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 p-6 sm:p-8 h-fit">
                 <div className="flex items-center gap-2 mb-6">
-                  <Lock size={16} className="text-[#0A6C54]" />
-                  <h3 className="text-[15px] font-bold text-[#0A6C54]">Login Credentials</h3>
+                  <Lock size={16} className="text-primary" />
+                  <h3 className="text-[15px] font-bold text-primary">Login Credentials</h3>
                 </div>
                 
                 <div className="space-y-5">
@@ -541,7 +541,7 @@ const Teachers = () => {
                       <button
                         type="button"
                         onClick={() => copyToClipboard(formData.username)}
-                        className="px-3 py-2 bg-[#0A6C54] text-white rounded-lg hover:bg-[#085a46] transition-colors"
+                        className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
                         title="Copy username"
                       >
                         <Copy size={16} />
@@ -564,7 +564,7 @@ const Teachers = () => {
                       <button
                         type="button"
                         onClick={() => copyToClipboard(formData.password || 'Teacher@123')}
-                        className="px-3 py-2 bg-[#0A6C54] text-white rounded-lg hover:bg-[#085a46] transition-colors"
+                        className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
                         title="Copy password"
                       >
                         <Copy size={16} />
@@ -578,7 +578,7 @@ const Teachers = () => {
                       type="checkbox" 
                       id="sendCredentials"
                       disabled
-                      className="w-4 h-4 text-[#0A6C54] border-gray-300 rounded focus:ring-[#0A6C54] disabled:cursor-not-allowed"
+                      className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary disabled:cursor-not-allowed"
                     />
                     <label htmlFor="sendCredentials" className="text-[13px] text-gray-500">
                       Send credentials to email (Coming soon)
@@ -608,7 +608,7 @@ const Teachers = () => {
           </button>
           <button 
             onClick={handleFormSubmit}
-            className="px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg transition-colors shadow-sm"
+            className="px-6 py-2.5 text-[13px] font-semibold text-white bg-primary hover:bg-primary-hover rounded-lg transition-colors shadow-sm"
           >
             {isEditing ? 'Update Teacher' : 'Create Teacher'}
           </button>
@@ -629,7 +629,7 @@ const Teachers = () => {
             <select 
               value={filters.department}
               onChange={(e) => handleFilterChange('department', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Departments</option>
               {departments.map(dept => (
@@ -645,7 +645,7 @@ const Teachers = () => {
             <select 
               value={filters.designation}
               onChange={(e) => handleFilterChange('designation', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Designations</option>
               {designations.map(desig => (
@@ -659,7 +659,7 @@ const Teachers = () => {
             <select 
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+              className="appearance-none w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
             >
               <option>All Status</option>
               <option>Active</option>
@@ -673,7 +673,7 @@ const Teachers = () => {
         {checkPermission('Add Teacher') && (
           <button 
             onClick={handleAddClick}
-            className="w-full md:w-auto bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
+            className="w-full md:w-auto bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
           >
             <Plus size={16} strokeWidth={2.5} />
             Add Teacher
@@ -690,7 +690,7 @@ const Teachers = () => {
             placeholder="Search by name or employee ID" 
             value={filters.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] placeholder:text-gray-400 shadow-sm"
+            className="w-full bg-white border border-gray-200 text-gray-700 py-2 pl-10 pr-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-gray-400 shadow-sm"
           />
         </div>
       </div>
@@ -722,7 +722,7 @@ const Teachers = () => {
                 {tableData.map((row, index) => (
                   <tr key={row._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                     <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{(pagination.page - 1) * pagination.limit + index + 1}</td>
-                    <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54] whitespace-nowrap cursor-pointer hover:underline">{row.empId}</td>
+                    <td className="py-4 px-6 text-[13px] font-semibold text-primary whitespace-nowrap cursor-pointer hover:underline">{row.empId}</td>
                     <td className="py-4 px-6 text-[13px] text-gray-800 font-medium whitespace-nowrap">{row.name}</td>
                     <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{row.designation}</td>
                     <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{row.department}</td>
@@ -736,7 +736,7 @@ const Teachers = () => {
                       <div className="flex items-center justify-center gap-2 whitespace-nowrap">
                         <button 
                           onClick={() => handleViewClick(row)}
-                          className="w-7 h-7 rounded border border-green-100 flex items-center justify-center text-[#0A6C54] hover:bg-green-50 transition-colors flex-shrink-0"
+                          className="w-7 h-7 rounded border border-green-100 flex items-center justify-center text-primary hover:bg-green-50 transition-colors flex-shrink-0"
                           title="View Details"
                         >
                           <Eye size={14} strokeWidth={2} />
@@ -788,7 +788,7 @@ const Teachers = () => {
               onClick={() => setPagination(prev => ({ ...prev, page: i + 1 }))}
               className={`w-8 h-8 flex items-center justify-center rounded-lg font-semibold text-[13px] transition-colors ${
                 pagination.page === i + 1 
-                  ? 'bg-[#0A6C54] text-white' 
+                  ? 'bg-primary text-white' 
                   : 'border border-transparent text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -854,7 +854,7 @@ const Teachers = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-[#0A6C54] to-[#085a46]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-primary to-primary-hover">
               <h3 className="text-lg font-bold text-white">Teacher Details</h3>
               <button 
                 onClick={() => setShowViewModal(false)}
@@ -867,16 +867,16 @@ const Teachers = () => {
             {/* Content */}
             <div className="p-6 max-h-[70vh] overflow-y-auto">
               {/* Basic Info Card */}
-              <div className="bg-gradient-to-br from-[#0A6C54]/5 to-[#0A6C54]/10 rounded-xl p-6 mb-6">
+              <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-6 mb-6">
                 <div className="flex items-center gap-4 mb-4">
                   {selectedTeacher.profileImage ? (
                     <img 
                       src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${selectedTeacher.profileImage}`}
                       alt={selectedTeacher.name}
-                      className="w-16 h-16 rounded-full object-cover border-2 border-[#0A6C54]"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-primary"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-[#0A6C54] flex items-center justify-center text-white text-2xl font-bold">
+                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-bold">
                       {selectedTeacher.name?.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -890,10 +890,10 @@ const Teachers = () => {
                     </span>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm mt-4 sm:mt-0 pt-4 sm:pt-0 border-t border-[#0A6C54]/10 sm:border-none">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm mt-4 sm:mt-0 pt-4 sm:pt-0 border-t border-primary/10 sm:border-none">
                   <div className="flex flex-col sm:flex-row sm:items-center">
                     <span className="text-gray-500 text-xs sm:text-sm">Employee ID:</span>
-                    <span className="sm:ml-2 font-semibold text-[#0A6C54] break-all">{selectedTeacher.empId}</span>
+                    <span className="sm:ml-2 font-semibold text-primary break-all">{selectedTeacher.empId}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center">
                     <span className="text-gray-500 text-xs sm:text-sm">Department:</span>
@@ -1025,7 +1025,7 @@ const Teachers = () => {
                   setShowViewModal(false);
                   handleEditClick(selectedTeacher);
                 }}
-                className="px-4 py-2 bg-[#0A6C54] text-white rounded-lg hover:bg-[#085a46] transition-colors font-medium text-sm flex items-center gap-2"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm flex items-center gap-2"
               >
                 <Edit size={14} />
                 Edit Teacher

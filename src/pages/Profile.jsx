@@ -95,12 +95,12 @@ const Profile = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            <button className="absolute bottom-0 right-0 w-8 h-8 bg-[#0A6C54] rounded-full border-2 border-white flex items-center justify-center text-white hover:bg-[#085a46] transition-colors shadow-sm">
+            <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full border-2 border-white flex items-center justify-center text-white hover:bg-primary-hover transition-colors shadow-sm">
               <Camera size={14} />
             </button>
           </div>
 
-          <h2 className="text-[20px] font-bold text-[#022A36] font-['Outfit'] mb-1">{userName}</h2>
+          <h2 className="text-[20px] font-bold text-sidebar font-['Outfit'] mb-1">{userName}</h2>
           <p className="text-[13px] text-gray-500 font-medium mb-8">{roleName}</p>
 
           <div className="w-full space-y-5 text-left border-t border-gray-100 pt-6">
@@ -124,7 +124,7 @@ const Profile = () => {
         
         {/* Basic Profile Details */}
         <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 p-8">
-          <h3 className="text-[16px] font-bold text-[#022A36] mb-6">My Profile</h3>
+          <h3 className="text-[16px] font-bold text-sidebar mb-6">My Profile</h3>
           
           <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] items-center gap-y-6 gap-x-6 max-w-2xl">
             <label className="text-[13px] font-semibold text-gray-600">Full Name</label>
@@ -132,7 +132,7 @@ const Profile = () => {
               type="text" 
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+              className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary"
             />
 
             <label className="text-[13px] font-semibold text-gray-600">Email</label>
@@ -140,7 +140,7 @@ const Profile = () => {
               type="email" 
               value={userEmail}
               onChange={(e) => setUserEmail(e.target.value)}
-              className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+              className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary"
             />
 
             <label className="text-[13px] font-semibold text-gray-600">Role & Access</label>
@@ -156,7 +156,7 @@ const Profile = () => {
                 type="button"
                 onClick={handleProfileUpdate}
                 disabled={isUpdatingProfile}
-                className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-colors shadow-sm disabled:opacity-50"
+                className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-colors shadow-sm disabled:opacity-50"
               >
                 {isUpdatingProfile ? 'Saving...' : 'Save Profile'}
               </button>
@@ -166,7 +166,7 @@ const Profile = () => {
 
         {/* Change Password */}
         <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 p-8">
-          <h3 className="text-[16px] font-bold text-[#022A36] mb-6">Change Password</h3>
+          <h3 className="text-[16px] font-bold text-sidebar mb-6">Change Password</h3>
           
           <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] items-center gap-y-6 gap-x-6 max-w-2xl">
             
@@ -177,7 +177,7 @@ const Profile = () => {
                 placeholder="Enter current password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm pr-10"
+                className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary shadow-sm pr-10"
               />
               <button 
                 type="button"
@@ -195,7 +195,7 @@ const Profile = () => {
                 placeholder="Enter new password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm pr-10"
+                className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary shadow-sm pr-10"
               />
               <button 
                 type="button"
@@ -213,7 +213,7 @@ const Profile = () => {
                 placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] shadow-sm pr-10"
+                className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary shadow-sm pr-10"
               />
               <button 
                 type="button"
@@ -229,7 +229,7 @@ const Profile = () => {
                 type="button"
                 onClick={handlePasswordUpdate}
                 disabled={isUpdating}
-                className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-colors shadow-sm disabled:opacity-50"
+                className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-colors shadow-sm disabled:opacity-50"
               >
                 {isUpdating ? 'Updating...' : 'Update Password'}
               </button>

@@ -84,7 +84,7 @@ const DocumentVerification = () => {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input type="text" placeholder="Search by name or app no..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]" />
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary" />
         </div>
       </div>
 
@@ -111,7 +111,7 @@ const DocumentVerification = () => {
                     <div className="text-right">
                       <p className="text-[12px] font-semibold text-gray-700">{verified}/{total} Verified</p>
                       <div className="w-32 bg-gray-200 rounded-full h-1.5 mt-1">
-                        <div className="bg-[#0A6C54] h-1.5 rounded-full" style={{ width: `${total > 0 ? (verified/total)*100 : 0}%` }}></div>
+                        <div className="bg-primary h-1.5 rounded-full" style={{ width: `${total > 0 ? (verified/total)*100 : 0}%` }}></div>
                       </div>
                     </div>
                   </div>

@@ -54,7 +54,7 @@ const Library = () => {
       
       {/* Title area */}
       <div className="mb-6">
-        <h2 className="text-[20px] font-bold text-[#022A36] font-['Outfit']">Library Dashboard</h2>
+        <h2 className="text-[20px] font-bold text-sidebar font-['Outfit']">Library Dashboard</h2>
         <p className="text-[13px] text-gray-500 mt-1">Library &gt; Dashboard</p>
       </div>
 
@@ -64,15 +64,15 @@ const Library = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-center h-[100px]">
             <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Total Books</div>
-            <div className="text-[24px] font-bold text-[#022A36]">{loading ? '-' : stats.totalBooks}</div>
+            <div className="text-[24px] font-bold text-sidebar">{loading ? '-' : stats.totalBooks}</div>
           </div>
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-center h-[100px]">
             <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Issued Books</div>
-            <div className="text-[24px] font-bold text-[#022A36]">{loading ? '-' : stats.issuedBooks}</div>
+            <div className="text-[24px] font-bold text-sidebar">{loading ? '-' : stats.issuedBooks}</div>
           </div>
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-center h-[100px]">
             <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Available Books</div>
-            <div className="text-[24px] font-bold text-[#022A36]">{loading ? '-' : stats.availableBooks}</div>
+            <div className="text-[24px] font-bold text-sidebar">{loading ? '-' : stats.availableBooks}</div>
           </div>
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-center h-[100px]">
             <div className="text-[12px] font-semibold text-gray-500 mb-1 tracking-wide">Overdue Books</div>
@@ -85,7 +85,7 @@ const Library = () => {
           
           {/* Books Issued This Week Card */}
           <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col h-full min-h-[300px]">
-            <h3 className="text-[14px] font-bold text-[#022A36] mb-6">Books Issued Recently</h3>
+            <h3 className="text-[14px] font-bold text-sidebar mb-6">Books Issued Recently</h3>
             
             <div className="flex-1 flex flex-col gap-5">
               {recentIssues.length > 0 ? (
@@ -103,7 +103,7 @@ const Library = () => {
             </div>
 
             <div className="mt-6 flex justify-end">
-              <button className="text-[13px] font-semibold text-[#0A6C54] hover:text-[#085a46] transition-colors">
+              <button className="text-[13px] font-semibold text-primary hover:text-primary-hover transition-colors">
                 View All
               </button>
             </div>
@@ -111,7 +111,7 @@ const Library = () => {
 
           {/* Overdue Books Card */}
           <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col h-full min-h-[300px]">
-            <h3 className="text-[14px] font-bold text-[#022A36] mb-6">Overdue Books</h3>
+            <h3 className="text-[14px] font-bold text-sidebar mb-6">Overdue Books</h3>
             
             <div className="flex-1 flex flex-col gap-5">
               {overdueTransactions.length > 0 ? (
@@ -134,7 +134,7 @@ const Library = () => {
             </div>
 
             <div className="mt-6 flex justify-end">
-              <button className="text-[13px] font-semibold text-[#0A6C54] hover:text-[#085a46] transition-colors">
+              <button className="text-[13px] font-semibold text-primary hover:text-primary-hover transition-colors">
                 View All
               </button>
             </div>

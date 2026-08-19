@@ -68,12 +68,12 @@ const layout_target =   return (
     <div className="flex flex-col h-full font-['Inter']">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-[20px] font-bold text-[#022A36] font-['Outfit']">Roles & Permissions</h2>
+          <h2 className="text-[20px] font-bold text-sidebar font-['Outfit']">Roles & Permissions</h2>
           <p className="text-[13px] text-gray-500 mt-1">Manage system roles and their permissions</p>
         </div>
         <button
           onClick={handleAddRole}
-          className="flex items-center gap-2 bg-[#022A36] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#022a36]/90 transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-sidebar text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-sidebar/90 transition-colors shadow-sm"
         >
           <Plus size={18} />
           Add New Role
@@ -86,13 +86,13 @@ const layout_replacement =   return (
     <div className="flex flex-col h-full font-['Inter'] bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-[20px] font-bold text-[#022A36] font-['Outfit']">Users & Roles</h2>
+          <h2 className="text-[20px] font-bold text-sidebar font-['Outfit']">Users & Roles</h2>
           <p className="text-[13px] text-gray-500 mt-1">Manage system roles and assign them to users</p>
         </div>
         {activeTab === 'roles' && (
           <button
             onClick={handleAddRole}
-            className="flex items-center gap-2 bg-[#022A36] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-[#022a36]/90 transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-sidebar text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold hover:bg-sidebar/90 transition-colors shadow-sm"
           >
             <Plus size={18} />
             Add New Role
@@ -108,7 +108,7 @@ const layout_replacement =   return (
         >
           Manage Roles
           {activeTab === 'roles' && (
-            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-full"></div>
+            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-full"></div>
           )}
         </button>
         <button
@@ -117,7 +117,7 @@ const layout_replacement =   return (
         >
           Assign Roles to Users
           {activeTab === 'users' && (
-            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#0A6C54] rounded-t-full"></div>
+            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-full"></div>
           )}
         </button>
       </div>
@@ -132,7 +132,7 @@ const layout_replacement =   return (
                 placeholder="Search users by name or ID..."
                 value={userSearchQuery}
                 onChange={(e) => setUserSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-[#022A36] focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:ring-2 focus:ring-sidebar focus:border-transparent"
               />
             </div>
           </div>
@@ -155,7 +155,7 @@ const layout_replacement =   return (
                     <tr key={user._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[#0A6C54] text-white flex items-center justify-center font-bold">
+                          <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">
                             {user.name.charAt(0)}
                           </div>
                           <div>
@@ -174,7 +174,7 @@ const layout_replacement =   return (
                         <select
                           value={user.role || ''}
                           onChange={(e) => handleAssignRole(user._id, e.target.value)}
-                          className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+                          className="w-full bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
                         >
                           <option value="">Select Role...</option>
                           {roles.map(r => (

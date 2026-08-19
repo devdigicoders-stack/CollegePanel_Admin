@@ -15,7 +15,7 @@ import SkeletonLoader from '../components/SkeletonLoader';
 const HCReact = HighchartsReact.default || HighchartsReact;
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const CHART_COLORS = ['#0A6C54', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
+const CHART_COLORS = ['var(--color-primary)', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
 
 // ── Reusable Stat Card ───────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, sub, color, bg, to }) => (
@@ -91,7 +91,7 @@ const Dashboard = () => {
     <div className="flex flex-col items-center justify-center h-full py-20 text-gray-400">
       <AlertCircle size={40} className="mb-3 opacity-40" />
       <p className="font-semibold text-gray-500">Failed to load dashboard data</p>
-      <button onClick={fetchData} className="mt-3 text-[#0A6C54] font-semibold text-sm hover:underline">Retry</button>
+      <button onClick={fetchData} className="mt-3 text-primary font-semibold text-sm hover:underline">Retry</button>
     </div>
   );
 
@@ -106,8 +106,8 @@ const Dashboard = () => {
     series: [
       {
         name: 'Students Enrolled', data: d.monthlyStudents || Array(12).fill(0),
-        color: '#0A6C54', lineWidth: 3,
-        marker: { symbol: 'circle', radius: 4, fillColor: '#fff', lineWidth: 2, lineColor: '#0A6C54' }
+        color: 'var(--color-primary)', lineWidth: 3,
+        marker: { symbol: 'circle', radius: 4, fillColor: '#fff', lineWidth: 2, lineColor: 'var(--color-primary)' }
       },
       {
         name: 'Admissions', data: d.monthlyAdmissions || Array(12).fill(0),
@@ -133,7 +133,7 @@ const Dashboard = () => {
     series: [{
       name: 'Complaints',
       data: Object.entries(d.complaints?.byStatus || {}).map(([k, v], i) => ({
-        name: k, y: v, color: ['#F59E0B', '#3B82F6', '#0A6C54', '#EF4444'][i] || CHART_COLORS[i]
+        name: k, y: v, color: ['#F59E0B', '#3B82F6', 'var(--color-primary)', '#EF4444'][i] || CHART_COLORS[i]
       }))
     }]
   });
@@ -199,7 +199,7 @@ const Dashboard = () => {
             {Object.entries(d.complaints?.byStatus || {}).map(([status, count], i) => (
               <div key={status} className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: ['#F59E0B', '#3B82F6', '#0A6C54', '#EF4444'][i] }} />
+                  style={{ backgroundColor: ['#F59E0B', '#3B82F6', 'var(--color-primary)', '#EF4444'][i] }} />
                 <span className="text-[11px] text-gray-500 font-medium truncate">{status}</span>
                 <span className="text-[11px] font-bold text-gray-700 ml-auto">{count}</span>
               </div>

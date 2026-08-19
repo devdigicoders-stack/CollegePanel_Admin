@@ -79,7 +79,7 @@ const GatePass = () => {
       <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/30">
         <div>
           <h2 className="text-[18px] font-bold text-gray-800 flex items-center gap-2">
-            <ScanLine className="text-[#0A6C54]" size={20} />
+            <ScanLine className="text-primary" size={20} />
             Gate Pass Verification
           </h2>
           <p className="text-[12px] text-gray-500 mt-1 font-medium">Scan QR code or enter gate pass codes manually to verify exit permissions</p>
@@ -102,12 +102,12 @@ const GatePass = () => {
                 value={passInput}
                 onChange={(e) => setPassInput(e.target.value)}
                 autoFocus
-                className="w-full p-3.5 border-2 border-gray-200 rounded-xl text-[14px] focus:outline-none focus:ring-4 focus:ring-[#0A6C54]/10 focus:border-[#0A6C54] bg-gray-50 font-mono tracking-wider transition-all"
+                className="w-full p-3.5 border-2 border-gray-200 rounded-xl text-[14px] focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary bg-gray-50 font-mono tracking-wider transition-all"
               />
               <button 
                 type="submit" 
                 disabled={isScanning}
-                className="w-full bg-[#0A6C54] hover:bg-[#085a46] disabled:opacity-70 text-white px-4 py-3.5 rounded-xl text-[14px] font-bold transition-colors shadow-sm flex items-center justify-center gap-2"
+                className="w-full bg-primary hover:bg-primary-hover disabled:opacity-70 text-white px-4 py-3.5 rounded-xl text-[14px] font-bold transition-colors shadow-sm flex items-center justify-center gap-2"
               >
                 {isScanning ? 'Verifying...' : 'Verify Pass'}
               </button>
@@ -175,7 +175,7 @@ const GatePass = () => {
               <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-5 shadow-sm relative z-10">
                 <div className="border-b border-gray-100 pb-4">
                   <span className="text-[11px] uppercase tracking-wider font-bold text-gray-400 block mb-1">Pass Number</span>
-                  <span className="font-mono text-[16px] font-bold text-[#0A6C54]">{scannedPass.passNo}</span>
+                  <span className="font-mono text-[16px] font-bold text-primary">{scannedPass.passNo}</span>
                 </div>
                 
                 <div className="border-b border-gray-100 pb-4">

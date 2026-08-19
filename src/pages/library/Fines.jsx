@@ -119,7 +119,7 @@ const Fines = () => {
             placeholder="Search by student name, book, or transaction no..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
@@ -127,7 +127,7 @@ const Fines = () => {
           <select 
             value={filterStatus} 
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+            className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
           >
             <option value="All">All Transactions</option>
             <option value="Paid">Paid</option>
@@ -156,7 +156,7 @@ const Fines = () => {
             <tbody>
               {filtered.map(item => (
                 <tr key={item.transactionId} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.txnId}</td>
+                  <td className="py-4 px-6 text-[13px] font-semibold text-primary">{item.txnId}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.memberName}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">{item.bookTitle}</td>
                   <td className="py-4 px-6 text-[13px] text-right font-bold text-gray-900">₹{item.fineAmount}</td>
@@ -203,7 +203,7 @@ const Fines = () => {
               <button onClick={() => { setShowCollectModal(false); setSelectedFine(null); }} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
             </div>
             <form onSubmit={handleCollectFine} className="p-6 space-y-4">
-              <div className="bg-[#0A6C54]/5 p-4 rounded-xl text-[13px] text-gray-700 space-y-1">
+              <div className="bg-primary/5 p-4 rounded-xl text-[13px] text-gray-700 space-y-1">
                 <p><span className="text-gray-500">Member:</span> <strong>{selectedFine.memberName}</strong></p>
                 <p><span className="text-gray-500">Total Pending:</span> <strong className="text-red-500">₹{selectedFine.balance}</strong></p>
               </div>
@@ -217,7 +217,7 @@ const Fines = () => {
                   onChange={(e) => setCollectAmount(e.target.value)}
                   max={selectedFine.balance}
                   min="1"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -226,7 +226,7 @@ const Fines = () => {
                 <select 
                   value={payMode} 
                   onChange={(e) => setPayMode(e.target.value)}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="Cash">Cash</option>
                   <option value="UPI">UPI</option>
@@ -245,7 +245,7 @@ const Fines = () => {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold disabled:bg-gray-400"
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold disabled:bg-gray-400"
                 >
                   {isSubmitting ? 'Recording...' : 'Record Payment'}
                 </button>

@@ -45,18 +45,18 @@ const Login = () => {
     <div className="h-screen w-full overflow-hidden flex flex-col md:flex-row bg-[#F8F9FA] font-['Outfit']">
       
       {/* Left Sidebar Panel */}
-      <div className="md:w-[40%] lg:w-[35%] h-full bg-[#022a36] text-white flex flex-col justify-between relative overflow-hidden hidden md:flex">
+      <div className="md:w-[40%] lg:w-[35%] h-full bg-sidebar text-white flex flex-col justify-between relative overflow-hidden hidden md:flex">
         <div className="z-10 flex flex-col items-center text-center mt-16 lg:mt-20">
           <div className="mb-6">
             {/* Original SVG logo */}
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M2 12l10-6 10 6-10 6-10-6z" />
               <path d="M22 12v6" />
               <path d="M6 14.5V20c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-5.5" />
             </svg>
           </div>
           <h1 className="text-[22px] lg:text-[24px] font-bold tracking-wide mb-3 font-['Inter']">POLYTECHNIC COLLEGE ERP</h1>
-          <p className="text-[#2DD4BF] text-base font-medium">College / Admin Login</p>
+          <p className="text-accent text-base font-medium">College / Admin Login</p>
         </div>
 
         {/* Building Image */}
@@ -70,21 +70,21 @@ const Login = () => {
       </div>
 
       {/* Mobile view top section - hidden on desktop */}
-      <div className="md:hidden bg-[#022a36] text-white py-12 px-6 flex flex-col items-center justify-center relative overflow-hidden">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4">
+      <div className="md:hidden bg-sidebar text-white py-12 px-6 flex flex-col items-center justify-center relative overflow-hidden">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4">
           <path d="M2 12l10-6 10 6-10 6-10-6z" />
           <path d="M22 12v6" />
           <path d="M6 14.5V20c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-5.5" />
         </svg>
         <h1 className="text-[20px] font-bold tracking-wider mb-2 font-['Inter'] text-center">POLYTECHNIC COLLEGE ERP</h1>
-        <p className="text-[#2DD4BF] text-[13px] font-medium">College / Admin Login</p>
+        <p className="text-accent text-[13px] font-medium">College / Admin Login</p>
       </div>
 
       {/* Right Login Panel */}
       <div className="flex-1 h-full flex flex-col justify-center items-center p-6 relative bg-[#F9FAFB]">
         <div className="w-full max-w-[480px] bg-white rounded-2xl p-8 lg:p-12 shadow-[0_4px_24px_rgb(0,0,0,0.03)] border border-gray-100 relative z-10">
           
-          <h2 className="text-[28px] font-bold text-[#0A6C54] mb-2 font-['Outfit']">Welcome Back!</h2>
+          <h2 className="text-[28px] font-bold text-primary mb-2 font-['Outfit']">Welcome Back!</h2>
           <p className="text-[#6B7280] mb-6 lg:mb-8 font-['Inter'] text-[15px]">Sign in to your college admin account</p>
 
           <form onSubmit={handleLogin} className="space-y-4 lg:space-y-5">
@@ -93,7 +93,7 @@ const Login = () => {
               <input 
                 type="text" 
                 placeholder="Enter username or email"
-                className="w-full px-4 py-2.5 lg:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] transition-all font-['Inter'] text-[14px] placeholder:text-[#9CA3AF]"
+                className="w-full px-4 py-2.5 lg:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-['Inter'] text-[14px] placeholder:text-[#9CA3AF]"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -106,7 +106,7 @@ const Login = () => {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   placeholder="Enter password"
-                  className="w-full px-4 py-2.5 lg:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#0A6C54] focus:border-[#0A6C54] transition-all font-['Inter'] text-[14px] placeholder:text-[#9CA3AF] pr-12"
+                  className="w-full px-4 py-2.5 lg:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-['Inter'] text-[14px] placeholder:text-[#9CA3AF] pr-12"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -124,11 +124,11 @@ const Login = () => {
             {/* <div className="flex items-center justify-between pt-1 pb-1 lg:pt-2 lg:pb-2">
               <label className="flex items-center cursor-pointer group">
                 <div className="relative flex items-center">
-                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-[#0A6C54] focus:ring-[#0A6C54] accent-[#0A6C54] cursor-pointer" />
+                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer" />
                 </div>
                 <span className="ml-2 text-[13px] text-[#4B5563] font-['Inter'] font-medium group-hover:text-gray-800 transition-colors">Remember Me</span>
               </label>
-              <a href="#" className="text-[13px] font-semibold text-[#0A6C54] hover:text-[#075340] transition-colors font-['Inter']">
+              <a href="#" className="text-[13px] font-semibold text-primary hover:text-[#075340] transition-colors font-['Inter']">
                 Forgot Password?
               </a>
             </div> */}
@@ -136,7 +136,7 @@ const Login = () => {
             <button 
               type="submit"
               disabled={loading}
-              className="w-full bg-[#0A6C54] hover:bg-[#085a46] disabled:bg-[#0A6C54]/70 text-white font-medium py-3 lg:py-3.5 rounded-lg transition-colors font-['Outfit'] text-[15px] mt-2 tracking-wide flex justify-center items-center"
+              className="w-full bg-primary hover:bg-primary-hover disabled:bg-primary/70 text-white font-medium py-3 lg:py-3.5 rounded-lg transition-colors font-['Outfit'] text-[15px] mt-2 tracking-wide flex justify-center items-center"
             >
               {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Login'}
             </button>

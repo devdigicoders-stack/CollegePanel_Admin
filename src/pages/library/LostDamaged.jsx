@@ -188,7 +188,7 @@ const LostDamaged = () => {
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={15} /> Export
           </button>
-          <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+          <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
             <Plus size={15} /> Report Case
           </button>
         </div>
@@ -202,7 +202,7 @@ const LostDamaged = () => {
             placeholder="Search by book title, member name or case number..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
@@ -210,7 +210,7 @@ const LostDamaged = () => {
           <select 
             value={filterType} 
             onChange={(e) => setFilterType(e.target.value)}
-            className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer"
+            className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
           >
             <option value="All">All Types</option>
             <option value="Lost">Lost</option>
@@ -240,7 +240,7 @@ const LostDamaged = () => {
             <tbody>
               {filtered.map(item => (
                 <tr key={item._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 text-[13px] font-semibold text-[#0A6C54]">{item.caseNo}</td>
+                  <td className="py-4 px-6 text-[13px] font-semibold text-primary">{item.caseNo}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{item.bookId?.accessionNo || 'N/A'}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{item.bookId?.title || 'N/A'}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-medium">
@@ -265,7 +265,7 @@ const LostDamaged = () => {
                   <td className="py-4 px-6 flex gap-1.5 flex-wrap max-w-[200px]">
                     {item.status?.includes('Recovery') ? (
                       <>
-                        <button onClick={() => handleResolve(item._id, 'Replacement Received')} className="px-2 py-1 text-[11px] font-bold bg-[#0A6C54] text-white rounded hover:bg-[#085a46]">Replacement</button>
+                        <button onClick={() => handleResolve(item._id, 'Replacement Received')} className="px-2 py-1 text-[11px] font-bold bg-primary text-white rounded hover:bg-primary-hover">Replacement</button>
                         <button onClick={() => handleResolve(item._id, 'Book Cost Recovered')} className="px-2 py-1 text-[11px] font-bold bg-blue-600 text-white rounded hover:bg-blue-700">Recover Cost</button>
                         <button onClick={() => handleDelete(item._id)} className="p-1 text-red-500 hover:bg-red-50 rounded"><Trash2 size={14}/></button>
                       </>
@@ -297,7 +297,7 @@ const LostDamaged = () => {
               <div className="border border-gray-100 p-4 rounded-xl bg-gray-50/50 space-y-3">
                 <form onSubmit={handleBookSearch} className="flex gap-2">
                   <input type="text" placeholder="Search Book by Accession No..." value={bookSearch} onChange={e=>setBookSearch(e.target.value)} className="flex-1 p-2 border border-gray-200 rounded-lg text-sm" />
-                  <button type="submit" className="bg-[#0A6C54] text-white px-3 py-2 rounded-lg text-sm font-bold">Search</button>
+                  <button type="submit" className="bg-primary text-white px-3 py-2 rounded-lg text-sm font-bold">Search</button>
                 </form>
                 {selectedBook && <div className="text-sm font-bold text-green-700">✓ Selected: {selectedBook.title} ({selectedBook.accessionNo})</div>}
               </div>
@@ -305,7 +305,7 @@ const LostDamaged = () => {
               <div className="border border-gray-100 p-4 rounded-xl bg-gray-50/50 space-y-3">
                 <form onSubmit={handleMemberSearch} className="flex gap-2">
                   <input type="text" placeholder="Search Member by Enrollment No..." value={memberSearch} onChange={e=>setMemberSearch(e.target.value)} className="flex-1 p-2 border border-gray-200 rounded-lg text-sm" />
-                  <button type="submit" className="bg-[#0A6C54] text-white px-3 py-2 rounded-lg text-sm font-bold">Search</button>
+                  <button type="submit" className="bg-primary text-white px-3 py-2 rounded-lg text-sm font-bold">Search</button>
                 </form>
                 {selectedMember && <div className="text-sm font-bold text-green-700">✓ Selected: {selectedMember.name}</div>}
               </div>
@@ -331,7 +331,7 @@ const LostDamaged = () => {
 
             <div className="p-5 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
               <button onClick={() => setShowAddModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">Cancel</button>
-              <button onClick={handleReportCase} disabled={isSubmitting} className="px-5 py-2 text-sm font-bold text-white bg-[#0A6C54] hover:bg-[#085a46] rounded-lg">
+              <button onClick={handleReportCase} disabled={isSubmitting} className="px-5 py-2 text-sm font-bold text-white bg-primary hover:bg-primary-hover rounded-lg">
                 {isSubmitting ? 'Submitting...' : 'Submit Report'}
               </button>
             </div>

@@ -137,7 +137,7 @@ const Rooms = () => {
         title: 'Cannot Delete Room',
         html: `Room <strong>${room.roomNumber}</strong> has <strong>${room.occupancy}</strong> active occupant(s).<br/>Please vacate the room before deleting.`,
         confirmButtonText: 'OK',
-        confirmButtonColor: '#0A6C54',
+        confirmButtonColor: 'var(--color-primary)',
       });
     }
 
@@ -182,7 +182,7 @@ const Rooms = () => {
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             <Download size={15} /> Export Excel
           </button>
-          <button onClick={() => setShowAddModal(true)} className="bg-[#0A6C54] hover:bg-[#085a46] text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+          <button onClick={() => setShowAddModal(true)} className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
             <Plus size={16} /> Add Room
           </button>
         </div>
@@ -217,20 +217,20 @@ const Rooms = () => {
             placeholder="Search by room number or block..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <select value={filterBlock} onChange={(e) => setFilterBlock(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
           {blocks.map(b => <option key={b} value={b}>{b === 'All' ? 'All Blocks' : b}</option>)}
         </select>
         <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
           <option value="All">All Types</option>
           {ROOM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0A6C54] cursor-pointer">
+          className="bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer">
           <option value="All">All Statuses</option>
           {ROOM_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
@@ -331,7 +331,7 @@ const Rooms = () => {
                     value={newRoom.roomNumber}
                     onChange={(e) => setNewRoom({ ...newRoom, roomNumber: e.target.value })}
                     placeholder="e.g. 101"
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div className="relative">
@@ -349,7 +349,7 @@ const Rooms = () => {
                         setNewRoom({ ...newRoom, blockName: e.target.value });
                         setShowBlockDropdown(true);
                       }}
-                      className="w-full p-2.5 pr-8 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-[#0A6C54]/30 focus:border-[#0A6C54] transition-all"
+                      className="w-full p-2.5 pr-8 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                     />
                     {newRoom.blockName ? (
                       <button
@@ -380,9 +380,9 @@ const Rooms = () => {
                                   setBlockSearch(b);
                                   setShowBlockDropdown(false);
                                 }}
-                                className="w-full text-left px-4 py-2.5 text-[13px] text-gray-700 hover:bg-[#0A6C54]/5 hover:text-[#0A6C54] flex items-center gap-2.5 transition-colors"
+                                className="w-full text-left px-4 py-2.5 text-[13px] text-gray-700 hover:bg-primary/5 hover:text-primary flex items-center gap-2.5 transition-colors"
                               >
-                                <span className="w-6 h-6 rounded-md bg-[#0A6C54]/10 flex items-center justify-center text-[#0A6C54] text-[10px] font-bold flex-shrink-0">
+                                <span className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold flex-shrink-0">
                                   {b.charAt(0).toUpperCase()}
                                 </span>
                                 {b}
@@ -399,7 +399,7 @@ const Rooms = () => {
                             onMouseDown={() => {
                               setShowBlockDropdown(false);
                             }}
-                            className="w-full text-left px-4 py-2.5 text-[13px] flex items-center gap-2.5 text-[#0A6C54] hover:bg-green-50 transition-colors"
+                            className="w-full text-left px-4 py-2.5 text-[13px] flex items-center gap-2.5 text-primary hover:bg-green-50 transition-colors"
                           >
                             <span className="w-6 h-6 rounded-md bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">+</span>
                             <span>Create <strong>"{newRoom.blockName.trim()}"</strong> as new block</span>
@@ -424,7 +424,7 @@ const Rooms = () => {
                   <select
                     value={newRoom.type}
                     onChange={(e) => setNewRoom({ ...newRoom, type: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     {ROOM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -435,7 +435,7 @@ const Rooms = () => {
                     type="number" required min="1" max="20"
                     value={newRoom.capacity}
                     onChange={(e) => setNewRoom({ ...newRoom, capacity: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -445,7 +445,7 @@ const Rooms = () => {
                   className="flex-1 py-2.5 border border-gray-200 rounded-lg text-[13px] font-semibold text-gray-700 hover:bg-gray-50">
                   Cancel
                 </button>
-                <button type="submit" className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold">
+                <button type="submit" className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold">
                   Add Room
                 </button>
               </div>
@@ -469,7 +469,7 @@ const Rooms = () => {
                   <select
                     value={editRoom.type}
                     onChange={(e) => setEditRoom({ ...editRoom, type: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     {ROOM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -480,7 +480,7 @@ const Rooms = () => {
                     type="number" required min={editRoom.occupancy || 1}
                     value={editRoom.capacity}
                     onChange={(e) => setEditRoom({ ...editRoom, capacity: e.target.value })}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                   {editRoom.occupancy > 0 && <p className="text-[11px] text-orange-500 mt-1">Min capacity: {editRoom.occupancy} (current occupancy)</p>}
                 </div>
@@ -490,7 +490,7 @@ const Rooms = () => {
                 <select
                   value={editRoom.status}
                   onChange={(e) => setEditRoom({ ...editRoom, status: e.target.value })}
-                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-[#0A6C54]"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   {ROOM_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -503,7 +503,7 @@ const Rooms = () => {
                   className="flex-1 py-2.5 border border-gray-200 rounded-lg text-[13px] font-semibold text-gray-700 hover:bg-gray-50">
                   Cancel
                 </button>
-                <button type="submit" className="flex-1 py-2.5 bg-[#0A6C54] hover:bg-[#085a46] text-white rounded-lg text-[13px] font-semibold">
+                <button type="submit" className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-[13px] font-semibold">
                   Save Changes
                 </button>
               </div>
