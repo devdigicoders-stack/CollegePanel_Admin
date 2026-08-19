@@ -16,11 +16,48 @@ const Layout = ({ children }) => {
   const [locationGranted, setLocationGranted] = useState(!isStudent);
   const [locationError, setLocationError] = useState(null);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [isInitializingLocation, setIsInitializingLocation] = useState(isStudent);
 
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
+    // Fully dynamic location check via browser system API
+    if (isStudent && navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        if (result.state === 'granted') {
+          // If already granted, silently fetch actual location to verify OS-level access
+          navigator.geolocation.getCurrentPosition(
+            () => {
+              setLocationGranted(true);
+              setIsInitializingLocation(false);
+            },
+            () => {
+              setLocationGranted(false);
+              setIsInitializingLocation(false);
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+          );
+        } else {
+          // Prompt needed or denied
+          setLocationGranted(false);
+          setIsInitializingLocation(false);
+        }
+        
+        result.addEventListener('change', () => {
+          if (result.state === 'denied' || result.state === 'prompt') {
+            setLocationGranted(false);
+          } else if (result.state === 'granted') {
+             navigator.geolocation.getCurrentPosition(() => setLocationGranted(true));
+          }
+        });
+      }).catch(() => {
+        setIsInitializingLocation(false);
+      });
+    } else if (isStudent) {
+      setIsInitializingLocation(false);
+    }
+
     const syncPermissions = async () => {
       try {
         const res = await axiosInstance.get('/college-admin/me');
@@ -95,6 +132,17 @@ const Layout = ({ children }) => {
 
   // Location Guard Screen for Students
   if (isStudent && !locationGranted) {
+    if (isInitializingLocation) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-['Inter']">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+            <p className="text-gray-500 font-medium text-sm">Verifying system location...</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-['Inter']">
         <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-gray-100 animate-in zoom-in-95 duration-300">
