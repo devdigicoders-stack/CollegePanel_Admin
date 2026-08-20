@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, CalendarCheck, Save, History, Clock, QrCode, X, MapPin, Shield, ShieldCheck, ShieldOff, Navigation, Locate } from 'lucide-react';
+import { Download, CalendarCheck, Save, History, Clock, QrCode, X, MapPin, Shield, ShieldCheck, ShieldOff, Navigation, Locate, Loader2 } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
@@ -30,6 +30,13 @@ const Attendance = () => {
   const [geoFence, setGeoFence] = useState({ isEnabled: false, lat: null, lng: null, radius: 50 });
   const [geoLoading, setGeoLoading] = useState(false);
   const [fetchingLocation, setFetchingLocation] = useState(false);
+  
+  // Single Student History State
+  const [showStudentModal, setShowStudentModal] = useState(false);
+  const [selectedStudentInfo, setSelectedStudentInfo] = useState(null);
+  const [studentHistoryData, setStudentHistoryData] = useState([]);
+  const [studentHistoryLoading, setStudentHistoryLoading] = useState(false);
+  
   const socketContext = useSocket();
   const socket = socketContext?.socket;
 
@@ -116,6 +123,21 @@ const Attendance = () => {
       toast.error('Failed to load attendance history');
     } finally {
       setLoadingHistory(false);
+    }
+  };
+
+  const handleViewStudentHistory = async (student) => {
+    if (!selectedClass) return;
+    setSelectedStudentInfo(student);
+    setShowStudentModal(true);
+    setStudentHistoryLoading(true);
+    try {
+      const res = await axiosInstance.get(`/teacher-portal/class/${selectedClass}/student/${student._id}/attendance/history`);
+      setStudentHistoryData(res.data || []);
+    } catch (error) {
+      toast.error('Failed to fetch student history');
+    } finally {
+      setStudentHistoryLoading(false);
     }
   };
 
@@ -335,7 +357,13 @@ const Attendance = () => {
                       <tr key={s._id} className="border-b border-gray-50 hover:bg-gray-50/30 transition-colors">
                         <td className="py-3 px-4 text-sm font-bold text-primary">{s.studentId}</td>
                         <td className="py-3 px-4">
-                          <div className="text-sm font-bold text-gray-800">{s.studentName}</div>
+                          <div 
+                            className="text-sm font-bold text-gray-800 cursor-pointer hover:text-primary transition-colors inline-block"
+                            onClick={() => handleViewStudentHistory(s)}
+                            title="Click to view full attendance history"
+                          >
+                            {s.studentName}
+                          </div>
                           <div className="text-[11px] font-semibold text-gray-500 mt-0.5">{s.course} • {s.branch} • {s.year}</div>
                           <div className="text-[10px] text-gray-400 mt-0.5">{s.email} | {s.phone}</div>
                         </td>
@@ -553,6 +581,86 @@ const Attendance = () => {
                   {geoLoading ? 'Saving...' : 'Save Settings'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Single Student History Modal */}
+      {showStudentModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative flex flex-col max-h-[80vh]">
+            <div className="bg-primary p-6 text-white shrink-0">
+              <button onClick={() => setShowStudentModal(false)} className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
+                <X size={24} />
+              </button>
+              <div className="flex items-center gap-3 mb-2">
+                <History size={24} />
+                <h2 className="text-xl font-black truncate">{selectedStudentInfo?.studentName}'s History</h2>
+              </div>
+              <p className="text-primary-50 text-sm">Attendance records for this class</p>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1">
+              {studentHistoryLoading ? (
+                <div className="flex flex-col items-center justify-center py-10">
+                  <Loader2 size={32} className="text-primary animate-spin mb-3" />
+                  <p className="text-gray-500 text-sm font-medium">Fetching records...</p>
+                </div>
+              ) : studentHistoryData.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                  <History size={40} className="mb-3 opacity-20" />
+                  <p className="text-sm font-medium">No attendance records found.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Summary Stats */}
+                  <div className="grid grid-cols-3 gap-2 mb-6 text-center">
+                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                      <p className="text-emerald-700 font-black text-xl">{studentHistoryData.filter(d => d.status === 'Present').length}</p>
+                      <p className="text-emerald-600 text-[10px] font-bold uppercase mt-1">Present</p>
+                    </div>
+                    <div className="bg-red-50 border border-red-100 rounded-xl p-3">
+                      <p className="text-red-700 font-black text-xl">{studentHistoryData.filter(d => d.status === 'Absent').length}</p>
+                      <p className="text-red-600 text-[10px] font-bold uppercase mt-1">Absent</p>
+                    </div>
+                    <div className="bg-orange-50 border border-orange-100 rounded-xl p-3">
+                      <p className="text-orange-700 font-black text-xl">{studentHistoryData.filter(d => d.status === 'Late').length}</p>
+                      <p className="text-orange-600 text-[10px] font-bold uppercase mt-1">Late</p>
+                    </div>
+                  </div>
+                  
+                  {/* List of dates */}
+                  <div className="space-y-2">
+                    {studentHistoryData.map((record, idx) => (
+                      <div key={idx} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <CalendarCheck size={16} className="text-gray-400" />
+                          <span className="text-sm font-bold text-gray-700">
+                            {new Date(record.date).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                        <span className={`text-[11px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider ${
+                          record.status === 'Present' ? 'bg-emerald-100 text-emerald-700' :
+                          record.status === 'Absent' ? 'bg-red-100 text-red-700' :
+                          'bg-orange-100 text-orange-700'
+                        }`}>
+                          {record.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-gray-100 shrink-0 bg-gray-50">
+              <button 
+                onClick={() => setShowStudentModal(false)}
+                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-xl font-bold text-sm transition-colors"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
