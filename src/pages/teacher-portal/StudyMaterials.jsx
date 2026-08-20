@@ -10,7 +10,11 @@ const StudyMaterials = () => {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [materialForm, setMaterialForm] = useState({ title: '', type: 'PDF', fileUrl: '', size: 'Unknown' });
+  const [materialForm, setMaterialForm] = useState({ title: '', type: 'PDF Document', fileUrl: '', size: '' });
+  
+  const [uploadMode, setUploadMode] = useState('link');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (selectedClass) {
@@ -30,16 +34,50 @@ const StudyMaterials = () => {
     }
   };
 
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      setMaterialForm(prev => ({ ...prev, size: `${sizeMB} MB` }));
+    }
+  };
+
   const handleUploadMaterial = async (e) => {
     e.preventDefault();
+    setUploading(true);
     try {
-      await axiosInstance.post(`/teacher-portal/class/${selectedClass}/study-materials`, materialForm);
+      let finalFileUrl = materialForm.fileUrl;
+      
+      if (uploadMode === 'file') {
+        if (!selectedFile) {
+          toast.error('Please select a file to upload');
+          setUploading(false);
+          return;
+        }
+        const uploadData = new FormData();
+        uploadData.append('file', selectedFile);
+        
+        const uploadRes = await axiosInstance.post('/upload', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        
+        finalFileUrl = axiosInstance.defaults.baseURL.replace('/api', '') + uploadRes.data.url;
+      }
+      
+      const payload = { ...materialForm, fileUrl: finalFileUrl };
+      await axiosInstance.post(`/teacher-portal/class/${selectedClass}/study-materials`, payload);
+      
       toast.success('Material uploaded successfully');
       setShowModal(false);
-      setMaterialForm({ title: '', type: 'PDF', fileUrl: '', size: 'Unknown' });
+      setMaterialForm({ title: '', type: 'PDF Document', fileUrl: '', size: '' });
+      setSelectedFile(null);
+      setUploadMode('link');
       fetchMaterials(selectedClass);
     } catch (error) {
       toast.error('Failed to upload material');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -130,12 +168,36 @@ const StudyMaterials = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-700">File URL / Drive Link</label>
-                <input type="url" required value={materialForm.fileUrl} onChange={e => setMaterialForm({...materialForm, fileUrl: e.target.value})} className="w-full border border-gray-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-primary" placeholder="https://..." />
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Upload Method</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="radio" name="uploadMode" checked={uploadMode === 'file'} onChange={() => setUploadMode('file')} className="text-primary focus:ring-primary" />
+                    Upload File
+                  </label>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="radio" name="uploadMode" checked={uploadMode === 'link'} onChange={() => setUploadMode('link')} className="text-primary focus:ring-primary" />
+                    Provide URL Link
+                  </label>
+                </div>
               </div>
+
+              {uploadMode === 'link' ? (
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700">External URL / Drive Link</label>
+                  <input type="url" required value={materialForm.fileUrl} onChange={e => setMaterialForm({...materialForm, fileUrl: e.target.value})} className="w-full border border-gray-200 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-primary" placeholder="https://..." />
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700">Select File to Upload</label>
+                  <input type="file" required onChange={handleFileChange} className="w-full border border-gray-200 rounded-lg p-2 text-sm focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                  {selectedFile && <p className="text-[11px] text-gray-500 mt-1 ml-1">Selected: {selectedFile.name}</p>}
+                </div>
+              )}
               <div className="pt-2 flex justify-end gap-3">
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-lg text-sm font-semibold text-gray-600">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-semibold">Upload</button>
+                <button type="submit" disabled={uploading} className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg text-sm font-semibold disabled:opacity-50">
+                  {uploading ? 'Uploading...' : 'Upload'}
+                </button>
               </div>
             </form>
           </div>

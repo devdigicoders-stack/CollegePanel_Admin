@@ -131,6 +131,7 @@ import StudentHostel from './pages/student-portal/Hostel';
 import StudentPlacement from './pages/student-portal/Placement';
 import StudentComplaints from './pages/student-portal/Complaints';
 import StudentNotices from './pages/student-portal/Notices';
+import ScanAttendance from './pages/student-portal/ScanAttendance';
 
 // Teacher Portal Pages
 import TeacherDashboard from './pages/teacher-portal/Dashboard';
@@ -279,6 +280,7 @@ function App() {
                 <Route path="/security/reports" element={<SecurityReports />} />
 
                 {/* Student Portal Specific Routes */}
+                <Route path="/student-portal/attendance/scan" element={<ScanAttendance />} />
                 <Route path="/student/dashboard" element={<StudentDashboard />} />
                 <Route path="/student/profile" element={<StudentProfile />} />
                 <Route path="/student/assignments" element={<StudentAssignments />} />

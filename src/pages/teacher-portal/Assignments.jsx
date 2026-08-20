@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, X } from 'lucide-react';
+import { FileText, Plus, X, Users } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import ClassSelector from './components/ClassSelector';
+import SubmissionsModal from './components/SubmissionsModal';
 
 const Assignments = () => {
   const [selectedClass, setSelectedClass] = useState('');
@@ -11,6 +12,7 @@ const Assignments = () => {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [viewingAssignment, setViewingAssignment] = useState(null); // Added this
   const [assignmentForm, setAssignmentForm] = useState({ title: '', description: '', dueDate: '', totalMarks: 100 });
 
   const selectedClassDetails = classesList.find(c => c._id === selectedClass);
@@ -97,7 +99,16 @@ const Assignments = () => {
                       Due: {new Date(a.dueDate).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600">{a.description}</p>
+                  <p className="text-sm text-gray-600 mb-4">{a.description}</p>
+                  
+                  <div className="flex justify-end border-t border-gray-50 pt-3">
+                    <button 
+                      onClick={() => setViewingAssignment(a)}
+                      className="text-primary hover:text-primary-hover font-bold text-sm flex items-center gap-1.5 transition-colors"
+                    >
+                      <Users size={16} /> View Submissions
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -145,6 +156,13 @@ const Assignments = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {viewingAssignment && (
+        <SubmissionsModal 
+          assignment={viewingAssignment} 
+          onClose={() => setViewingAssignment(null)} 
+        />
       )}
     </div>
   );

@@ -65,15 +65,45 @@ const TeacherDashboard = () => {
         </div>
       )}
 
-      {/* Placeholder for Quick Actions or Recent Activity */}
+      {/* Quick Actions or Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 min-h-[300px] flex flex-col items-center justify-center text-gray-400">
-          <BookOpen size={48} className="mb-4 opacity-20" />
-          <p className="font-medium">Upcoming Classes (Coming Soon)</p>
+        <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 min-h-[300px]">
+          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><BookOpen size={20} className="text-blue-500"/> My Upcoming Classes</h2>
+          {stats.upcomingClasses && stats.upcomingClasses.length > 0 ? (
+            <div className="space-y-4">
+              {stats.upcomingClasses.map((cls, idx) => (
+                <div key={idx} className="p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
+                  <h4 className="font-bold text-gray-800 text-[15px]">{cls.subjectName} ({cls.subjectCode})</h4>
+                  <p className="text-[12px] font-semibold text-gray-500 mt-1">{cls.courseName} • Sem {cls.semester}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-gray-400 h-[200px]">
+              <BookOpen size={48} className="mb-4 opacity-20" />
+              <p className="font-medium">No upcoming classes found</p>
+            </div>
+          )}
         </div>
-        <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 min-h-[300px] flex flex-col items-center justify-center text-gray-400">
-          <Bell size={48} className="mb-4 opacity-20" />
-          <p className="font-medium">Recent Notifications (Coming Soon)</p>
+        
+        <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 min-h-[300px]">
+          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><Bell size={20} className="text-purple-500"/> Recent Notices</h2>
+          {stats.recentNotices && stats.recentNotices.length > 0 ? (
+            <div className="space-y-4">
+              {stats.recentNotices.map((notice, idx) => (
+                <div key={idx} className="p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
+                  <h4 className="font-bold text-gray-800 text-[15px]">{notice.title}</h4>
+                  <p className="text-[12px] text-gray-500 mt-1 line-clamp-2">{notice.details}</p>
+                  <p className="text-[11px] font-semibold text-primary mt-2">{new Date(notice.createdAt).toLocaleDateString()}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-gray-400 h-[200px]">
+              <Bell size={48} className="mb-4 opacity-20" />
+              <p className="font-medium">No recent notices found</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
