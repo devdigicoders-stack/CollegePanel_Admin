@@ -37,6 +37,10 @@ const Attendance = () => {
   const [studentHistoryData, setStudentHistoryData] = useState([]);
   const [studentHistoryLoading, setStudentHistoryLoading] = useState(false);
   
+  // Date History State
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [selectedDateRecord, setSelectedDateRecord] = useState(null);
+  
   const socketContext = useSocket();
   const socket = socketContext?.socket;
 
@@ -165,7 +169,7 @@ const Attendance = () => {
 
   const handleDownloadQR = async () => {
     try {
-      const baseUrl = window.location.hostname === 'localhost' ? 'https://college-panel-admin.vercel.app' : window.location.origin;
+      const baseUrl = window.location.origin;
       const qrDataUrl = `${baseUrl}/student-portal/attendance/scan?classId=${selectedClass}`;
       const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(qrDataUrl)}`;
       
@@ -433,15 +437,24 @@ const Attendance = () => {
                         <p className="text-orange-600 text-[10px] font-bold uppercase">Late</p>
                       </div>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-gray-50 flex justify-end">
+                    <div className="mt-4 pt-4 border-t border-gray-50 flex justify-end gap-3">
+                      <button 
+                        onClick={() => {
+                          setSelectedDateRecord(record);
+                          setShowDateModal(true);
+                        }}
+                        className="text-primary text-[12px] font-bold hover:underline"
+                      >
+                        View Students
+                      </button>
                       <button 
                         onClick={() => {
                           setAttendanceDate(new Date(record.date).toISOString().split('T')[0]);
                           setActiveTab('mark');
                         }}
-                        className="text-primary text-[12px] font-bold hover:underline"
+                        className="text-gray-500 text-[12px] font-bold hover:text-gray-700 hover:underline"
                       >
-                        Edit / View Details
+                        Edit
                       </button>
                     </div>
                   </div>
@@ -467,7 +480,7 @@ const Attendance = () => {
             
             <div className="flex justify-center bg-gray-50 p-6 rounded-xl border border-gray-100 mb-6">
               <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`${window.location.hostname === 'localhost' ? 'https://college-panel-admin.vercel.app' : window.location.origin}/student-portal/attendance/scan?classId=${selectedClass}`)}`} 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`${window.location.origin}/student-portal/attendance/scan?classId=${selectedClass}`)}`} 
                 alt="Attendance QR Code"
                 className="w-48 h-48 object-contain"
               />
@@ -658,6 +671,93 @@ const Attendance = () => {
               <button 
                 onClick={() => setShowStudentModal(false)}
                 className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-xl font-bold text-sm transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Date History Modal */}
+      {showDateModal && selectedDateRecord && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden relative flex flex-col max-h-[85vh]">
+            <div className="bg-primary p-6 text-white shrink-0">
+              <button onClick={() => setShowDateModal(false)} className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
+                <X size={24} />
+              </button>
+              <div className="flex items-center gap-3 mb-2">
+                <CalendarCheck size={24} />
+                <h2 className="text-xl font-black">Attendance Details</h2>
+              </div>
+              <p className="text-primary-50 text-sm">
+                {new Date(selectedDateRecord.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1">
+              {/* Summary Stats */}
+              <div className="grid grid-cols-4 gap-2 mb-6 text-center">
+                <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
+                  <p className="text-gray-700 font-black text-xl">{selectedDateRecord.total}</p>
+                  <p className="text-gray-500 text-[10px] font-bold uppercase mt-1">Total</p>
+                </div>
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                  <p className="text-emerald-700 font-black text-xl">{selectedDateRecord.present}</p>
+                  <p className="text-emerald-600 text-[10px] font-bold uppercase mt-1">Present</p>
+                </div>
+                <div className="bg-red-50 border border-red-100 rounded-xl p-3">
+                  <p className="text-red-700 font-black text-xl">{selectedDateRecord.absent}</p>
+                  <p className="text-red-600 text-[10px] font-bold uppercase mt-1">Absent</p>
+                </div>
+                <div className="bg-orange-50 border border-orange-100 rounded-xl p-3">
+                  <p className="text-orange-700 font-black text-xl">{selectedDateRecord.late}</p>
+                  <p className="text-orange-600 text-[10px] font-bold uppercase mt-1">Late</p>
+                </div>
+              </div>
+              
+              {/* List of students */}
+              <div className="space-y-2">
+                {selectedDateRecord.records && selectedDateRecord.records.length > 0 ? (
+                  selectedDateRecord.records.map((r, idx) => {
+                    const student = r.studentId || {};
+                    return (
+                      <div key={idx} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-gray-800">{student.studentName || 'Unknown'}</span>
+                          <span className="text-xs text-gray-500 font-medium">Roll No: {student.studentId || student.rollNo || 'N/A'}</span>
+                        </div>
+                        <span className={`text-[11px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider ${
+                          r.status === 'Present' ? 'bg-emerald-100 text-emerald-700' :
+                          r.status === 'Absent' ? 'bg-red-100 text-red-700' :
+                          'bg-orange-100 text-orange-700'
+                        }`}>
+                          {r.status}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-center text-gray-400 py-4 text-sm font-medium">No student records found for this date.</p>
+                )}
+              </div>
+            </div>
+            
+            <div className="p-4 border-t border-gray-100 shrink-0 bg-gray-50 flex gap-3">
+              <button 
+                onClick={() => {
+                  setShowDateModal(false);
+                  setAttendanceDate(new Date(selectedDateRecord.date).toISOString().split('T')[0]);
+                  setActiveTab('mark');
+                }}
+                className="flex-1 bg-primary hover:bg-primary-hover text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors"
+              >
+                Edit Attendance
+              </button>
+              <button 
+                onClick={() => setShowDateModal(false)}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-xl font-bold text-sm transition-colors"
               >
                 Close
               </button>
