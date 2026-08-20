@@ -32,7 +32,14 @@ const Login = () => {
       toast.success('Login successful!');
       
       // Redirect to the page they tried to access, or dashboard
-      const from = location.state?.from || '/dashboard';
+      let from = location.state?.from || '/dashboard';
+      if (from === '/dashboard') {
+        if (res.data.role === 'student' || res.data.role === 'Student') {
+          from = '/student/dashboard';
+        } else if (res.data.role === 'teacher' || res.data.role === 'Teacher') {
+          from = '/teacher-portal/dashboard';
+        }
+      }
       navigate(from, { replace: true });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid credentials or server error');

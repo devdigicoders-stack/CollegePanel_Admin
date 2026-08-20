@@ -1,5 +1,7 @@
-import { Menu, Plus, Maximize } from 'lucide-react';
+import { Menu, Plus, Maximize, Bell } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '../utils/axiosInstance';
 
 export const Header = ({ onMenuClick }) => {
   const location = useLocation();
@@ -8,6 +10,56 @@ export const Header = ({ onMenuClick }) => {
   const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
   const userRole = adminInfo.role || 'college_admin';
   const isStudent = userRole.toLowerCase() === 'student';
+  const isTeacher = userRole.toLowerCase() === 'teacher' || userRole.toLowerCase() === 'teacher role';
+
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const fetchNotifications = async () => {
+    try {
+      let url = '';
+      if (isStudent) url = '/student-portal/live-notifications';
+      else if (isTeacher) url = '/teacher-portal/live-notifications';
+      
+      if (url) {
+        const res = await axiosInstance.get(url);
+        setNotifications(res.data);
+      }
+    } catch (error) {
+      console.error('Error fetching live notifications', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+
+    const handleNewNotification = (e) => {
+      // Prepend new notification to state
+      setNotifications(prev => [e.detail, ...prev]);
+    };
+
+    window.addEventListener('live-notification', handleNewNotification);
+    return () => {
+      window.removeEventListener('live-notification', handleNewNotification);
+    };
+  }, []);
+
+  const handleMarkAsRead = async () => {
+    if (unreadCount === 0) return;
+    try {
+      let url = '';
+      if (isStudent) url = '/student-portal/live-notifications';
+      else if (isTeacher) url = '/teacher-portal/live-notifications';
+      
+      if (url) {
+        await axiosInstance.put(url);
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      }
+    } catch (error) {
+      console.error('Error marking as read', error);
+    }
+  };
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
@@ -109,13 +161,49 @@ export const Header = ({ onMenuClick }) => {
           <Maximize size={20} strokeWidth={1.8} />
         </button>
 
-        {/* <button 
-          onClick={() => navigate('/notifications')}
-          className="relative text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <Bell size={20} strokeWidth={1.5} />
-          <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-        </button> */}
+        {/* Notifications Dropdown */}
+        {(isStudent || isTeacher) && (
+          <div className="relative">
+            <button 
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+                if (!showNotifications) handleMarkAsRead();
+              }}
+              className="relative text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-50"
+            >
+              <Bell size={20} strokeWidth={1.8} />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.1)] border border-gray-100 overflow-hidden z-50">
+                <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                  <h3 className="font-bold text-gray-800 text-[14px]">Notifications</h3>
+                  {unreadCount > 0 && <span className="text-[11px] bg-primary text-white px-2 py-0.5 rounded-full font-bold">{unreadCount} New</span>}
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-6 text-center text-gray-400 text-[13px]">No notifications yet</div>
+                  ) : (
+                    notifications.map((n, i) => (
+                      <div key={i} className={`p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer ${!n.isRead ? 'bg-blue-50/30' : ''}`}>
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className={`text-[13px] text-gray-800 ${!n.isRead ? 'font-bold' : 'font-semibold'}`}>{n.title}</h4>
+                          <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
+                            {new Date(n.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-[12px] text-gray-500 leading-snug line-clamp-2">{n.message}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         
         <div 
           onClick={() => navigate('/profile')}

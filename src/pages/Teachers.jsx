@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, Plus, Search, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, Eye, Edit, Trash2, X, AlertTriangle, Lock, Info } from 'lucide-react';
+import { Copy, Plus, Search, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, Eye, Edit, Trash2, X, AlertTriangle, Lock, Info, BookOpen } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
@@ -19,6 +19,15 @@ const Teachers = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
+  
+  // Subject Assignment State
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [assignFormData, setAssignFormData] = useState({});
+  const [courses, setCourses] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [allocatingTeacher, setAllocatingTeacher] = useState(null);
+  const [assignLoading, setAssignLoading] = useState(false);
   
   // Filters
   const [filters, setFilters] = useState({
@@ -92,20 +101,38 @@ const Teachers = () => {
     }
   };
 
-  // Copy to clipboard utility function
   const copyToClipboard = (text) => {
     if (!text) {
       toast.error('No text to copy');
       return;
     }
     
-    navigator.clipboard.writeText(text)
-      .then(() => {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          toast.success('Copied to clipboard!');
+        })
+        .catch(() => {
+          toast.error('Failed to copy');
+        });
+    } else {
+      // Fallback for non-secure contexts (e.g., local network IP)
+      let textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
         toast.success('Copied to clipboard!');
-      })
-      .catch(() => {
+      } catch (err) {
         toast.error('Failed to copy');
-      });
+      }
+      textArea.remove();
+    }
   };
 
   const handleFilterChange = (field, value) => {
@@ -162,6 +189,47 @@ const Teachers = () => {
     setShowDeleteModal(true);
   };
 
+  const handleAssignClick = async (teacher) => {
+    setAllocatingTeacher(teacher);
+    setAssignFormData({ teacher: teacher._id, department: teacher.department });
+    setShowAssignModal(true);
+    
+    // Fetch academic options if not already loaded
+    try {
+      if (courses.length === 0) {
+        const [cRes, sRes, subRes] = await Promise.all([
+          axiosInstance.get('/academics/courses'),
+          axiosInstance.get('/academics/semesters'),
+          axiosInstance.get('/academics/subjects')
+        ]);
+        setCourses(Array.isArray(cRes.data) ? cRes.data : []);
+        setSemesters(Array.isArray(sRes.data) ? sRes.data : []);
+        setSubjects(Array.isArray(subRes.data) ? subRes.data : []);
+      }
+    } catch (error) {
+      toast.error('Failed to load academic data');
+    }
+  };
+
+  const handleAssignSubmit = async (e) => {
+    e.preventDefault();
+    if (!assignFormData.course || !assignFormData.semester || !assignFormData.subject) {
+      toast.error('Please select branch, semester and subject');
+      return;
+    }
+    setAssignLoading(true);
+    try {
+      await axiosInstance.post('/academics/allocations', assignFormData);
+      toast.success(`Subject successfully assigned to ${allocatingTeacher.name}`);
+      setShowAssignModal(false);
+      setAssignFormData({});
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to assign subject');
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -215,8 +283,9 @@ const Teachers = () => {
           confirmButtonColor: 'var(--color-primary)'
         }).then((result) => {
           if (result.isConfirmed) {
-            navigator.clipboard.writeText(`Login Details for ${newTeacher.name}\nUsername: ${newTeacher.username}\nPassword: ${newTeacher.password}\nPortal URL: ${window.location.origin}`);
-            toast.success('Credentials copied to clipboard!');
+            const portalUrl = 'https://college-panel-admin.vercel.app/';
+            const creds = `Login Details for ${newTeacher.name}\nUsername: ${newTeacher.username}\nPassword: ${newTeacher.password}\nPortal URL: ${portalUrl}`;
+            copyToClipboard(creds);
           }
         });
       }
@@ -741,6 +810,24 @@ const Teachers = () => {
                         >
                           <Eye size={14} strokeWidth={2} />
                         </button>
+                        <button
+                          onClick={() => {
+                            const portalUrl = 'https://college-panel-admin.vercel.app/';
+                            const creds = `Login Details for ${row.name}\nUsername: ${row.username}\nPassword: ${row.password || 'Teacher@123'}\nPortal URL: ${portalUrl}`;
+                            copyToClipboard(creds);
+                          }}
+                          className="w-7 h-7 rounded border border-blue-100 flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors flex-shrink-0"
+                          title="Copy Credentials"
+                        >
+                          <Copy size={14} strokeWidth={2} />
+                        </button>
+                        <button
+                          onClick={() => handleAssignClick(row)}
+                          className="w-7 h-7 rounded border border-purple-100 flex items-center justify-center text-purple-500 hover:bg-purple-50 transition-colors flex-shrink-0"
+                          title="Assign Class"
+                        >
+                          <BookOpen size={14} strokeWidth={2} />
+                        </button>
                         {checkPermission('Edit Teacher') && (
                           <button 
                             onClick={() => handleEditClick(row)}
@@ -1037,6 +1124,127 @@ const Teachers = () => {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Class Modal */}
+      {showAssignModal && allocatingTeacher && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden font-['Inter']">
+            <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <BookOpen size={18} className="text-primary" />
+                Assign Class
+              </h2>
+              <button 
+                onClick={() => setShowAssignModal(false)}
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 rounded-lg transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAssignSubmit} className="p-5 space-y-4">
+              <div className="bg-gray-50/50 p-3 rounded-lg border border-gray-100 mb-2">
+                <p className="text-sm text-gray-600 font-medium">Teacher: <span className="text-primary font-bold">{allocatingTeacher.name}</span></p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Department</label>
+                <select 
+                  value={assignFormData.department || ''}
+                  onChange={(e) => setAssignFormData({ ...assignFormData, department: e.target.value, course: '', semester: '', subject: '' })}
+                  required
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary appearance-none bg-white"
+                >
+                  <option value="">Select Department</option>
+                  {departments.map(d => (
+                    <option key={d.name} value={d.name}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Branch</label>
+                <select 
+                  value={assignFormData.course || ''}
+                  onChange={(e) => setAssignFormData({ ...assignFormData, course: e.target.value, semester: '', subject: '' })}
+                  required
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary appearance-none bg-white"
+                >
+                  <option value="">Select Branch</option>
+                  {courses
+                    .filter(c => !assignFormData.department || c.department === assignFormData.department)
+                    .map(c => (
+                      <option key={c._id} value={c._id}>{c.name}</option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Semester</label>
+                <select 
+                  value={assignFormData.semester || ''}
+                  onChange={(e) => setAssignFormData({ ...assignFormData, semester: e.target.value, subject: '' })}
+                  required
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary appearance-none bg-white"
+                >
+                  <option value="">Select Semester</option>
+                  {semesters
+                    .filter(s => {
+                      if (!assignFormData.course) return true;
+                      const selectedCourse = courses.find(c => c._id === assignFormData.course);
+                      return selectedCourse && s.courseName === selectedCourse.name;
+                    })
+                    .map(s => (
+                      <option key={s.semesterNumber} value={s.semesterNumber}>Semester {s.semesterNumber}</option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Subject</label>
+                <select 
+                  value={assignFormData.subject || ''}
+                  onChange={(e) => setAssignFormData({ ...assignFormData, subject: e.target.value })}
+                  required
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary appearance-none bg-white"
+                >
+                  <option value="">Select Subject</option>
+                  {subjects
+                    .filter(s => {
+                      if (assignFormData.department && s.department !== assignFormData.department) return false;
+                      if (assignFormData.course) {
+                        const selectedCourse = courses.find(c => c._id === assignFormData.course);
+                        if (selectedCourse && s.courseName !== selectedCourse.name) return false;
+                      }
+                      if (assignFormData.semester && s.semester !== parseInt(assignFormData.semester)) return false;
+                      return true;
+                    })
+                    .map(s => (
+                      <option key={s._id} value={s._id}>{s.name}</option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="pt-3 flex justify-end gap-3 mt-4">
+                <button 
+                  type="button"
+                  onClick={() => setShowAssignModal(false)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={assignLoading}
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {assignLoading ? 'Assigning...' : 'Assign Class'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -8,7 +8,7 @@ import {
   PieChart,
   ClipboardList, AlertCircle, LogOut,
   DollarSign, BookOpen, RotateCcw, ShoppingCart,
-  Bed, ShieldAlert, CheckSquare
+  Bed, ShieldAlert, CheckSquare, Bell
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
@@ -61,7 +61,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         
         const token = localStorage.getItem('admin_token');
         if (!token) return;
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/student-portal/dashboard`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/student-portal/dashboard/stats`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const totalAssignments = res.data.totalAssignments || 0;
@@ -185,6 +185,19 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
       ]
     },
     {
+      name: 'Teacher Portal',
+      items: [
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/teacher-portal/dashboard' },
+        { name: 'My Classes', icon: BookOpen, path: '/teacher-portal/my-classes' },
+        { name: 'Students', icon: Users, path: '/teacher-portal/students' },
+        { name: 'Attendance', icon: CheckSquare, path: '/teacher-portal/attendance' },
+        { name: 'Study Materials', icon: FileText, path: '/teacher-portal/study-materials' },
+        { name: 'Assignments', icon: ClipboardList, path: '/teacher-portal/assignments' },
+        { name: 'Notices', icon: Bell, path: '/teacher-portal/notices' },
+        { name: 'Complaints', icon: AlertCircle, path: '/teacher-portal/complaints' },
+      ]
+    },
+    {
       name: 'Reports',
       items: [
         { name: 'Reports', icon: PieChart, path: '/reports' },
@@ -263,9 +276,16 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
   };
 
   const filteredMenuGroups = menuGroups.map(group => {
-    if (userRole === 'college_admin' || userRole === 'Principal') return group;
+    if (userRole === 'college_admin' || userRole === 'Principal') {
+      // Admin sees everything EXCEPT portal specific views
+      if (group.name === 'Student Portal' || group.name === 'Teacher Portal') return null;
+      return group;
+    }
     if (userRole === 'Student') {
       return group.name === 'Student Portal' ? group : null;
+    }
+    if (userRole === 'Teacher Role') {
+      return group.name === 'Teacher Portal' ? group : null;
     }
     const categoryPermissions = groupPermissionCategories[group.name];
     if (categoryPermissions) {

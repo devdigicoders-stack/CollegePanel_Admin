@@ -23,6 +23,11 @@ const PrivateRoute = ({ children }) => {
      return <Navigate to="/dashboard" replace />;
   }
 
+  // Protect teacher portal routes
+  if ((userRole === 'teacher' || userRole === 'Teacher') && !path.startsWith('/teacher') && path !== '/dashboard' && path !== '/' && path !== '/profile') {
+    return <Navigate to="/teacher-portal/dashboard" replace />;
+  }
+
   return children;
 };
 

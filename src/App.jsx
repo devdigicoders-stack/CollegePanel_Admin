@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
+import { SocketProvider } from './context/SocketContext';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Admissions from './pages/Admissions';
@@ -131,6 +132,16 @@ import StudentPlacement from './pages/student-portal/Placement';
 import StudentComplaints from './pages/student-portal/Complaints';
 import StudentNotices from './pages/student-portal/Notices';
 
+// Teacher Portal Pages
+import TeacherDashboard from './pages/teacher-portal/Dashboard';
+import MyClasses from './pages/teacher-portal/MyClasses';
+import TeacherStudents from './pages/teacher-portal/Students';
+import TeacherAttendance from './pages/teacher-portal/Attendance';
+import TeacherNotices from './pages/teacher-portal/Notices';
+import TeacherStudyMaterials from './pages/teacher-portal/StudyMaterials';
+import TeacherAssignments from './pages/teacher-portal/Assignments';
+import TeacherComplaints from './pages/teacher-portal/Complaints';
+
 function App() {
   return (
     <Router>
@@ -145,8 +156,9 @@ function App() {
         {/* Protected Routes - inside Layout */}
         <Route path="/*" element={
           <PrivateRoute>
-            <Layout>
-              <Routes>
+            <SocketProvider>
+              <Layout>
+                <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/admissions" element={<Admissions />} />
@@ -275,8 +287,19 @@ function App() {
                 <Route path="/student/placement" element={<StudentPlacement />} />
                 <Route path="/student/complaints" element={<StudentComplaints />} />
                 <Route path="/student/notices" element={<StudentNotices />} />
+
+                {/* Teacher Portal Specific Routes */}
+                <Route path="/teacher-portal/dashboard" element={<TeacherDashboard />} />
+                <Route path="/teacher-portal/my-classes" element={<MyClasses />} />
+                <Route path="/teacher-portal/students" element={<TeacherStudents />} />
+                <Route path="/teacher-portal/attendance" element={<TeacherAttendance />} />
+                <Route path="/teacher-portal/notices" element={<TeacherNotices />} />
+                <Route path="/teacher-portal/study-materials" element={<TeacherStudyMaterials />} />
+                <Route path="/teacher-portal/assignments" element={<TeacherAssignments />} />
+                <Route path="/teacher-portal/complaints" element={<TeacherComplaints />} />
               </Routes>
             </Layout>
+            </SocketProvider>
           </PrivateRoute>
         } />
       </Routes>
