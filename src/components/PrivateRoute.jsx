@@ -6,7 +6,7 @@ const PrivateRoute = ({ children }) => {
 
   if (!token) {
     // Redirect to login and save the attempted URL
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    return <Navigate to="/login" state={{ from: location.pathname + location.search }} replace />;
   }
 
   const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');

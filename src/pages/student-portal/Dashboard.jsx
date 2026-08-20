@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   BookOpen, FileText, Home,
-  GraduationCap, AlertCircle, CheckCircle, ChevronRight,
-  User, Bell, CheckSquare
-} from 'lucide-react';
+  GraduationCap, CheckCircle, ChevronRight,
+  User, Bell} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
@@ -56,8 +55,8 @@ const StudentDashboard = () => {
       }
       if (results[3].status === 'fulfilled') {
         const all = results[3].value.data || [];
-        const pending = all.filter(a => a.submissionStatus === 'Pending' && new Date(a.dueDate) >= new Date());
-        setAssignments(pending.slice(0, 4));
+        const pending = all.filter(a => a.submissionStatus === 'Pending');
+        setAssignments(pending.slice(0, 5));
       }
 
     } catch (error) {
