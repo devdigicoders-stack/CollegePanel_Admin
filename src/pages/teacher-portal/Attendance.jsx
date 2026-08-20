@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, CalendarCheck, Save, History, Clock, QrCode, X } from 'lucide-react';
+import { Download, CalendarCheck, Save, History, Clock, QrCode, X, MapPin, Shield, ShieldCheck, ShieldOff, Navigation, Locate } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
@@ -24,6 +24,12 @@ const Attendance = () => {
 
   // QR State & Socket
   const [showQRModal, setShowQRModal] = useState(false);
+
+  // Geo-Fence State
+  const [showGeoModal, setShowGeoModal] = useState(false);
+  const [geoFence, setGeoFence] = useState({ isEnabled: false, lat: null, lng: null, radius: 50 });
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [fetchingLocation, setFetchingLocation] = useState(false);
   const socketContext = useSocket();
   const socket = socketContext?.socket;
 
@@ -45,6 +51,23 @@ const Attendance = () => {
       };
     }
   }, [socket, selectedClass, attendanceDate]);
+
+  // Load geo-fence settings when class changes
+  useEffect(() => {
+    if (selectedClass && classesList.length > 0) {
+      const cls = classesList.find(c => c._id === selectedClass);
+      if (cls?.geoFence) {
+        setGeoFence({
+          isEnabled: cls.geoFence.isEnabled || false,
+          lat: cls.geoFence.lat || null,
+          lng: cls.geoFence.lng || null,
+          radius: cls.geoFence.radius || 50
+        });
+      } else {
+        setGeoFence({ isEnabled: false, lat: null, lng: null, radius: 50 });
+      }
+    }
+  }, [selectedClass, classesList]);
 
   useEffect(() => {
     if (selectedClass) {
@@ -170,6 +193,48 @@ const Attendance = () => {
     }
   };
 
+  const handleCaptureLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by this browser.');
+      return;
+    }
+    setFetchingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setGeoFence(prev => ({
+          ...prev,
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        }));
+        toast.success('Location captured successfully!');
+        setFetchingLocation(false);
+      },
+      (err) => {
+        toast.error('Failed to get location: ' + err.message);
+        setFetchingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleSaveGeoFence = async () => {
+    if (!selectedClass) return;
+    if (geoFence.isEnabled && (!geoFence.lat || !geoFence.lng)) {
+      toast.error('Please capture location before enabling geo-fence.');
+      return;
+    }
+    setGeoLoading(true);
+    try {
+      await axiosInstance.put(`/teacher-portal/class/${selectedClass}/geofence`, geoFence);
+      toast.success('Geo-fence settings saved!');
+      setShowGeoModal(false);
+    } catch (error) {
+      toast.error('Failed to save geo-fence settings.');
+    } finally {
+      setGeoLoading(false);
+    }
+  };
+
   return (
     <div className="font-['Inter'] space-y-6">
       {/* Header */}
@@ -215,6 +280,15 @@ const Attendance = () => {
                 />
               </div>
               <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setShowGeoModal(true)}
+                  disabled={!selectedClass}
+                  title={geoFence.isEnabled ? 'Geo-fence Active' : 'Set Geo-fence'}
+                  className={`border-2 px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50 ${geoFence.isEnabled ? 'bg-emerald-50 border-emerald-500 text-emerald-700 hover:bg-emerald-100' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                >
+                  {geoFence.isEnabled ? <ShieldCheck size={16} /> : <Shield size={16} />}
+                  {geoFence.isEnabled ? 'Geo-fence ON' : 'Geo-fence'}
+                </button>
                 <button 
                   onClick={() => setShowQRModal(true)}
                   disabled={!selectedClass || students.length === 0}
@@ -381,6 +455,104 @@ const Attendance = () => {
             <div className="flex items-center justify-center gap-2 text-emerald-600 text-sm font-bold bg-emerald-50 py-2 rounded-lg border border-emerald-100">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Live Sync Active
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Geo-Fence Settings Modal */}
+      {showGeoModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative">
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
+              <button onClick={() => setShowGeoModal(false)} className="absolute top-4 right-4 text-white/70 hover:text-white">
+                <X size={24} />
+              </button>
+              <div className="flex items-center gap-3 mb-1">
+                <MapPin size={24} />
+                <h2 className="text-xl font-black">Geo-fence Settings</h2>
+              </div>
+              <p className="text-emerald-100 text-sm">Students can only mark attendance from within the set radius.</p>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Enable Toggle */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <div>
+                  <p className="font-bold text-gray-800 text-sm">Enable Geo-fencing</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Restrict attendance to college location</p>
+                </div>
+                <button
+                  onClick={() => setGeoFence(prev => ({ ...prev, isEnabled: !prev.isEnabled }))}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${geoFence.isEnabled ? 'bg-emerald-500' : 'bg-gray-300'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${geoFence.isEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                </button>
+              </div>
+
+              {/* Capture Location */}
+              <div>
+                <label className="text-sm font-bold text-gray-700 block mb-2 flex items-center gap-2">
+                  <Locate size={14} /> Classroom Location
+                </label>
+                {geoFence.lat && geoFence.lng ? (
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm">
+                    <p className="font-bold text-emerald-800 flex items-center gap-2"><MapPin size={14} /> Location Captured</p>
+                    <p className="text-emerald-600 text-xs mt-1">Lat: {geoFence.lat.toFixed(6)}, Lng: {geoFence.lng.toFixed(6)}</p>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-700">
+                    No location captured yet. Please stand inside the classroom and capture.
+                  </div>
+                )}
+                <button
+                  onClick={handleCaptureLocation}
+                  disabled={fetchingLocation}
+                  className="mt-3 w-full bg-gray-900 hover:bg-black text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  <Navigation size={16} className={fetchingLocation ? 'animate-spin' : ''} />
+                  {fetchingLocation ? 'Detecting Location...' : geoFence.lat ? 'Recapture Current Location' : 'Capture Current Location'}
+                </button>
+              </div>
+
+              {/* Radius Input */}
+              <div>
+                <label className="text-sm font-bold text-gray-700 block mb-2">
+                  Allowed Radius: <span className="text-primary font-black">{geoFence.radius}m</span>
+                </label>
+                <input
+                  type="range"
+                  min="10"
+                  max="500"
+                  step="5"
+                  value={geoFence.radius}
+                  onChange={(e) => setGeoFence(prev => ({ ...prev, radius: Number(e.target.value) }))}
+                  className="w-full accent-emerald-500"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>10m (Strict)</span>
+                  <span>250m (Medium)</span>
+                  <span>500m (Loose)</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowGeoModal(false)}
+                  className="flex-1 border border-gray-200 text-gray-600 px-4 py-3 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveGeoFence}
+                  disabled={geoLoading}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  <ShieldCheck size={16} />
+                  {geoLoading ? 'Saving...' : 'Save Settings'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
