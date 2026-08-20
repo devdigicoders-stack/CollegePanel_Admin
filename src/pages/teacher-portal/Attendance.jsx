@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Download, CalendarCheck, Save, History, Clock, QrCode, X, MapPin, Shield, ShieldCheck, ShieldOff, Navigation, Locate, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Download, CalendarCheck, Save, History, Clock, QrCode, X, MapPin, Shield, ShieldCheck, Navigation, Locate, Loader2 } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
