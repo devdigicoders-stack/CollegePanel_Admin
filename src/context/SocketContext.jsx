@@ -27,7 +27,10 @@ export const SocketProvider = ({ children }) => {
     if (token) {
       const decoded = parseJwt(token);
       if (decoded && decoded.id) {
-        const newSocket = io('http://localhost:5000', {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        // Socket.io usually runs on the same base URL as the API
+        const socketUrl = apiUrl.endsWith('/api') ? apiUrl.replace('/api', '') : apiUrl;
+        const newSocket = io(socketUrl, {
           withCredentials: true,
         });
 
