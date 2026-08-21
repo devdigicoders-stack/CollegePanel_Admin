@@ -41,8 +41,7 @@ const Attendance = () => {
   const [showDateModal, setShowDateModal] = useState(false);
   const [selectedDateRecord, setSelectedDateRecord] = useState(null);
   
-  const socketContext = useSocket();
-  const socket = socketContext?.socket;
+  const socket = useSocket();
 
   useEffect(() => {
     if (socket) {
