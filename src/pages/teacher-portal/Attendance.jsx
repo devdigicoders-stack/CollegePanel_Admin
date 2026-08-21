@@ -107,8 +107,6 @@ const Attendance = () => {
         attData.records.forEach(r => {
           recordsMap[r.studentId._id || r.studentId] = r.status;
         });
-      } else {
-        studentsList.forEach(s => { recordsMap[s._id] = 'Present'; });
       }
       setAttendanceRecords(recordsMap);
     } catch (error) {
