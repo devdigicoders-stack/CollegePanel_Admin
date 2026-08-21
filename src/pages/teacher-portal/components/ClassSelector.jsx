@@ -44,7 +44,7 @@ const ClassSelector = ({ selectedClass, setSelectedClass, setClassesList }) => {
     >
       {classes.map(cls => (
         <option key={cls._id} value={cls._id}>
-          {cls.subjectName} ({cls.subjectCode}) - Sem {cls.semester}
+          {cls.subjectName} ({cls.subjectCode}) - Sem {cls.semester} {cls.teacherName ? `(By: ${cls.teacherName})` : ''}
         </option>
       ))}
     </select>

@@ -213,7 +213,7 @@ export const Header = ({ onMenuClick }) => {
             const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
             const userName = adminInfo.name || 'Admin User';
             const userRole = adminInfo.role || 'college_admin';
-            const displayRole = userRole === 'college_admin' ? 'College Admin' : userRole;
+            const displayRole = adminInfo.designation === 'HOD' ? 'HOD' : (userRole === 'college_admin' ? 'College Admin' : userRole);
             const initial = userName.charAt(0).toUpperCase();
             return (
               <>

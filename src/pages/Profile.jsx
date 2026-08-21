@@ -41,7 +41,7 @@ const Profile = () => {
   };
 
   const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
-  const roleName = adminInfo.role === 'college_admin' ? 'College Admin' : (adminInfo.role || 'Staff Member');
+  const roleName = adminInfo.designation === 'HOD' ? 'HOD' : (adminInfo.role === 'college_admin' ? 'College Admin' : (adminInfo.role || 'Staff Member'));
   
   const [userName, setUserName] = useState(adminInfo.name || 'Admin User');
   const [userEmail, setUserEmail] = useState(adminInfo.email || adminInfo.adminEmail || 'admin@pccollege.edu.in');
