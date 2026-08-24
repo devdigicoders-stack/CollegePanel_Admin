@@ -199,7 +199,7 @@ const NewAdmission = () => {
               value={publicUrl} 
               size={180} 
               bgColor={"#ffffff"}
-              fgColor={"var(--color-sidebar)"}
+              fgColor={"#022a36"}
               level={"H"}
               includeMargin={false}
             />
