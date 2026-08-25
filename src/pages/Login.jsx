@@ -94,10 +94,10 @@ const Login = () => {
 
           <form onSubmit={handleLogin} className="space-y-4 lg:space-y-5">
             <div>
-              <label className="block text-[13px] font-semibold text-[#4B5563] mb-1.5 font-['Inter']">Username / Email</label>
+              <label className="block text-[13px] font-semibold text-[#4B5563] mb-1.5 font-['Inter']">Username / Email / App No.</label>
               <input 
                 type="text" 
-                placeholder="Enter username or email"
+                placeholder="e.g. admin, email, or APP-2026-101"
                 className="w-full px-4 py-2.5 lg:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-['Inter'] text-[14px] placeholder:text-[#9CA3AF]"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -106,11 +106,11 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-[13px] font-semibold text-[#4B5563] mb-1.5 font-['Inter']">Password</label>
+              <label className="block text-[13px] font-semibold text-[#4B5563] mb-1.5 font-['Inter']">Password / DOB</label>
               <div className="relative">
                 <input 
                   type={showPassword ? "text" : "password"} 
-                  placeholder="Enter password"
+                  placeholder="Enter password or DOB (YYYY-MM-DD)"
                   className="w-full px-4 py-2.5 lg:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-['Inter'] text-[14px] placeholder:text-[#9CA3AF] pr-12"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

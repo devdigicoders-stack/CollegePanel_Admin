@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Eye, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Eye, Trash2, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
@@ -16,6 +16,24 @@ const RejectedApplications = () => {
   const [loading, setLoading] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [appToDelete, setAppToDelete] = useState(null);
+
+  const handleDelete = async () => {
+    try {
+      const token = localStorage.getItem('admin_token');
+      await axios.delete(`${import.meta.env.VITE_API_URL}/admissions/${appToDelete._id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Application deleted successfully');
+      setShowDeleteModal(false);
+      setAppToDelete(null);
+      fetchApplications();
+    } catch (error) {
+      console.error('Error deleting application', error);
+      toast.error('Failed to delete application');
+    }
+  };
 
   const fetchApplications = async () => {
     try {
@@ -109,13 +127,22 @@ const RejectedApplications = () => {
                       </span>
                     </td>
                     <td className="p-4 text-right">
-                      <button 
-                        onClick={() => { setSelectedApp(app); setShowViewModal(true); }}
-                        className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors inline-flex"
-                        title="View Details"
-                      >
-                        <Eye size={18} />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => { setSelectedApp(app); setShowViewModal(true); }}
+                          className="p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors inline-flex"
+                          title="View Details"
+                        >
+                          <Eye size={18} />
+                        </button>
+                        <button 
+                          onClick={() => { setAppToDelete(app); setShowDeleteModal(true); }}
+                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors inline-flex"
+                          title="Delete Application"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )) : (
@@ -146,6 +173,41 @@ const RejectedApplications = () => {
           </button>
         }
       />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-red-50">
+              <AlertTriangle size={24} className="text-red-600" />
+              <h3 className="text-lg font-bold text-gray-800">Delete Application</h3>
+            </div>
+            
+            <div className="px-6 py-6">
+              <p className="text-gray-600 text-[14px]">
+                Are you sure you want to permanently delete the rejected application for 
+                <span className="font-bold text-gray-800"> {appToDelete?.name}</span>? 
+                This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
+              <button
+                onClick={handleDelete}
+                className="flex-1 bg-red-500 text-white py-2.5 rounded-xl hover:bg-red-600 transition-colors font-semibold text-[13px] shadow-sm shadow-red-500/20"
+              >
+                Delete Permanently
+              </button>
+              <button
+                onClick={() => { setShowDeleteModal(false); setAppToDelete(null); }}
+                className="flex-1 border border-gray-200 text-gray-600 bg-white py-2.5 rounded-xl hover:bg-gray-50 transition-colors font-semibold text-[13px]"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

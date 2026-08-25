@@ -6,7 +6,7 @@ import SkeletonLoader from '../components/SkeletonLoader';
 import { checkPermission } from '../utils/checkPermission';
 
 const Academics = () => {
-  const [activeMenu, setActiveMenu] = useState('Departments');
+  const [activeMenu, setActiveMenu] = useState('Courses');
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -26,7 +26,7 @@ const Academics = () => {
 
   // Permission to menu tab mapping - VIEW permission needed to see the tab
   const menuPermissionMap = {
-    'Departments': ['View Departments', 'Add Department', 'Edit Department', 'Delete Department'],
+    'Courses': ['View Departments', 'Add Department', 'Edit Department', 'Delete Department'],
     'Branches': ['View Courses', 'Add Course', 'Edit Course', 'Delete Course'],
     'Semesters': ['View Courses', 'Add Course'], // semesters tied to courses
     'Subjects': ['View Courses', 'Add Course', 'Edit Course', 'Delete Course'],
@@ -39,7 +39,7 @@ const Academics = () => {
   const isFullAdmin = userRole === 'college_admin' || userRole === 'Principal';
 
   const allMenuItems = [
-    { name: 'Departments' },
+    { name: 'Courses' },
     { name: 'Branches' },
     { name: 'Semesters' },
     { name: 'Subjects' },
@@ -58,19 +58,19 @@ const Academics = () => {
   // Granular per-action permission check per tab
   const canAdd = (menuName) => {
     if (isFullAdmin) return true;
-    const addPerms = { 'Departments': 'Add Department', 'Branches': 'Add Course', 'Semesters': 'Add Course', 'Subjects': 'Add Course', 'Designations': 'Add Employee', 'Subject Allocations': 'Add Course' };
+    const addPerms = { 'Courses': 'Add Department', 'Branches': 'Add Course', 'Semesters': 'Add Course', 'Subjects': 'Add Course', 'Designations': 'Add Employee', 'Subject Allocations': 'Add Course' };
     return checkPermission(addPerms[menuName] || '');
   };
 
   const canEdit = (menuName) => {
     if (isFullAdmin) return true;
-    const editPerms = { 'Departments': 'Edit Department', 'Branches': 'Edit Course', 'Semesters': 'Edit Course', 'Subjects': 'Edit Course', 'Designations': 'Edit Employee', 'Subject Allocations': 'Edit Course' };
+    const editPerms = { 'Courses': 'Edit Department', 'Branches': 'Edit Course', 'Semesters': 'Edit Course', 'Subjects': 'Edit Course', 'Designations': 'Edit Employee', 'Subject Allocations': 'Edit Course' };
     return checkPermission(editPerms[menuName] || '');
   };
 
   const canDelete = (menuName) => {
     if (isFullAdmin) return true;
-    const deletePerms = { 'Departments': 'Delete Department', 'Branches': 'Delete Course', 'Semesters': 'Delete Course', 'Subjects': 'Delete Course', 'Designations': 'Delete Employee', 'Subject Allocations': 'Delete Course' };
+    const deletePerms = { 'Courses': 'Delete Department', 'Branches': 'Delete Course', 'Semesters': 'Delete Course', 'Subjects': 'Delete Course', 'Designations': 'Delete Employee', 'Subject Allocations': 'Delete Course' };
     return checkPermission(deletePerms[menuName] || '');
   };
 
@@ -78,7 +78,7 @@ const Academics = () => {
   const canManage = (menuName) => canAdd(menuName) || canEdit(menuName) || canDelete(menuName);
 
   const endpoints = {
-    Departments: '/academics/departments',
+    Courses: '/academics/departments',
     Branches: '/academics/courses',
     Semesters: '/academics/semesters',
     Subjects: '/academics/subjects',
@@ -87,15 +87,15 @@ const Academics = () => {
   };
 
   const tableColumns = {
-    Departments: [
-      { key: 'name', label: 'Department Name' },
-      { key: 'hod', label: 'HOD' },
+    Courses: [
+      { key: 'name', label: 'Course Name' },
       { key: 'totalFaculty', label: 'Total Faculty' }
     ],
     Branches: [
       { key: 'code', label: 'Branch Code' },
       { key: 'name', label: 'Branch Name' },
-      { key: 'department', label: 'Department' },
+      { key: 'department', label: 'Course' },
+      { key: 'hod', label: 'HOD' },
       { key: 'duration', label: 'Duration' },
       { key: 'status', label: 'Status' }
     ],
@@ -103,13 +103,12 @@ const Academics = () => {
       { key: 'semesterNumber', label: 'Semester No.' },
       { key: 'courseName', label: 'Branch' },
       { key: 'startDate', label: 'Start Date' },
-      { key: 'endDate', label: 'End Date' },
       { key: 'status', label: 'Status' }
     ],
     Subjects: [
       { key: 'code', label: 'Subject Code' },
       { key: 'name', label: 'Subject Name' },
-      { key: 'department', label: 'Department' },
+      { key: 'department', label: 'Course' },
       { key: 'courseName', label: 'Branch' },
       { key: 'semester', label: 'Semester' },
       { key: 'status', label: 'Status' }
@@ -131,15 +130,8 @@ const Academics = () => {
 
   const getFormFields = () => {
     const fields = {
-      Departments: [
-        { key: 'name', label: 'Department Name', type: 'text', required: true },
-        { 
-          key: 'hod', 
-          label: 'HOD Name', 
-          type: 'select', 
-          required: true,
-          options: hods.map(h => ({ value: h.name, label: h.name }))
-        },
+      Courses: [
+        { key: 'name', label: 'Course Name', type: 'text', required: true },
         { key: 'totalFaculty', label: 'Total Faculty', type: 'number', required: false }
       ],
       Branches: [
@@ -147,10 +139,17 @@ const Academics = () => {
         { key: 'name', label: 'Branch Name', type: 'text', required: true },
         { 
           key: 'department', 
-          label: 'Department', 
+          label: 'Course', 
           type: 'select', 
           required: true,
           options: departments.map(d => ({ value: d.name, label: d.name }))
+        },
+        { 
+          key: 'hod', 
+          label: 'HOD Name', 
+          type: 'select', 
+          required: true,
+          options: hods.map(h => ({ value: h.name, label: h.name }))
         },
         { key: 'duration', label: 'Duration (Years)', type: 'number', required: true },
         { key: 'totalSemesters', label: 'Total Semesters', type: 'number', required: true },
@@ -175,8 +174,6 @@ const Academics = () => {
           options: courses.map(c => ({ value: c.name, label: c.name }))
         },
         { key: 'startDate', label: 'Start Date', type: 'date', required: true },
-        { key: 'endDate', label: 'End Date', type: 'date', required: true },
-        { key: 'totalWeeks', label: 'Total Weeks', type: 'number', required: false },
         { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Upcoming', 'Completed'], required: false }
       ],
       Subjects: [
@@ -184,14 +181,14 @@ const Academics = () => {
         { key: 'name', label: 'Subject Name', type: 'text', required: true },
         { 
           key: 'department', 
-          label: 'Department', 
+          label: 'Course', 
           type: 'select', 
           required: true,
           options: departments.map(d => ({ value: d.name, label: d.name }))
         },
         { 
           key: 'courseName', 
-          label: 'Branch (Course)', 
+          label: 'Branch', 
           type: 'select', 
           required: true,
           options: courses.filter(c => !formData.department || c.department === formData.department).map(c => ({ value: c.name, label: c.name }))
@@ -224,14 +221,14 @@ const Academics = () => {
         },
         { 
           key: 'department', 
-          label: 'Department', 
+          label: 'Course', 
           type: 'select', 
           required: true,
           options: departments.map(d => ({ value: d.name, label: d.name }))
         },
         { 
           key: 'course', 
-          label: 'Branch (Course)', 
+          label: 'Branch', 
           type: 'select', 
           required: true,
           options: courses.filter(c => !formData.department || c.department === formData.department).map(c => ({ value: c._id, label: c.name }))
