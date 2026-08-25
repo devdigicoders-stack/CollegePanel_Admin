@@ -101,7 +101,6 @@ const Academics = () => {
     ],
     Semesters: [
       { key: 'semesterNumber', label: 'Semester No.' },
-      { key: 'courseName', label: 'Branch' },
       { key: 'startDate', label: 'Start Date' },
       { key: 'status', label: 'Status' }
     ],
@@ -166,13 +165,6 @@ const Academics = () => {
       ],
       Semesters: [
         { key: 'semesterNumber', label: 'Semester Number', type: 'number', required: true },
-        { 
-          key: 'courseName', 
-          label: 'Branch', 
-          type: 'select', 
-          required: true,
-          options: courses.map(c => ({ value: c.name, label: c.name }))
-        },
         { key: 'startDate', label: 'Start Date', type: 'date', required: true },
         { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Upcoming', 'Completed'], required: false }
       ],
@@ -198,7 +190,7 @@ const Academics = () => {
           label: 'Semester', 
           type: 'select', 
           required: true,
-          options: semesters.filter(s => !formData.courseName || s.courseName === formData.courseName).map(s => ({ value: s.semesterNumber, label: `Semester ${s.semesterNumber}` }))
+          options: Array.from(new Set(semesters.map(s => s.semesterNumber))).sort((a,b)=>a-b).map(num => ({ value: num, label: `Semester ${num}` }))
         },
         { key: 'credits', label: 'Credits', type: 'number', required: true },
         { key: 'theory', label: 'Theory Marks', type: 'number', required: false },
@@ -222,41 +214,49 @@ const Academics = () => {
         { 
           key: 'department', 
           label: 'Course', 
-          type: 'select', 
+          type: 'multiselect', 
           required: true,
           options: departments.map(d => ({ value: d.name, label: d.name }))
         },
         { 
           key: 'course', 
           label: 'Branch', 
-          type: 'select', 
+          type: 'multiselect', 
           required: true,
-          options: courses.filter(c => !formData.department || c.department === formData.department).map(c => ({ value: c._id, label: c.name }))
+          options: courses.filter(c => {
+            if (!formData.department || (Array.isArray(formData.department) && formData.department.length === 0)) return true;
+            if (Array.isArray(formData.department)) return formData.department.includes(c.department);
+            return c.department === formData.department;
+          }).map(c => ({ value: c._id, label: c.name }))
         },
         { 
           key: 'semester', 
           label: 'Semester', 
-          type: 'select', 
+          type: 'multiselect', 
           required: true,
-          options: semesters.filter(s => {
-            if (!formData.course) return true;
-            const selectedCourse = courses.find(c => c._id === formData.course);
-            return selectedCourse && s.courseName === selectedCourse.name;
-          }).map(s => ({ value: s.semesterNumber, label: `Semester ${s.semesterNumber}` }))
+          options: Array.from(new Set(semesters.map(s => s.semesterNumber))).sort((a,b)=>a-b).map(num => ({ value: num, label: `Semester ${num}` }))
         },
         { 
           key: 'subject', 
           label: 'Subject', 
-          type: 'select', 
+          type: 'multiselect', 
           required: true,
           options: subjects.filter(s => {
-            if (formData.department && s.department !== formData.department) return false;
-            if (formData.course) {
-              const selectedCourse = courses.find(c => c._id === formData.course);
-              if (selectedCourse && s.courseName !== selectedCourse.name) return false;
+            let match = true;
+            if (formData.department && formData.department.length > 0) {
+              const deps = Array.isArray(formData.department) ? formData.department : [formData.department];
+              match = match && deps.includes(s.department);
             }
-            if (formData.semester && s.semester !== parseInt(formData.semester)) return false;
-            return true;
+            if (formData.course && formData.course.length > 0) {
+              const crsIds = Array.isArray(formData.course) ? formData.course : [formData.course];
+              const selectedCourseNames = courses.filter(c => crsIds.includes(c._id)).map(c => c.name);
+              match = match && selectedCourseNames.includes(s.courseName);
+            }
+            if (formData.semester && formData.semester.length > 0) {
+              const sems = Array.isArray(formData.semester) ? formData.semester.map(v => parseInt(v)) : [parseInt(formData.semester)];
+              match = match && sems.includes(s.semester);
+            }
+            return match;
           }).map(s => ({ value: s._id, label: s.name }))
         },
         { 
@@ -390,8 +390,8 @@ const Academics = () => {
         await axiosInstance.put(`${endpoints[activeMenu]}/${selectedItem._id}`, formData);
         toast.success(`${activeMenu.slice(0, -1)} updated successfully`);
       } else {
-        await axiosInstance.post(endpoints[activeMenu], formData);
-        toast.success(`${activeMenu.slice(0, -1)} created successfully`);
+        const response = await axiosInstance.post(endpoints[activeMenu], formData);
+        toast.success(response.data?.message || `${activeMenu.slice(0, -1)} created successfully`);
       }
       // Close modal and reset form
       setShowModal(false);
@@ -601,7 +601,6 @@ const AcademicsModal = ({ title, fields, formData, onInputChange, onSubmit, onCl
                 >
                   <option value="">Select {field.label}</option>
                   {field.options?.map((opt) => {
-                    // Handle both string options and object options
                     const value = typeof opt === 'string' ? opt : opt.value;
                     const label = typeof opt === 'string' ? opt : opt.label;
                     return (
@@ -609,6 +608,45 @@ const AcademicsModal = ({ title, fields, formData, onInputChange, onSubmit, onCl
                     );
                   })}
                 </select>
+              ) : field.type === 'multiselect' ? (
+                <div className="relative flex flex-col gap-1">
+                  <div className="border border-gray-300 rounded-lg p-2 max-h-40 overflow-y-auto bg-white flex flex-col gap-1">
+                    {field.options?.length === 0 ? (
+                      <div className="text-xs text-gray-500 italic p-1">No options available</div>
+                    ) : (
+                      field.options?.map((opt) => {
+                        const value = typeof opt === 'string' ? opt : opt.value;
+                        const label = typeof opt === 'string' ? opt : opt.label;
+                        
+                        const valData = formData[field.key];
+                        const selectedArray = Array.isArray(valData) ? valData : (valData ? [valData] : []);
+                        const isSelected = selectedArray.some(v => String(v) === String(value));
+
+                        return (
+                          <label key={value} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 p-1.5 rounded transition-colors">
+                            <input 
+                              type="checkbox" 
+                              className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                const currentSelected = [...selectedArray];
+                                if (e.target.checked) {
+                                  currentSelected.push(value);
+                                } else {
+                                  const idx = currentSelected.findIndex(v => String(v) === String(value));
+                                  if (idx > -1) currentSelected.splice(idx, 1);
+                                }
+                                onInputChange(field.key, currentSelected);
+                              }}
+                            />
+                            {label}
+                          </label>
+                        );
+                      })
+                    )}
+                  </div>
+                  <div className="text-[11px] text-gray-400 pl-1">Select one or multiple options</div>
+                </div>
               ) : (
                 <input
                   type={field.type}
