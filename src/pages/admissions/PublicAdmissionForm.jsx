@@ -376,11 +376,11 @@ Password: ${formData.dob}
                   <input type="text" name="prevSchool" value={formData.prevSchool} onChange={handleChange} placeholder="School name" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Board/University</label>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Previous Board/University</label>
                   <input type="text" name="board" value={formData.board} onChange={handleChange} placeholder="e.g. CBSE, State Board" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Percentage/CGPA</label>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Previous Percentage/CGPA</label>
                   <input type="text" name="percentage" value={formData.percentage} onChange={handleChange} placeholder="e.g. 85%" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
                 </div>
               </div>
