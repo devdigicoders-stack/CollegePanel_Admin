@@ -198,7 +198,12 @@ Password: ${formData.dob}
         <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20">
           <GraduationCap className="text-white" size={32} />
         </div>
-        <h1 className="text-2xl md:text-3xl font-black text-gray-800">Student Registration Portal</h1>
+        <h1 className="text-2xl md:text-3xl font-black text-primary mb-2 tracking-wide">
+          {formOptions.collegeName ? formOptions.collegeName.toUpperCase() : 'LOADING...'}
+        </h1>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-800">
+          Student Registration Form
+        </h2>
         <p className="text-gray-500 font-medium mt-2">Fill out the form below to complete your registration</p>
       </div>
 
@@ -513,9 +518,9 @@ Password: ${formData.dob}
         </form>
       </div>
       
-      {/* Footer link for Digicoders requirement mentioned earlier */}
+      {/* Footer link for DigiCoders requirement mentioned earlier */}
       <div className="mt-auto pt-10 pb-4 text-center">
-         <p className="text-[12px] text-gray-400 font-medium">Crafted with ♥ by <a href="https://digicoders.in/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-bold">Team Digicoders</a></p>
+         <p className="text-[12px] text-gray-400 font-medium">Crafted with ♥ by <a href="https://DigiCoders.in/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-bold">Team DigiCoders</a></p>
       </div>
     </div>
   );

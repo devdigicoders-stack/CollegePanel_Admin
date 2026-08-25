@@ -13,10 +13,11 @@ const Layout = ({ children }) => {
   
   const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
   const isStudent = adminInfo.role === 'Student';
-  const [locationGranted, setLocationGranted] = useState(!isStudent);
+  const checkSessionLocation = () => sessionStorage.getItem('location_granted') === 'true';
+  const [locationGranted, setLocationGranted] = useState(!isStudent ? true : checkSessionLocation());
   const [locationError, setLocationError] = useState(null);
   const [gettingLocation, setGettingLocation] = useState(false);
-  const [isInitializingLocation, setIsInitializingLocation] = useState(isStudent);
+  const [isInitializingLocation, setIsInitializingLocation] = useState(isStudent && !checkSessionLocation());
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,12 +34,13 @@ const Layout = ({ children }) => {
     document.documentElement.setAttribute('data-theme', theme);
 
     // Fully dynamic location check via browser system API
-    if (isStudent && navigator.permissions && navigator.permissions.query) {
+    if (isStudent && !checkSessionLocation() && navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
         if (result.state === 'granted') {
           // If already granted, silently fetch actual location to verify OS-level access
           navigator.geolocation.getCurrentPosition(
             () => {
+              sessionStorage.setItem('location_granted', 'true');
               setLocationGranted(true);
               setIsInitializingLocation(false);
             },
@@ -56,15 +58,19 @@ const Layout = ({ children }) => {
         
         result.addEventListener('change', () => {
           if (result.state === 'denied' || result.state === 'prompt') {
+            sessionStorage.removeItem('location_granted');
             setLocationGranted(false);
           } else if (result.state === 'granted') {
-             navigator.geolocation.getCurrentPosition(() => setLocationGranted(true));
+             navigator.geolocation.getCurrentPosition(() => {
+               sessionStorage.setItem('location_granted', 'true');
+               setLocationGranted(true);
+             });
           }
         });
       }).catch(() => {
         setIsInitializingLocation(false);
       });
-    } else if (isStudent) {
+    } else if (isStudent && !checkSessionLocation()) {
       setIsInitializingLocation(false);
     }
 
@@ -120,6 +126,7 @@ const Layout = ({ children }) => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           console.log('Location accessed:', position.coords.latitude, position.coords.longitude);
+          sessionStorage.setItem('location_granted', 'true');
           setLocationGranted(true);
           setGettingLocation(false);
         },
@@ -227,12 +234,12 @@ const Layout = ({ children }) => {
           <span className="text-red-500 text-base animate-pulse">♥</span>
           <span>by</span>
           <a
-            href="https://digicoders.in/"
+            href="https://DigiCoders.in/"
             target="_blank"
             rel="noopener noreferrer"
             className="font-bold underline underline-offset-2 text-red-500 hover:text-red-600 transition-colors duration-200"
           >
-            Team Digicoders
+            Team DigiCoders
           </a>
         </footer>
       </div>

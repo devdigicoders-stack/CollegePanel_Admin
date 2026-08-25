@@ -55,12 +55,11 @@ const Login = () => {
       <div className="md:w-[40%] lg:w-[35%] h-full bg-sidebar text-white flex flex-col justify-between relative overflow-hidden hidden md:flex">
         <div className="z-10 flex flex-col items-center text-center mt-16 lg:mt-20">
           <div className="mb-6">
-            {/* Original SVG logo */}
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 12l10-6 10 6-10 6-10-6z" />
-              <path d="M22 12v6" />
-              <path d="M6 14.5V20c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-5.5" />
-            </svg>
+            <img 
+              src="/DigiCoders%20Transparent%20Logo.png" 
+              alt="DigiCoders Logo" 
+              className="h-25 w-auto object-contain drop-shadow-md bg-white/10 rounded-2xl p-2 backdrop-blur-sm"
+            />
           </div>
           <h1 className="text-[22px] lg:text-[24px] font-bold tracking-wide mb-3 font-['Inter']">POLYTECHNIC COLLEGE ERP</h1>
           <p className="text-accent text-base font-medium">College / Admin Login</p>
@@ -76,13 +75,12 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Mobile view top section - hidden on desktop */}
       <div className="md:hidden bg-sidebar text-white py-12 px-6 flex flex-col items-center justify-center relative overflow-hidden">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4">
-          <path d="M2 12l10-6 10 6-10 6-10-6z" />
-          <path d="M22 12v6" />
-          <path d="M6 14.5V20c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-5.5" />
-        </svg>
+        <img 
+          src="/DigiCoders%20Transparent%20Logo.png" 
+          alt="DigiCoders Logo" 
+          className="h-16 w-auto object-contain mb-4 drop-shadow-md bg-white/10 rounded-xl p-2 backdrop-blur-sm" 
+        />
         <h1 className="text-[20px] font-bold tracking-wider mb-2 font-['Inter'] text-center">POLYTECHNIC COLLEGE ERP</h1>
         <p className="text-accent text-[13px] font-medium">College / Admin Login</p>
       </div>
@@ -156,12 +154,12 @@ const Login = () => {
               <span className="text-red-500 animate-pulse">♥</span>
               by
               <a
-                href="https://digicoders.in/"
+                href="https://DigiCoders.in/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-bold text-red-500 hover:text-red-600 underline underline-offset-2 transition-colors duration-200"
               >
-                Team Digicoders
+                Team DigiCoders
               </a>
             </p>
           </div>
