@@ -80,7 +80,7 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
                     </p>
                   </div>
                   <div className="col-span-2 sm:col-span-1">
-                    <p className="text-[12px] text-gray-500 mb-1 font-medium">Aadhaar Number</p>
+                    <p className="text-[12px] text-gray-500 mb-1 font-medium">Adhar Number</p>
                     <p className="text-[14px] font-bold text-gray-800 flex items-center gap-1.5">
                       {student.aadhaar || 'N/A'}
                     </p>

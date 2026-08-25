@@ -259,8 +259,8 @@ Password: ${formData.dob}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Aadhaar Number <span className="text-red-500">*</span></label>
-                  <input type="text" name="aadhaar" required value={formData.aadhaar} onChange={handleChange} placeholder="12-digit Aadhaar" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Adhar Number <span className="text-red-500">*</span></label>
+                  <input type="text" name="aadhaar" required value={formData.aadhaar} onChange={handleChange} placeholder="12-digit Adhar" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[13px] focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
                 </div>
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Blood Group</label>
@@ -401,11 +401,18 @@ Password: ${formData.dob}
                   {formData.documents?.find(d => d.name === 'Student Photo') && <p className="text-[11px] text-emerald-600 font-medium mt-2 flex items-center gap-1"><Check size={12}/> Uploaded Successfully</p>}
                 </div>
                 
-                {/* Aadhaar */}
+                {/* Adhar Front */}
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5 flex items-center gap-2"><FileText size={14}/> Aadhaar Card</label>
-                  <input type="file" accept="image/*,.pdf" onChange={(e) => handleFileUpload(e, 'Aadhaar Card')} className="w-full text-[12px] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[12px] file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 transition-all cursor-pointer" />
-                  {formData.documents?.find(d => d.name === 'Aadhaar Card') && <p className="text-[11px] text-emerald-600 font-medium mt-2 flex items-center gap-1"><Check size={12}/> Uploaded Successfully</p>}
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5 flex items-center gap-2"><FileText size={14}/> Adhar Front Side</label>
+                  <input type="file" accept="image/*,.pdf" onChange={(e) => handleFileUpload(e, 'Adhar Front Side')} className="w-full text-[12px] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[12px] file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 transition-all cursor-pointer" />
+                  {formData.documents?.find(d => d.name === 'Adhar Front Side') && <p className="text-[11px] text-emerald-600 font-medium mt-2 flex items-center gap-1"><Check size={12}/> Uploaded Successfully</p>}
+                </div>
+
+                {/* Adhar Back */}
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5 flex items-center gap-2"><FileText size={14}/> Adhar Back Side</label>
+                  <input type="file" accept="image/*,.pdf" onChange={(e) => handleFileUpload(e, 'Adhar Back Side')} className="w-full text-[12px] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[12px] file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 transition-all cursor-pointer" />
+                  {formData.documents?.find(d => d.name === 'Adhar Back Side') && <p className="text-[11px] text-emerald-600 font-medium mt-2 flex items-center gap-1"><Check size={12}/> Uploaded Successfully</p>}
                 </div>
 
                 {/* Marksheet */}
@@ -436,7 +443,7 @@ Password: ${formData.dob}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-4">
                     <div><p className="text-[11px] text-gray-500">Full Name</p><p className="text-[13px] font-bold text-gray-800">{formData.name}</p></div>
                     <div><p className="text-[11px] text-gray-500">Mobile Number</p><p className="text-[13px] font-bold text-gray-800">{formData.mobile}</p></div>
-                    <div><p className="text-[11px] text-gray-500">Aadhaar Number</p><p className="text-[13px] font-bold text-gray-800">{formData.aadhaar}</p></div>
+                    <div><p className="text-[11px] text-gray-500">Adhar Number</p><p className="text-[13px] font-bold text-gray-800">{formData.aadhaar}</p></div>
                     <div><p className="text-[11px] text-gray-500">Course Applied</p><p className="text-[13px] font-bold text-emerald-700">{formData.course}</p></div>
                     <div><p className="text-[11px] text-gray-500">Branch</p><p className="text-[13px] font-bold text-gray-800">{formData.branch}</p></div>
                     <div><p className="text-[11px] text-gray-500">Year / Session</p><p className="text-[13px] font-bold text-gray-800">{formData.year} ({formData.session})</p></div>
@@ -484,7 +491,7 @@ Password: ${formData.dob}
                     if (!formData.name) { toast.error('Name is required'); return; }
                     if (!formData.mobile) { toast.error('Mobile number is required'); return; }
                     if (!formData.category) { toast.error('Category is required'); return; }
-                    if (!formData.aadhaar) { toast.error('Aadhaar number is required'); return; }
+                    if (!formData.aadhaar) { toast.error('Adhar number is required'); return; }
                   }
                   if (currentStep === 2) {
                     if (!formData.parentName) { toast.error('Father\'s name is required'); return; }
