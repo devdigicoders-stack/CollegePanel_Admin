@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { 
   Search, ChevronDown, Eye, Plus, Edit2, Trash2, X as XIcon,
-  ChevronLeft, ChevronRight, CheckCircle, Download, FileText } from 'lucide-react';
+  ChevronLeft, ChevronRight, CheckCircle, Download, FileText, Upload, RefreshCw, Paperclip } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
 import axiosInstance from '../utils/axiosInstance';
@@ -27,7 +27,7 @@ const Assignments = () => {
   const [tabCounts, setTabCounts] = useState({ Pending: 0, Submitted: 0, Graded: 0, Overdue: 0, All: 0 });
 
   const [filters, setFilters] = useState({
-    department: 'All Departments',
+    branch: 'All Branches',
     subject: 'All Subjects',
     search: ''
   });
@@ -36,24 +36,33 @@ const Assignments = () => {
     assignmentId: '',
     title: '',
     subject: '',
-    department: '',
+    branch: '',
     semester: '',
     section: '',
     description: '',
     dueDate: '',
-    totalMarks: '',
+    totalMarks: '25',
     teacherId: '',
-    teacherName: ''
+    teacherName: '',
+    fileUrl: '',
+    fileName: ''
   });
 
   const [teachers, setTeachers] = useState([]);
   const [subjects, setSubjects] = useState([]);
-  const [departments, setDepartments] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [sections, setSections] = useState([]);
   const [formLoading, setFormLoading] = useState(false);
+  const [fileUploading, setFileUploading] = useState(false);
   const [editId, setEditId] = useState(null);
   const searchTimeout = useRef(null);
+
+  const generateAssignmentId = () => {
+    const year = new Date().getFullYear();
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    return `ASN${year}${randomNum}`;
+  };
 
   const tabs = [
     { name: 'Pending' },
@@ -64,7 +73,7 @@ const Assignments = () => {
   ];
 
   useEffect(() => {
-    fetchDepartments();
+    fetchBranches();
     fetchSubjects();
     fetchTeachers();
     fetchTabCounts();
@@ -76,12 +85,12 @@ const Assignments = () => {
     fetchAssignments();
   }, [activeTab, filters, pagination.page]);
 
-  const fetchDepartments = async () => {
+  const fetchBranches = async () => {
     try {
-      const res = await axiosInstance.get('/academics/departments');
-      setDepartments(res.data.data || res.data || []);
+      const res = await axiosInstance.get('/academics/courses');
+      setBranches(res.data.data || res.data || []);
     } catch (error) {
-      console.error('Failed to fetch departments', error);
+      console.error('Failed to fetch branches', error);
     }
   };
 
@@ -144,7 +153,7 @@ const Assignments = () => {
         page: pagination.page,
         limit: pagination.limit,
         status: activeTab === 'All' ? '' : activeTab,
-        department: filters.department,
+        branch: filters.branch,
         subject: filters.subject,
         search: filters.search
       };
@@ -191,20 +200,29 @@ const Assignments = () => {
       assignmentId: '',
       title: '',
       subject: '',
-      department: '',
+      branch: '',
       semester: '',
       section: '',
       description: '',
       dueDate: '',
-      totalMarks: '',
+      totalMarks: '25',
       teacherId: '',
-      teacherName: ''
+      teacherName: '',
+      fileUrl: '',
+      fileName: ''
     });
     setEditId(null);
   };
 
   const handleAddAssignment = () => {
     resetForm();
+    const newId = generateAssignmentId();
+    setFormData(prev => ({
+      ...prev,
+      assignmentId: newId,
+      totalMarks: '25',
+      section: sections.length > 0 ? sections[0].name : 'A'
+    }));
     setShowAddModal(true);
   };
 
@@ -213,21 +231,60 @@ const Assignments = () => {
       assignmentId: assignment.assignmentId || '',
       title: assignment.title || '',
       subject: assignment.subject || '',
-      department: assignment.course || '',
+      branch: assignment.branch || assignment.course || '',
       semester: assignment.semester || '',
       section: assignment.section || '',
       description: assignment.description || '',
       dueDate: assignment.dueDate ? assignment.dueDate.split('T')[0] : '',
-      totalMarks: assignment.totalMarks || '',
+      totalMarks: assignment.totalMarks || '25',
       teacherId: assignment.teacherId || '',
-      teacherName: assignment.teacherName || ''
+      teacherName: assignment.teacherName || '',
+      fileUrl: assignment.fileUrl || '',
+      fileName: assignment.fileName || ''
     });
     setEditId(assignment._id);
     setShowEditModal(true);
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      toast.error('Please upload a PDF file only');
+      return;
+    }
+    setFileUploading(true);
+    try {
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+      const res = await axiosInstance.post('/upload', uploadData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const fileUrl = res.data.url;
+      setFormData(prev => ({
+        ...prev,
+        fileUrl,
+        fileName: file.name
+      }));
+      toast.success('PDF attached successfully!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to upload PDF file');
+    } finally {
+      setFileUploading(false);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFormData(prev => ({
+      ...prev,
+      fileUrl: '',
+      fileName: ''
+    }));
+  };
+
   const handleSaveAssignment = async () => {
-    if (!formData.title || !formData.subject || !formData.dueDate || !formData.department) {
+    if (!formData.title || !formData.subject || !formData.dueDate || !formData.branch) {
       toast.error('Please fill all required fields');
       return;
     }
@@ -235,7 +292,8 @@ const Assignments = () => {
     try {
       const payload = {
         ...formData,
-        course: formData.department,
+        course: formData.branch,
+        department: formData.branch,
         assignedDate: new Date().toISOString().split('T')[0],
         totalStudents: 0,
         submittedCount: 0,
@@ -328,6 +386,16 @@ const Assignments = () => {
     return Math.round((submitted / total) * 100);
   };
 
+  const filteredSubjects = subjects.filter(subj => {
+    if (formData.branch && subj.courseName && subj.courseName.toLowerCase() !== formData.branch.toLowerCase()) return false;
+    if (formData.semester && subj.semester) {
+      const fSem = formData.semester.replace(/[^0-9]/g, '');
+      const sSem = subj.semester.replace(/[^0-9]/g, '');
+      if (fSem && sSem && fSem !== sSem) return false;
+    }
+    return true;
+  });
+  const displaySubjects = filteredSubjects.length > 0 ? filteredSubjects : subjects;
   const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
   const userRole = adminInfo.role || 'college_admin';
   const canEdit = userRole === 'college_admin' || userRole === 'Teacher' || userRole === 'Principal' || userRole === 'HOD';
@@ -377,13 +445,13 @@ const Assignments = () => {
       <div className="p-5 flex flex-wrap gap-3 bg-white border-b border-gray-100">
         <div className="relative">
           <select
-            value={filters.department}
-            onChange={(e) => handleFilterChange('department', e.target.value)}
+            value={filters.branch}
+            onChange={(e) => handleFilterChange('branch', e.target.value)}
             className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer"
           >
-            <option>All Departments</option>
-            {departments.map((dept) => (
-              <option key={dept._id} value={dept.name}>{dept.name}</option>
+            <option>All Branches</option>
+            {branches.map((b) => (
+              <option key={b._id} value={b.name}>{b.name}</option>
             ))}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
@@ -441,7 +509,20 @@ const Assignments = () => {
                   <td className="py-4 px-6">
                     <div className="flex flex-col">
                       <span className="text-[13px] text-gray-800 font-medium">{assignment.title}</span>
-                      <span className="text-[11px] text-gray-500">{assignment.teacherName}</span>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] text-gray-500">{assignment.teacherName}</span>
+                        {assignment.fileUrl && (
+                          <a 
+                            href={assignment.fileUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline bg-green-50 px-1.5 py-0.5 rounded border border-green-100"
+                            title="View attached PDF"
+                          >
+                            <FileText size={11} /> PDF
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="py-4 px-6 text-[13px] text-gray-600">{assignment.subject}</td>
@@ -539,7 +620,10 @@ const Assignments = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-gray-800">Create New Assignment</h3>
+              <div>
+                <h3 className="text-lg font-bold text-gray-800">Create New Assignment</h3>
+                <p className="text-[12px] text-gray-500 mt-0.5">Assign coursework, set deadlines, and attach reference PDFs</p>
+              </div>
               <button onClick={() => { setShowAddModal(false); resetForm(); }} className="text-gray-400 hover:text-gray-600">
                 <XIcon size={20} />
               </button>
@@ -548,14 +632,26 @@ const Assignments = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Assignment ID *</label>
-                  <input
-                    type="text"
-                    value={formData.assignmentId}
-                    onChange={(e) => setFormData({ ...formData, assignmentId: e.target.value })}
-                    placeholder="e.g., ASN2024001"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-[13px] font-semibold text-gray-700">Assignment ID *</label>
+                    <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">Auto-Generated</span>
+                  </div>
+                  <div className="relative flex items-center">
+                    <input
+                      type="text"
+                      readOnly
+                      value={formData.assignmentId}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] font-semibold text-gray-700 cursor-not-allowed select-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, assignmentId: generateAssignmentId() }))}
+                      title="Generate New ID"
+                      className="absolute right-2 p-1.5 text-gray-400 hover:text-primary transition-colors"
+                    >
+                      <RefreshCw size={14} />
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-[13px] font-semibold text-gray-700 mb-2">Title *</label>
@@ -571,28 +667,28 @@ const Assignments = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Subject *</label>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Branch *</label>
                   <select
-                    value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    value={formData.branch}
+                    onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
-                    <option value="">Select Subject</option>
-                    {subjects.map((subj) => (
-                      <option key={subj._id} value={subj.name}>{subj.name}</option>
+                    <option value="">Select Branch</option>
+                    {branches.map((b) => (
+                      <option key={b._id} value={b.name}>{b.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Department *</label>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Subject *</label>
                   <select
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
-                    <option value="">Select Department</option>
-                    {departments.map((dept) => (
-                      <option key={dept._id} value={dept.name}>{dept.name}</option>
+                    <option value="">Select Subject</option>
+                    {displaySubjects.map((subj) => (
+                      <option key={subj._id} value={subj.name}>{subj.name}</option>
                     ))}
                   </select>
                 </div>
@@ -648,7 +744,7 @@ const Assignments = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Teacher *</label>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Teacher (Optional)</label>
                   <select
                     value={formData.teacherId}
                     onChange={(e) => {
@@ -656,12 +752,12 @@ const Assignments = () => {
                       setFormData({
                         ...formData,
                         teacherId: e.target.value,
-                        teacherName: teacher ? teacher.name : ''
+                        teacherName: teacher ? teacher.name : 'Admin'
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
-                    <option value="">Select Teacher</option>
+                    <option value="">Default (Admin / Current Faculty)</option>
                     {teachers.map((teacher) => (
                       <option key={teacher._id} value={teacher._id}>{teacher.name}</option>
                     ))}
@@ -675,16 +771,70 @@ const Assignments = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Enter assignment description and instructions..."
-                  rows={4}
+                  rows={3}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                 />
+              </div>
+
+              {/* Attach PDF Section */}
+              <div>
+                <label className="block text-[13px] font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
+                  <Paperclip size={14} className="text-primary" />
+                  Attach Reference PDF / Sheet (Optional)
+                </label>
+                {formData.fileUrl ? (
+                  <div className="flex items-center justify-between p-3.5 bg-green-50 border border-green-200 rounded-xl">
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <div className="p-2 bg-green-100 text-green-700 rounded-lg flex-shrink-0">
+                        <FileText size={20} />
+                      </div>
+                      <div className="truncate">
+                        <p className="text-[13px] font-bold text-gray-800 truncate">{formData.fileName || 'Attached PDF Document'}</p>
+                        <a 
+                          href={formData.fileUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-[11px] text-primary hover:underline font-semibold inline-flex items-center gap-1"
+                        >
+                          View Uploaded PDF <Eye size={12} />
+                        </a>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="text-red-600 hover:text-red-700 text-[12px] font-bold px-3 py-1 bg-white rounded-lg border border-red-200 shadow-sm transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="relative border-2 border-dashed border-gray-200 rounded-xl p-5 text-center hover:bg-gray-50/70 hover:border-primary/40 transition-all cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileUpload}
+                      disabled={fileUploading}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                    />
+                    <div className="flex flex-col items-center justify-center pointer-events-none">
+                      <div className="p-2.5 bg-primary/10 text-primary rounded-full mb-2">
+                        <Upload size={20} />
+                      </div>
+                      <p className="text-[13px] font-bold text-gray-700">
+                        {fileUploading ? 'Uploading PDF Document...' : 'Click or drag PDF file here'}
+                      </p>
+                      <p className="text-[11px] text-gray-400 mt-0.5 font-medium">Accepts PDF files only (Up to 10MB)</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="flex gap-3 mt-6">
               <button
                 onClick={handleSaveAssignment}
-                disabled={formLoading}
+                disabled={formLoading || fileUploading}
                 className="flex-1 bg-primary text-white py-2.5 rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm disabled:opacity-50"
               >
                 {formLoading ? 'Saving...' : 'Create Assignment'}
@@ -705,7 +855,10 @@ const Assignments = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-gray-800">Edit Assignment</h3>
+              <div>
+                <h3 className="text-lg font-bold text-gray-800">Edit Assignment</h3>
+                <p className="text-[12px] text-gray-500 mt-0.5">Update assignment details or attached reference file</p>
+              </div>
               <button onClick={() => { setShowEditModal(false); resetForm(); }} className="text-gray-400 hover:text-gray-600">
                 <XIcon size={20} />
               </button>
@@ -717,9 +870,9 @@ const Assignments = () => {
                   <label className="block text-[13px] font-semibold text-gray-700 mb-2">Assignment ID *</label>
                   <input
                     type="text"
+                    readOnly
                     value={formData.assignmentId}
-                    onChange={(e) => setFormData({ ...formData, assignmentId: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] font-semibold text-gray-700 cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -735,28 +888,28 @@ const Assignments = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Subject *</label>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Branch *</label>
                   <select
-                    value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    value={formData.branch}
+                    onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
-                    <option value="">Select Subject</option>
-                    {subjects.map((subj) => (
-                      <option key={subj._id} value={subj.name}>{subj.name}</option>
+                    <option value="">Select Branch</option>
+                    {branches.map((b) => (
+                      <option key={b._id} value={b.name}>{b.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Department *</label>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Subject *</label>
                   <select
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
-                    <option value="">Select Department</option>
-                    {departments.map((dept) => (
-                      <option key={dept._id} value={dept.name}>{dept.name}</option>
+                    <option value="">Select Subject</option>
+                    {displaySubjects.map((subj) => (
+                      <option key={subj._id} value={subj.name}>{subj.name}</option>
                     ))}
                   </select>
                 </div>
@@ -811,7 +964,7 @@ const Assignments = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Teacher *</label>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Teacher (Optional)</label>
                   <select
                     value={formData.teacherId}
                     onChange={(e) => {
@@ -819,12 +972,12 @@ const Assignments = () => {
                       setFormData({
                         ...formData,
                         teacherId: e.target.value,
-                        teacherName: teacher ? teacher.name : ''
+                        teacherName: teacher ? teacher.name : 'Admin'
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
-                    <option value="">Select Teacher</option>
+                    <option value="">Default (Admin / Current Faculty)</option>
                     {teachers.map((teacher) => (
                       <option key={teacher._id} value={teacher._id}>{teacher.name}</option>
                     ))}
@@ -837,16 +990,70 @@ const Assignments = () => {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
+                  rows={3}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                 />
+              </div>
+
+              {/* Attach PDF Section in Edit */}
+              <div>
+                <label className="block text-[13px] font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
+                  <Paperclip size={14} className="text-primary" />
+                  Attach Reference PDF / Sheet (Optional)
+                </label>
+                {formData.fileUrl ? (
+                  <div className="flex items-center justify-between p-3.5 bg-green-50 border border-green-200 rounded-xl">
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <div className="p-2 bg-green-100 text-green-700 rounded-lg flex-shrink-0">
+                        <FileText size={20} />
+                      </div>
+                      <div className="truncate">
+                        <p className="text-[13px] font-bold text-gray-800 truncate">{formData.fileName || 'Attached PDF Document'}</p>
+                        <a 
+                          href={formData.fileUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-[11px] text-primary hover:underline font-semibold inline-flex items-center gap-1"
+                        >
+                          View Uploaded PDF <Eye size={12} />
+                        </a>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="text-red-600 hover:text-red-700 text-[12px] font-bold px-3 py-1 bg-white rounded-lg border border-red-200 shadow-sm transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="relative border-2 border-dashed border-gray-200 rounded-xl p-5 text-center hover:bg-gray-50/70 hover:border-primary/40 transition-all cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileUpload}
+                      disabled={fileUploading}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                    />
+                    <div className="flex flex-col items-center justify-center pointer-events-none">
+                      <div className="p-2.5 bg-primary/10 text-primary rounded-full mb-2">
+                        <Upload size={20} />
+                      </div>
+                      <p className="text-[13px] font-bold text-gray-700">
+                        {fileUploading ? 'Uploading PDF Document...' : 'Click or drag PDF file here'}
+                      </p>
+                      <p className="text-[11px] text-gray-400 mt-0.5 font-medium">Accepts PDF files only (Up to 10MB)</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="flex gap-3 mt-6">
               <button
                 onClick={handleSaveAssignment}
-                disabled={formLoading}
+                disabled={formLoading || fileUploading}
                 className="flex-1 bg-primary text-white py-2.5 rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm disabled:opacity-50"
               >
                 {formLoading ? 'Updating...' : 'Update Assignment'}
@@ -886,10 +1093,26 @@ const Assignments = () => {
                   <DetailRow label="Subject" value={selectedAssignment.subject} />
                   <DetailRow label="Teacher" value={selectedAssignment.teacherName} />
                   <DetailRow label="Class" value={`${selectedAssignment.semester} - Section ${selectedAssignment.section}`} />
-                  <DetailRow label="Department" value={selectedAssignment.course} />
+                  <DetailRow label="Branch" value={selectedAssignment.branch || selectedAssignment.course} />
                   <DetailRow label="Total Marks" value={`${selectedAssignment.totalMarks} marks`} />
                 </div>
               </div>
+
+              {selectedAssignment.fileUrl && (
+                <div className="border-t border-gray-100 pt-4">
+                  <h4 className="text-sm font-bold text-gray-700 mb-2">Attached PDF Document</h4>
+                  <a
+                    href={selectedAssignment.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2.5 px-4 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-[13px] font-bold transition-all border border-primary/20"
+                  >
+                    <FileText size={18} />
+                    {selectedAssignment.fileName || 'View Attached Assignment PDF'}
+                    <Download size={14} className="ml-1" />
+                  </a>
+                </div>
+              )}
 
               <div className="border-t border-gray-100 pt-4">
                 <h4 className="text-sm font-bold text-gray-700 mb-3">Timeline</h4>

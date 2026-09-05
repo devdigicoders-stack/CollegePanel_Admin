@@ -5,8 +5,10 @@ import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import ClassSelector from './components/ClassSelector';
 import { useSocket } from '../../context/SocketContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Attendance = () => {
+  const { user: adminInfo } = useAuth();
   const [selectedClass, setSelectedClass] = useState('');
   const [classesList, setClassesList] = useState([]);
   const [activeTab, setActiveTab] = useState('mark'); // 'mark' | 'history'
@@ -168,51 +170,148 @@ const Attendance = () => {
     try {
       const baseUrl = window.location.origin;
       const qrDataUrl = `${baseUrl}/student-portal/attendance/scan?classId=${selectedClass}`;
-      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(qrDataUrl)}`;
+      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(qrDataUrl)}&margin=0`;
       
       const response = await fetch(qrImageUrl);
       const blob = await response.blob();
       
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      canvas.width = 600;
-      canvas.height = 700;
+      // Premium Design Canvas Size
+      canvas.width = 800;
+      canvas.height = 1100;
       
-      ctx.fillStyle = '#ffffff';
+      // Soft Gradient Background
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#f8fafc'); 
+      gradient.addColorStop(1, '#e2e8f0'); 
+      ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Central White Card
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 20;
+      ctx.fillStyle = '#ffffff';
       
+      const rectX = 50;
+      const rectY = 50;
+      const rectW = 700;
+      const rectH = 1000;
+      const radius = 30;
+      
+      ctx.beginPath();
+      ctx.moveTo(rectX + radius, rectY);
+      ctx.lineTo(rectX + rectW - radius, rectY);
+      ctx.quadraticCurveTo(rectX + rectW, rectY, rectX + rectW, rectY + radius);
+      ctx.lineTo(rectX + rectW, rectY + rectH - radius);
+      ctx.quadraticCurveTo(rectX + rectW, rectY + rectH, rectX + rectW - radius, rectY + rectH);
+      ctx.lineTo(rectX + radius, rectY + rectH);
+      ctx.quadraticCurveTo(rectX, rectY + rectH, rectX, rectY + rectH - radius);
+      ctx.lineTo(rectX, rectY + radius);
+      ctx.quadraticCurveTo(rectX, rectY, rectX + radius, rectY);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Reset shadow for text and images
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+      
+      // Header Text
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '900 42px "Inter", Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('CLASS ATTENDANCE', canvas.width / 2, 130);
+      
+      ctx.fillStyle = '#10b981';
+      ctx.font = '700 20px "Inter", Arial, sans-serif';
+      ctx.fillText('SCAN TO MARK YOUR PRESENCE', canvas.width / 2, 170);
+      
+      // Line separator
+      ctx.beginPath();
+      ctx.moveTo(150, 210);
+      ctx.lineTo(650, 210);
+      ctx.strokeStyle = '#f1f5f9';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      const classObj = classesList.find(c => c._id === selectedClass);
+      
+      // Details Section
+      if (classObj) {
+        ctx.fillStyle = '#334155';
+        ctx.font = '800 28px "Inter", Arial, sans-serif';
+        
+        let cName = adminInfo?.collegeName || 'Our College';
+        if (ctx.measureText(cName).width > 600) {
+           ctx.font = '800 22px "Inter", Arial, sans-serif';
+        }
+        ctx.fillText(cName.toUpperCase(), canvas.width / 2, 250);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '700 20px "Inter", Arial, sans-serif';
+        let subjName = classObj.subjectName;
+        if (ctx.measureText(subjName).width > 600) {
+           ctx.font = '700 16px "Inter", Arial, sans-serif';
+        }
+        ctx.fillText(`SUBJECT: ${subjName}`, canvas.width / 2, 290);
+        
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '600 16px "Inter", Arial, sans-serif';
+        ctx.fillText(`CODE : ${classObj.subjectCode}`, canvas.width / 2, 320);
+
+        // Course & Sem Badges
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(150, 350, 500, 50); 
+        
+        ctx.fillStyle = '#0ea5e9'; 
+        ctx.font = '700 18px "Inter", Arial, sans-serif';
+        ctx.fillText(`${classObj.courseName || 'Course'}  •  Semester ${classObj.semester || 'N/A'}`, canvas.width / 2, 382);
+      } else {
+        ctx.fillStyle = '#334155';
+        ctx.font = '800 28px "Inter", Arial, sans-serif';
+        let cName = adminInfo?.collegeName || 'Our College';
+        ctx.fillText(cName.toUpperCase(), canvas.width / 2, 280);
+      }
+
+      // Draw QR Code
       const img = new Image();
       const url = URL.createObjectURL(blob);
       img.onload = () => {
-        ctx.drawImage(img, 50, 50, 500, 500);
+        // QR Border
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = '#10b981';
+        const qrSize = 420;
+        const qrX = (canvas.width - qrSize) / 2;
+        const qrY = 460;
         
-        ctx.fillStyle = '#1f2937';
-        ctx.font = 'bold 24px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        const classObj = classesList.find(c => c._id === selectedClass);
-        if (classObj) {
-          ctx.fillText(`${classObj.subjectName} (${classObj.subjectCode})`, 300, 600);
-          ctx.font = 'bold 20px Inter, sans-serif';
-          ctx.fillStyle = '#4b5563';
-          ctx.fillText(`${classObj.courseName} • Sem ${classObj.semester}`, 300, 635);
-          ctx.font = '16px Inter, sans-serif';
-          ctx.fillStyle = '#6b7280';
-          ctx.fillText(`Scan Daily for Attendance`, 300, 665);
-        } else {
-          ctx.fillText(`Daily Attendance QR Code`, 300, 600);
-        }
+        // Rounded rect for QR border
+        ctx.beginPath();
+        ctx.roundRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40, 20);
+        ctx.stroke();
         
-        const finalUrl = canvas.toDataURL('image/png');
+        // Draw QR
+        ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
+        
+        // Footer Note
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '500 16px "Inter", Arial, sans-serif';
+        ctx.fillText('Powered by College ERP', canvas.width / 2, 980);
+        
+        // Download logic
+        const finalUrl = canvas.toDataURL('image/png', 1.0);
         const link = document.createElement('a');
         link.href = finalUrl;
-        link.download = `Class_Attendance_QR_${selectedClass}.png`;
+        link.download = `Class_Attendance_QR_${classObj?.subjectCode || selectedClass}.png`;
         link.click();
         URL.revokeObjectURL(url);
-        toast.success('QR Code downloaded successfully!');
+        toast.success('Premium QR Code downloaded successfully!');
       };
       img.src = url;
     } catch (error) {
       toast.error('Failed to download QR code');
+      console.error(error);
     }
   };
 

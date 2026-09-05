@@ -160,6 +160,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         { name: 'Hostel Reports', icon: PieChart, path: '/hostel-warden/reports' },
       ]
     },
+    /*
     {
       name: 'Security',
       items: [
@@ -173,6 +174,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         { name: 'Security Reports', icon: PieChart, path: '/security/reports' },
       ]
     },
+    */
     {
       name: 'Student Portal',
       items: [

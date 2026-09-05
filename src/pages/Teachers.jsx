@@ -191,22 +191,48 @@ const Teachers = () => {
 
   const handleAssignClick = async (teacher) => {
     setAllocatingTeacher(teacher);
-    setAssignFormData({ teacher: teacher._id, department: teacher.department });
     setShowAssignModal(true);
+    setAssignLoading(false);
     
-    // Fetch academic options if not already loaded
+    // Always fetch fresh academic options
     try {
-      if (courses.length === 0) {
-        const [cRes, sRes, subRes] = await Promise.all([
-          axiosInstance.get('/academics/courses'),
-          axiosInstance.get('/academics/semesters'),
-          axiosInstance.get('/academics/subjects')
-        ]);
-        setCourses(Array.isArray(cRes.data) ? cRes.data : []);
-        setSemesters(Array.isArray(sRes.data) ? sRes.data : []);
-        setSubjects(Array.isArray(subRes.data) ? subRes.data : []);
-      }
+      const [deptRes, cRes, sRes, subRes] = await Promise.all([
+        axiosInstance.get('/academics/departments'),
+        axiosInstance.get('/academics/courses'),
+        axiosInstance.get('/academics/semesters'),
+        axiosInstance.get('/academics/subjects')
+      ]);
+
+      const depts = Array.isArray(deptRes.data) ? deptRes.data : (deptRes.data?.data || []);
+      const crs = Array.isArray(cRes.data) ? cRes.data : (cRes.data?.data || []);
+      const sems = Array.isArray(sRes.data) ? sRes.data : (sRes.data?.data || []);
+      const subs = Array.isArray(subRes.data) ? subRes.data : (subRes.data?.data || []);
+
+      setDepartments(depts);
+      setCourses(crs);
+      setSemesters(sems);
+      setSubjects(subs);
+
+      // Smart match teacher's department with available departments or courses
+      const teacherDept = teacher.department || '';
+      const matchedDept = depts.find(d => d.name?.toLowerCase() === teacherDept.toLowerCase());
+      const matchedCourse = crs.find(c => 
+        c.name?.toLowerCase() === teacherDept.toLowerCase() ||
+        c.department?.toLowerCase() === teacherDept.toLowerCase()
+      );
+
+      const defaultDept = matchedDept ? matchedDept.name : (matchedCourse ? matchedCourse.department : '');
+      const defaultCourse = matchedCourse ? matchedCourse._id : (crs.length === 1 ? crs[0]._id : '');
+
+      setAssignFormData({
+        teacher: teacher._id,
+        department: defaultDept,
+        course: defaultCourse,
+        semester: '',
+        subject: ''
+      });
     } catch (error) {
+      console.error('Error fetching academic data:', error);
       toast.error('Failed to load academic data');
     }
   };
@@ -219,8 +245,14 @@ const Teachers = () => {
     }
     setAssignLoading(true);
     try {
-      await axiosInstance.post('/academics/allocations', assignFormData);
-      toast.success(`Subject successfully assigned to ${allocatingTeacher.name}`);
+      const res = await axiosInstance.post('/academics/allocations', {
+        teacher: allocatingTeacher._id,
+        course: assignFormData.course,
+        semester: parseInt(assignFormData.semester, 10),
+        subject: assignFormData.subject,
+        status: 'Active'
+      });
+      toast.success(res.data?.message || `Subject successfully assigned to ${allocatingTeacher.name}`);
       setShowAssignModal(false);
       setAssignFormData({});
     } catch (error) {
@@ -533,45 +565,6 @@ const Teachers = () => {
 
                   <div>
                     <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                      Date of Joining<span className="text-red-500">*</span>
-                    </label>
-                    <input 
-                      type="date" 
-                      value={formData.dateOfJoining ? formData.dateOfJoining.split('T')[0] : ''}
-                      onChange={(e) => handleInputChange('dateOfJoining', e.target.value)}
-                      required
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                      Employee ID
-                    </label>
-                    <input 
-                      type="text" 
-                      placeholder="Auto-generated"
-                      value={formData.empId || ''}
-                      disabled
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-500 bg-gray-50 focus:outline-none disabled:cursor-not-allowed"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                      Pay Scale / Grade
-                    </label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. Level 10"
-                      value={formData.payScale || ''}
-                      onChange={(e) => handleInputChange('payScale', e.target.value)}
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-[13px] text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">
                       Status
                     </label>
                     <select 
@@ -642,17 +635,18 @@ const Teachers = () => {
                   </div>
 
                   {/* Send to email checkbox (future feature) */}
-                  <div className="flex items-center gap-2 pt-2">
+                  {/* <div className="flex items-center gap-2 pt-2">
                     <input 
                       type="checkbox" 
                       id="sendCredentials"
                       disabled
                       className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary disabled:cursor-not-allowed"
-                    />
-                    <label htmlFor="sendCredentials" className="text-[13px] text-gray-500">
+                    /> */}
+                    {/* <label htmlFor="sendCredentials" className="text-[13px] text-gray-500">
                       Send credentials to email (Coming soon)
-                    </label>
-                  </div>
+                    </label> */}
+                  {/* </div>
+                   */}
 
                   {/* Info message */}
                   <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
@@ -1151,81 +1145,133 @@ const Teachers = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Department</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Department / Course Type</label>
                 <select 
                   value={assignFormData.department || ''}
-                  onChange={(e) => setAssignFormData({ ...assignFormData, department: e.target.value, course: '', semester: '', subject: '' })}
-                  required
+                  onChange={(e) => setAssignFormData(prev => ({ 
+                    ...prev, 
+                    department: e.target.value, 
+                    course: '', 
+                    semester: '', 
+                    subject: '' 
+                  }))}
                   className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary appearance-none bg-white"
                 >
-                  <option value="">Select Department</option>
+                  <option value="">All Departments (Show All Branches)</option>
                   {departments.map(d => (
-                    <option key={d.name} value={d.name}>{d.name}</option>
+                    <option key={d._id || d.name} value={d.name}>{d.name}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Branch</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Branch<span className="text-red-500">*</span>
+                </label>
                 <select 
                   value={assignFormData.course || ''}
-                  onChange={(e) => setAssignFormData({ ...assignFormData, course: e.target.value, semester: '', subject: '' })}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    const crsObj = courses.find(c => c._id === selectedId);
+                    setAssignFormData(prev => ({
+                      ...prev,
+                      course: selectedId,
+                      department: crsObj?.department || prev.department,
+                      semester: '',
+                      subject: ''
+                    }));
+                  }}
                   required
                   className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary appearance-none bg-white"
                 >
                   <option value="">Select Branch</option>
                   {courses
-                    .filter(c => !assignFormData.department || c.department === assignFormData.department)
+                    .filter(c => !assignFormData.department || c.department?.toLowerCase() === assignFormData.department?.toLowerCase())
                     .map(c => (
-                      <option key={c._id} value={c._id}>{c.name}</option>
+                      <option key={c._id} value={c._id}>
+                        {c.name} {c.department ? `(${c.department})` : ''}
+                      </option>
                     ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Semester</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Semester<span className="text-red-500">*</span>
+                </label>
                 <select 
                   value={assignFormData.semester || ''}
-                  onChange={(e) => setAssignFormData({ ...assignFormData, semester: e.target.value, subject: '' })}
+                  onChange={(e) => setAssignFormData(prev => ({ ...prev, semester: e.target.value, subject: '' }))}
                   required
                   className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary appearance-none bg-white"
                 >
                   <option value="">Select Semester</option>
-                  {semesters
-                    .filter(s => {
-                      if (!assignFormData.course) return true;
-                      const selectedCourse = courses.find(c => c._id === assignFormData.course);
-                      return selectedCourse && s.courseName === selectedCourse.name;
-                    })
-                    .map(s => (
-                      <option key={s.semesterNumber} value={s.semesterNumber}>Semester {s.semesterNumber}</option>
-                    ))}
+                  {(() => {
+                    const selectedCrs = courses.find(c => c._id === assignFormData.course);
+                    const maxSems = selectedCrs?.totalSemesters || 8;
+                    const semNumbers = Array.from(new Set([
+                      ...semesters.map(s => Number(s.semesterNumber)).filter(n => !isNaN(n) && n > 0),
+                      ...Array.from({ length: maxSems }, (_, i) => i + 1)
+                    ])).sort((a, b) => a - b);
+
+                    return semNumbers.map(num => (
+                      <option key={num} value={num}>Semester {num}</option>
+                    ));
+                  })()}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Subject</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Subject<span className="text-red-500">*</span>
+                </label>
                 <select 
                   value={assignFormData.subject || ''}
-                  onChange={(e) => setAssignFormData({ ...assignFormData, subject: e.target.value })}
+                  onChange={(e) => setAssignFormData(prev => ({ ...prev, subject: e.target.value }))}
                   required
                   className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary appearance-none bg-white"
                 >
                   <option value="">Select Subject</option>
-                  {subjects
-                    .filter(s => {
-                      if (assignFormData.department && s.department !== assignFormData.department) return false;
-                      if (assignFormData.course) {
-                        const selectedCourse = courses.find(c => c._id === assignFormData.course);
-                        if (selectedCourse && s.courseName !== selectedCourse.name) return false;
+                  {(() => {
+                    const selectedCrs = courses.find(c => c._id === assignFormData.course);
+                    const selectedSem = assignFormData.semester ? parseInt(assignFormData.semester, 10) : null;
+
+                    const filteredSubjects = subjects.filter(s => {
+                      if (selectedCrs) {
+                        const nameMatches = s.courseName?.toLowerCase() === selectedCrs.name?.toLowerCase();
+                        if (!nameMatches && s.courseName) return false;
                       }
-                      if (assignFormData.semester && s.semester !== parseInt(assignFormData.semester)) return false;
+                      if (selectedSem !== null && !isNaN(selectedSem) && s.semester) {
+                        if (s.semester !== selectedSem) return false;
+                      }
                       return true;
-                    })
-                    .map(s => (
-                      <option key={s._id} value={s._id}>{s.name}</option>
-                    ))}
+                    });
+
+                    return filteredSubjects.map(s => (
+                      <option key={s._id} value={s._id}>
+                        {s.name} {s.code ? `(${s.code})` : ''} - Sem {s.semester}
+                      </option>
+                    ));
+                  })()}
                 </select>
+                {assignFormData.course && (() => {
+                  const selectedCrs = courses.find(c => c._id === assignFormData.course);
+                  const selectedSem = assignFormData.semester ? parseInt(assignFormData.semester, 10) : null;
+                  const matchingCount = subjects.filter(s => {
+                    if (selectedCrs && s.courseName && s.courseName.toLowerCase() !== selectedCrs.name.toLowerCase()) return false;
+                    if (selectedSem !== null && s.semester && s.semester !== selectedSem) return false;
+                    return true;
+                  }).length;
+
+                  if (matchingCount === 0 && subjects.length > 0) {
+                    return (
+                      <p className="text-[11px] text-amber-600 mt-1">
+                        Notice: No subjects found specifically for {selectedCrs?.name} Sem {selectedSem || '...'}. You can add subjects in Academics &gt; Subjects.
+                      </p>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
               <div className="pt-3 flex justify-end gap-3 mt-4">

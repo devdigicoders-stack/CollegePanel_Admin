@@ -84,7 +84,7 @@ const StudyMaterials = () => {
       }
 
       // Submit data
-      const payload = { ...formData, fileUrl: finalFileUrl };
+      const payload = { ...formData, course: formData.course, branch: formData.course, fileUrl: finalFileUrl };
       await axiosInstance.post('/study-materials', payload);
       
       toast.success('Study Material added successfully');
@@ -160,7 +160,7 @@ const StudyMaterials = () => {
                 </div>
               </div>
               <div className="space-y-2 text-[12px] text-gray-600">
-                <p><span className="font-semibold text-gray-700">Course:</span> {mat.course}</p>
+                <p><span className="font-semibold text-gray-700">Branch:</span> {mat.branch || mat.course}</p>
                 <p><span className="font-semibold text-gray-700">Subject:</span> {mat.subject}</p>
               </div>
               <div className="mt-4 pt-4 border-t border-gray-50">
@@ -194,10 +194,10 @@ const StudyMaterials = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1">Course/Branch</label>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1">Branch *</label>
                   <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                     value={formData.course} onChange={e => setFormData({...formData, course: e.target.value})}>
-                    <option value="">Select Course</option>
+                    <option value="">Select Branch</option>
                     {courses.map(c => (
                       <option key={c._id} value={c.name}>{c.name}</option>
                     ))}

@@ -27,64 +27,114 @@ const NewAdmission = () => {
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
-  const generateCompositeCanvas = async () => {
+  const generateCompositeCanvas = () => {
     return new Promise((resolve) => {
       const qrCanvas = document.getElementById('qr-code-canvas');
       if (!qrCanvas) return resolve(null);
-      
-      const collegeName = adminInfo?.collegeName || 'College Admission';
-      
-      // Create a new canvas
+
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      
-      // Set dimensions
-      const width = 400;
-      const height = 500;
+      // Premium Design Canvas Size
+      const width = 800;
+      const height = 1100;
       canvas.width = width;
       canvas.height = height;
       
-      // Background
-      ctx.fillStyle = '#ffffff';
+      // Soft Gradient Background
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, '#f8fafc'); 
+      gradient.addColorStop(1, '#e2e8f0'); 
+      ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
       
-      // Header: College Name
-      ctx.fillStyle = 'var(--color-primary)';
-      ctx.font = 'bold 24px Inter, Arial, sans-serif';
+      // Central White Card
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 20;
+      ctx.fillStyle = '#ffffff';
+      
+      const rectX = 50;
+      const rectY = 50;
+      const rectW = 700;
+      const rectH = 1000;
+      const radius = 30;
+      
+      ctx.beginPath();
+      ctx.moveTo(rectX + radius, rectY);
+      ctx.lineTo(rectX + rectW - radius, rectY);
+      ctx.quadraticCurveTo(rectX + rectW, rectY, rectX + rectW, rectY + radius);
+      ctx.lineTo(rectX + rectW, rectY + rectH - radius);
+      ctx.quadraticCurveTo(rectX + rectW, rectY + rectH, rectX + rectW - radius, rectY + rectH);
+      ctx.lineTo(rectX + radius, rectY + rectH);
+      ctx.quadraticCurveTo(rectX, rectY + rectH, rectX, rectY + rectH - radius);
+      ctx.lineTo(rectX, rectY + radius);
+      ctx.quadraticCurveTo(rectX, rectY, rectX + radius, rectY);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Reset shadow for text and images
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+      
+      // Header Text
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '900 42px "Inter", Arial, sans-serif';
       ctx.textAlign = 'center';
+      ctx.fillText('COLLEGE ADMISSION', width / 2, 130);
       
-      // Simple word wrap for long college names
-      const maxTextWidth = width - 40;
-      let textToPrint = collegeName;
-      if (ctx.measureText(collegeName).width > maxTextWidth) {
-         ctx.font = 'bold 20px Inter, Arial, sans-serif';
+      ctx.fillStyle = '#10b981';
+      ctx.font = '700 20px "Inter", Arial, sans-serif';
+      ctx.fillText('SCAN TO FILL ADMISSION FORM', width / 2, 170);
+      
+      // Line separator
+      ctx.beginPath();
+      ctx.moveTo(150, 210);
+      ctx.lineTo(650, 210);
+      ctx.strokeStyle = '#f1f5f9';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Details Section
+      ctx.fillStyle = '#334155';
+      ctx.font = '800 28px "Inter", Arial, sans-serif';
+      
+      let cName = adminInfo?.collegeName || 'Our College';
+      if (ctx.measureText(cName).width > 600) {
+         ctx.font = '800 22px "Inter", Arial, sans-serif';
       }
-      ctx.fillText(textToPrint, width / 2, 50);
+      ctx.fillText(cName, width / 2, 270);
       
-      // Subtitle
-      ctx.fillStyle = '#4B5563';
-      ctx.font = '16px Inter, Arial, sans-serif';
-      ctx.fillText('Student Registration Portal', width / 2, 80);
+      ctx.fillStyle = '#64748b';
+      ctx.font = '600 18px "Inter", Arial, sans-serif';
+      ctx.fillText('NEW STUDENT REGISTRATION PORTAL', width / 2, 310);
+
+      // Course & Sem Badges
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(150, 340, 500, 50); 
       
-      // Draw QR Code
-      const qrSize = 250;
+      ctx.fillStyle = '#0ea5e9'; 
+      ctx.font = '700 18px "Inter", Arial, sans-serif';
+      ctx.fillText(`Batch ${new Date().getFullYear()}-${new Date().getFullYear() + 1}  •  All Branches`, width / 2, 372);
+
+      // QR Border
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = '#10b981';
+      const qrSize = 420;
       const qrX = (width - qrSize) / 2;
-      const qrY = 110;
+      const qrY = 460;
+      
+      ctx.beginPath();
+      ctx.roundRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40, 20);
+      ctx.stroke();
+      
+      // Draw QR Code from canvas
       ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
       
-      // Footer messages
-      ctx.fillStyle = '#111827';
-      ctx.font = 'bold 20px Inter, Arial, sans-serif';
-      ctx.fillText('Scan QR Code', width / 2, 410);
-      
-      ctx.fillStyle = '#6B7280';
-      ctx.font = '15px Inter, Arial, sans-serif';
-      ctx.fillText('to open & submit your registration form', width / 2, 440);
-      
-      // Outer Border
-      ctx.strokeStyle = '#E5E7EB';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(1, 1, width - 2, height - 2);
+      // Footer Note
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '500 16px "Inter", Arial, sans-serif';
+      ctx.fillText('Powered by College ERP', width / 2, 980);
 
       resolve(canvas);
     });

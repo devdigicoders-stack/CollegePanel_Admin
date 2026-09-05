@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Edit, Trash2, ChevronRight, Plus, X, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Edit, Trash2, ChevronRight, Plus, X, AlertTriangle } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';

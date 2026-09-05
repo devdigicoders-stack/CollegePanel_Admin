@@ -15,6 +15,13 @@ const Notice = () => {
     return <AccessDenied />;
   }
   const canManageNotices = checkPermission('Manage Notices');
+
+  const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
+  const loggedInUserName = adminInfo.name || adminInfo.username || 'College Admin';
+  const loggedInUserRole = adminInfo.designation === 'HOD'
+    ? 'HOD'
+    : (adminInfo.role === 'college_admin' ? 'College Admin' : (adminInfo.role === 'Teacher Role' ? 'Teacher' : (adminInfo.role || 'College Admin')));
+
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 1 });
@@ -27,10 +34,10 @@ const Notice = () => {
     noticeId: '',
     title: '',
     targetAudience: 'All Students',
-    postedBy: '',
-    postedByRole: 'Admin',
+    postedBy: loggedInUserName,
+    postedByRole: loggedInUserRole,
     department: '',
-    dateOfPublishing: '',
+    dateOfPublishing: new Date().toISOString().split('T')[0],
     details: '',
     status: 'Published',
     pdfs: [],
@@ -111,10 +118,10 @@ const Notice = () => {
       noticeId: '',
       title: '',
       targetAudience: 'All Students',
-      postedBy: '',
-      postedByRole: 'Admin',
+      postedBy: loggedInUserName,
+      postedByRole: loggedInUserRole,
       department: '',
-      dateOfPublishing: '',
+      dateOfPublishing: new Date().toISOString().split('T')[0],
       details: '',
       status: 'Published',
       pdfs: [],
@@ -135,10 +142,10 @@ const Notice = () => {
       noticeId: notice.noticeId || '',
       title: notice.title || '',
       targetAudience: notice.targetAudience || 'All Students',
-      postedBy: notice.postedBy || '',
-      postedByRole: notice.postedByRole || 'Admin',
+      postedBy: notice.postedBy || loggedInUserName,
+      postedByRole: notice.postedByRole || loggedInUserRole,
       department: notice.department || '',
-      dateOfPublishing: notice.dateOfPublishing ? notice.dateOfPublishing.split('T')[0] : '',
+      dateOfPublishing: notice.dateOfPublishing ? notice.dateOfPublishing.split('T')[0] : new Date().toISOString().split('T')[0],
       details: notice.details || '',
       status: notice.status || 'Published',
       pdfs: notice.pdfs || [],
@@ -176,22 +183,22 @@ const Notice = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.title || !formData.details || !formData.dateOfPublishing) {
-      toast.error('Please fill all required fields');
+    if (!formData.title?.trim() || !formData.details?.trim()) {
+      toast.error('Please enter notice title and details');
       return;
     }
     setFormLoading(true);
     try {
       const payload = new FormData();
-      payload.append('noticeId', formData.noticeId || `NOT-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`);
-      payload.append('title', formData.title);
+      payload.append('noticeId', formData.noticeId || `NOT-${Date.now().toString().slice(-6)}`);
+      payload.append('title', formData.title.trim());
       payload.append('targetAudience', formData.targetAudience);
-      payload.append('postedBy', formData.postedBy);
-      payload.append('postedByRole', formData.postedByRole);
+      payload.append('postedBy', formData.postedBy || loggedInUserName);
+      payload.append('postedByRole', formData.postedByRole || loggedInUserRole);
       if (formData.department) payload.append('department', formData.department);
-      payload.append('dateOfPublishing', new Date(formData.dateOfPublishing).toISOString());
-      payload.append('details', formData.details);
-      payload.append('status', formData.status);
+      payload.append('dateOfPublishing', formData.dateOfPublishing ? new Date(formData.dateOfPublishing).toISOString() : new Date().toISOString());
+      payload.append('details', formData.details.trim());
+      payload.append('status', formData.status || 'Published');
 
       if (formData.link) payload.append('link', formData.link);
       
@@ -441,7 +448,63 @@ const Notice = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {formData.targetAudience === 'Specific Department' ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Target Audience *</label>
+                    <select
+                      value={formData.targetAudience}
+                      onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value, department: '' })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="All Students">All Students</option>
+                      <option value="All Staff">All Staff</option>
+                      <option value="All Parents">All Parents</option>
+                      <option value="Specific Department">Specific Department</option>
+                      <option value="Specific Course">Specific Course</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Select Department *</label>
+                    <select
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="">-- Select Department --</option>
+                      {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+              ) : formData.targetAudience === 'Specific Course' ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Target Audience *</label>
+                    <select
+                      value={formData.targetAudience}
+                      onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value, department: '' })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="All Students">All Students</option>
+                      <option value="All Staff">All Staff</option>
+                      <option value="All Parents">All Parents</option>
+                      <option value="Specific Department">Specific Department</option>
+                      <option value="Specific Course">Specific Course</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Select Course *</label>
+                    <select
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="">-- Select Course --</option>
+                      {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+              ) : (
                 <div>
                   <label className="block text-[13px] font-semibold text-gray-700 mb-2">Target Audience *</label>
                   <select
@@ -456,78 +519,19 @@ const Notice = () => {
                     <option value="Specific Course">Specific Course</option>
                   </select>
                 </div>
-                
-                {formData.targetAudience === 'Specific Department' ? (
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Select Department *</label>
-                    <select
-                      value={formData.department}
-                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                      <option value="">-- Select Department --</option>
-                      {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
-                    </select>
-                  </div>
-                ) : formData.targetAudience === 'Specific Course' ? (
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Select Course *</label>
-                    <select
-                      value={formData.department}
-                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                      <option value="">-- Select Course --</option>
-                      {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
-                    </select>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Posted By *</label>
-                    <input
-                      type="text"
-                      value={formData.postedBy}
-                      onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
-                      placeholder="e.g., Admin, Principal"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {(formData.targetAudience === 'Specific Department' || formData.targetAudience === 'Specific Course') && (
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Posted By *</label>
-                  <input
-                    type="text"
-                    value={formData.postedBy}
-                    onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
-                    placeholder="e.g., Admin, Principal"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Posted By Role</label>
-                  <select
-                    value={formData.postedByRole}
-                    onChange={(e) => setFormData({ ...formData, postedByRole: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                  >
-                    <option value="">-- Select Role --</option>
-                    {roles.map((r, i) => <option key={i} value={r}>{r}</option>)}
-                  </select>
+              {/* Dynamic Auto-populated Creator & Date Info */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gradient-to-r from-blue-50/70 to-indigo-50/50 border border-blue-100 rounded-xl text-xs gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-700">Posted By:</span>
+                  <span className="font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full text-[11px]">
+                    {loggedInUserName} ({loggedInUserRole})
+                  </span>
                 </div>
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Date of Publishing *</label>
-                  <input
-                    type="date"
-                    value={formData.dateOfPublishing}
-                    onChange={(e) => setFormData({ ...formData, dateOfPublishing: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
+                <div className="flex items-center gap-1.5 text-gray-600 font-medium">
+                  <span className="font-semibold text-gray-700">Publish Date:</span>
+                  <span>Today ({new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })})</span>
                 </div>
               </div>
 
@@ -637,7 +641,63 @@ const Notice = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {formData.targetAudience === 'Specific Department' ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Target Audience *</label>
+                    <select
+                      value={formData.targetAudience}
+                      onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value, department: '' })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="All Students">All Students</option>
+                      <option value="All Staff">All Staff</option>
+                      <option value="All Parents">All Parents</option>
+                      <option value="Specific Department">Specific Department</option>
+                      <option value="Specific Course">Specific Course</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Select Department *</label>
+                    <select
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="">-- Select Department --</option>
+                      {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+              ) : formData.targetAudience === 'Specific Course' ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Target Audience *</label>
+                    <select
+                      value={formData.targetAudience}
+                      onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value, department: '' })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="All Students">All Students</option>
+                      <option value="All Staff">All Staff</option>
+                      <option value="All Parents">All Parents</option>
+                      <option value="Specific Department">Specific Department</option>
+                      <option value="Specific Course">Specific Course</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Select Course *</label>
+                    <select
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="">-- Select Course --</option>
+                      {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+              ) : (
                 <div>
                   <label className="block text-[13px] font-semibold text-gray-700 mb-2">Target Audience *</label>
                   <select
@@ -652,76 +712,28 @@ const Notice = () => {
                     <option value="Specific Course">Specific Course</option>
                   </select>
                 </div>
-                
-                {formData.targetAudience === 'Specific Department' ? (
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Select Department *</label>
-                    <select
-                      value={formData.department}
-                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                      <option value="">-- Select Department --</option>
-                      {departments.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
-                    </select>
-                  </div>
-                ) : formData.targetAudience === 'Specific Course' ? (
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Select Course *</label>
-                    <select
-                      value={formData.department}
-                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                      <option value="">-- Select Course --</option>
-                      {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
-                    </select>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-[13px] font-semibold text-gray-700 mb-2">Posted By *</label>
-                    <input
-                      type="text"
-                      value={formData.postedBy}
-                      onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {(formData.targetAudience === 'Specific Department' || formData.targetAudience === 'Specific Course') && (
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Posted By *</label>
-                  <input
-                    type="text"
-                    value={formData.postedBy}
-                    onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
               )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Date of Publishing *</label>
-                  <input
-                    type="date"
-                    value={formData.dateOfPublishing}
-                    onChange={(e) => setFormData({ ...formData, dateOfPublishing: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Status</label>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-2">Notice Status</label>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                   >
-                    <option value="Draft">Draft</option>
                     <option value="Published">Published</option>
+                    <option value="Draft">Draft</option>
                   </select>
+                </div>
+                <div className="flex flex-col justify-center bg-gray-50 border border-gray-100 rounded-lg px-4 py-2">
+                  <span className="text-[11px] font-semibold text-gray-500">Posted By</span>
+                  <span className="text-[13px] font-bold text-gray-800 truncate">
+                    {formData.postedBy || 'Admin'} ({formData.postedByRole || 'Admin'})
+                  </span>
+                  <span className="text-[11px] text-gray-400">
+                    On {formatDate(formData.dateOfPublishing)}
+                  </span>
                 </div>
               </div>
 
