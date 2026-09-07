@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, Trash2, AlertTriangle } from 'lucide-react';
+import { Search, Eye, Trash2, AlertTriangle, RotateCcw } from 'lucide-react';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import { checkPermission } from '../../utils/checkPermission';
@@ -28,10 +29,39 @@ const RejectedApplications = () => {
       toast.success('Application deleted successfully');
       setShowDeleteModal(false);
       setAppToDelete(null);
+      window.dispatchEvent(new Event('admissions_updated'));
       fetchApplications();
     } catch (error) {
       console.error('Error deleting application', error);
       toast.error('Failed to delete application');
+    }
+  };
+
+  const handleRestore = async (app) => {
+    const result = await Swal.fire({
+      title: 'Restore Application?',
+      text: `Move ${app.name}'s application back to Pending status for re-evaluation?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: 'var(--color-primary)',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, Restore'
+    });
+    if (!result.isConfirmed) return;
+
+    try {
+      const token = localStorage.getItem('admin_token');
+      await axios.put(`${import.meta.env.VITE_API_URL}/admissions/${app._id}`, {
+        stage: 'Application',
+        status: 'Pending'
+      }, { headers: { Authorization: `Bearer ${token}` } });
+
+      toast.success('Application restored to pending status!');
+      window.dispatchEvent(new Event('admissions_updated'));
+      fetchApplications();
+    } catch (error) {
+      console.error('Error restoring application', error);
+      toast.error('Failed to restore application');
     }
   };
 
@@ -125,6 +155,11 @@ const RejectedApplications = () => {
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-red-100 text-red-700">
                         Rejected
                       </span>
+                      {app.remarks && (
+                        <p className="text-[11px] text-red-600 font-medium mt-1 truncate max-w-xs" title={app.remarks}>
+                          Reason: {app.remarks}
+                        </p>
+                      )}
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -134,6 +169,13 @@ const RejectedApplications = () => {
                           title="View Details"
                         >
                           <Eye size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleRestore(app)}
+                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors inline-flex"
+                          title="Restore to Pending"
+                        >
+                          <RotateCcw size={18} />
                         </button>
                         <button 
                           onClick={() => { setAppToDelete(app); setShowDeleteModal(true); }}

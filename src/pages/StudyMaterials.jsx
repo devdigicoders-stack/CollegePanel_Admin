@@ -40,6 +40,19 @@ const StudyMaterials = () => {
     }
   };
 
+  const resolveFileUrl = (url) => {
+    if (!url) return '#';
+    const baseUrl = (axiosInstance?.defaults?.baseURL || import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      if (url.includes('localhost:') && url.includes('/uploads/')) {
+        const uploadPath = url.substring(url.indexOf('/uploads/'));
+        return `${baseUrl}${uploadPath}`;
+      }
+      return url;
+    }
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
   const fetchMaterials = async () => {
     try {
       const res = await axiosInstance.get('/study-materials');
@@ -164,7 +177,7 @@ const StudyMaterials = () => {
                 <p><span className="font-semibold text-gray-700">Subject:</span> {mat.subject}</p>
               </div>
               <div className="mt-4 pt-4 border-t border-gray-50">
-                <a href={mat.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-primary text-[13px] font-semibold transition-colors">
+                <a href={resolveFileUrl(mat.fileUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-primary text-[13px] font-semibold transition-colors">
                   <LinkIcon size={14} /> View File
                 </a>
               </div>

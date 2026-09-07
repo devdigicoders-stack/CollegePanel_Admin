@@ -119,9 +119,9 @@ const Dashboard = () => {
 
   // Course-wise Bar Chart
   const courseBarChart = baseChart({
-    chart: { type: 'bar', height: 220 },
-    xAxis: { categories: (d.courseDistribution || []).map(c => c.name), lineWidth: 0, tickWidth: 0, labels: { style: { color: '#6B7280', fontSize: '11px' } } },
-    yAxis: { title: { text: '' }, gridLineDashStyle: 'Dash', gridLineColor: '#F3F4F6', labels: { style: { color: '#9CA3AF', fontSize: '11px' } } },
+    chart: { type: 'bar', height: 240 },
+    xAxis: { categories: (d.courseDistribution || []).map(c => c.name), lineWidth: 0, tickWidth: 0, labels: { style: { color: '#6B7280', fontSize: '11px', fontWeight: '500' } } },
+    yAxis: { title: { text: '' }, allowDecimals: false, gridLineDashStyle: 'Dash', gridLineColor: '#F3F4F6', labels: { style: { color: '#9CA3AF', fontSize: '11px' } } },
     plotOptions: { bar: { borderRadius: 4, colorByPoint: true, colors: CHART_COLORS, dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: '600', color: '#374151' } } } },
     series: [{ name: 'Students', data: (d.courseDistribution || []).map(c => c.count) }]
   });

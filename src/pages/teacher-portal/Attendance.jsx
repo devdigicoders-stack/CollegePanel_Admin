@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Download, CalendarCheck, Save, History, Clock, QrCode, X, MapPin, Shield, ShieldCheck, Navigation, Locate, Loader2 } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import ClassSelector from './components/ClassSelector';
 import { useSocket } from '../../context/SocketContext';
-import { useAuth } from '../../context/AuthContext';
 
 const Attendance = () => {
-  const { user: adminInfo } = useAuth();
+  const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
   const [selectedClass, setSelectedClass] = useState('');
   const [classesList, setClassesList] = useState([]);
   const [activeTab, setActiveTab] = useState('mark'); // 'mark' | 'history'
@@ -856,6 +856,68 @@ const Attendance = () => {
                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-xl font-bold text-sm transition-colors"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Teacher QR Modal */}
+      {showQRModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative text-center">
+            <div className="bg-primary p-6 text-white relative">
+              <button onClick={() => setShowQRModal(false)} className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
+                <X size={24} />
+              </button>
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <QrCode size={24} />
+                <h2 className="text-xl font-black">Class Attendance QR</h2>
+              </div>
+              <p className="text-primary-100 text-xs">Students can scan this code to mark attendance</p>
+            </div>
+
+            <div className="p-6 flex flex-col items-center">
+              <div className="bg-white p-4 rounded-2xl shadow-md border border-gray-100 mb-4">
+                <QRCodeCanvas
+                  id="teacher-qr-canvas"
+                  value={`${
+                    window.location.origin.includes('localhost')
+                      ? 'https://college-panel-admin.vercel.app'
+                      : window.location.origin
+                  }/student-portal/attendance/scan?classId=${selectedClass}`}
+                  size={200}
+                  bgColor="#ffffff"
+                  fgColor="#022a36"
+                  level="H"
+                  includeMargin={false}
+                />
+              </div>
+
+              <div className="w-full bg-gray-50 p-3.5 rounded-xl border border-gray-100 text-left space-y-1.5 text-xs mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-400 font-semibold">Subject:</span>
+                  <span className="text-gray-800 font-bold">{classesList.find(c => c._id === selectedClass)?.subjectName || 'Class'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400 font-semibold">Code:</span>
+                  <span className="text-gray-800 font-bold">{classesList.find(c => c._id === selectedClass)?.subjectCode || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400 font-semibold">Geo-fence:</span>
+                  <span className="text-gray-800 font-bold">{geoFence.isEnabled ? `Active (${geoFence.radius}m)` : 'Disabled'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400 font-semibold">Date:</span>
+                  <span className="text-gray-800 font-bold">{attendanceDate}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowQRModal(false)}
+                className="w-full bg-gray-900 hover:bg-black text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-colors"
+              >
+                Close QR Code
               </button>
             </div>
           </div>

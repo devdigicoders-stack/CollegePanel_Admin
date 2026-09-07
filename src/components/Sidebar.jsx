@@ -14,6 +14,7 @@ import {
 export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
   const location = useLocation();
   const [pendingAdmissionsCount, setPendingAdmissionsCount] = useState(0);
+  const [pendingHostelLeavesCount, setPendingHostelLeavesCount] = useState(0);
   const [unreadNotices, setUnreadNotices] = useState(0);
   const [unreadAssignments, setUnreadAssignments] = useState(0);
 
@@ -30,6 +31,20 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         console.error('Error fetching pending applications count:', error);
       }
     };
+
+    const fetchPendingHostelLeaves = async () => {
+      try {
+        const token = localStorage.getItem('admin_token');
+        if (!token) return;
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/hostel/leaves/pending-count`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setPendingHostelLeavesCount(res.data?.count || 0);
+      } catch (error) {
+        // Silently catch if not authorized or not a hostel role
+      }
+    };
+
     const fetchNoticesCount = async () => {
       try {
         const token = localStorage.getItem('admin_token');
@@ -82,17 +97,29 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
     
     // Fetch immediately
     fetchPendingAdmissions();
+    fetchPendingHostelLeaves();
     fetchNoticesCount();
     fetchStudentStats();
+
+    // Listen for custom update events
+    const handleLeaveUpdate = () => fetchPendingHostelLeaves();
+    const handleAdmissionUpdate = () => fetchPendingAdmissions();
+    window.addEventListener('hostel_leave_updated', handleLeaveUpdate);
+    window.addEventListener('admissions_updated', handleAdmissionUpdate);
     
     // Set up an interval to check periodically
     const intervalId = setInterval(() => {
       fetchPendingAdmissions();
+      fetchPendingHostelLeaves();
       fetchNoticesCount();
       fetchStudentStats();
     }, 3000);
     
-    return () => clearInterval(intervalId);
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('hostel_leave_updated', handleLeaveUpdate);
+      window.removeEventListener('admissions_updated', handleAdmissionUpdate);
+    };
   }, [location.pathname]);
 
   const menuGroups = [
@@ -152,7 +179,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         { name: 'Assets & Inventory', icon: ShoppingCart, path: '/hostel-warden/inventory' },
         { name: 'Student Allotment', icon: UserPlus, path: '/hostel-warden/allotment' },
         { name: 'Check-In/Out', icon: RotateCcw, path: '/hostel-warden/check-in-out' },
-        { name: 'Leave & Outing', icon: ClipboardList, path: '/hostel-warden/leave-outing' },
+        { name: 'Leave & Outing', icon: ClipboardList, path: '/hostel-warden/leave-outing', badge: pendingHostelLeavesCount },
         { name: 'Visitors Gate', icon: Users, path: '/hostel-warden/visitors' },
         { name: 'Room Complaints', icon: AlertCircle, path: '/hostel-warden/complaints' },
         { name: 'Discipline Incidents', icon: ShieldAlert, path: '/hostel-warden/incidents' },
@@ -223,24 +250,24 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
     '/employees': ['View Employees', 'Add Employee', 'Edit Employee'],
     '/roles': ['Manage Roles', 'Manage Permissions'],
     '/notice': ['View Notices', 'Manage Notices'],
-    '/complaints': ['View Students', 'View Employees'],
+    '/complaints': ['View Complaints', 'Manage Complaints', 'View Students', 'View Employees'],
     '/library/dashboard': ['View Books'],
     '/library/books': ['View Books', 'Add Book', 'Edit Book'],
     '/library/issue-return': ['Issue Book', 'Return Book'],
-    '/library/fines': ['Issue Book', 'Return Book'],
+    '/library/fines': ['Issue Book', 'Return Book', 'Collect Fine'],
     '/library/lost-damaged': ['View Books', 'Edit Book'],
-    '/library/reports': ['View Books'],
+    '/library/reports': ['View Books', 'View All Reports'],
     '/hostel-warden/dashboard': ['View Hostels'],
     '/hostel-warden/rooms': ['Manage Rooms'],
     '/hostel-warden/allotment': ['Manage Allocations'],
     '/hostel-warden/check-in-out': ['View Hostels', 'Manage Allocations'],
     '/hostel-warden/attendance': ['View Hostels'],
-    '/hostel-warden/leave-outing': ['View Hostels'],
+    '/hostel-warden/leave-outing': ['View Hostels', 'Approve Leave Outing'],
     '/hostel-warden/visitors': ['View Hostels'],
-    '/hostel-warden/complaints': ['View Hostels'],
+    '/hostel-warden/complaints': ['View Hostels', 'View Complaints'],
     '/hostel-warden/incidents': ['View Hostels'],
-    '/hostel-warden/inventory': ['Manage Rooms'],
-    '/hostel-warden/notices': ['View Hostels'],
+    '/hostel-warden/inventory': ['Manage Rooms', 'Manage Hostel Inventory'],
+    '/hostel-warden/notices': ['View Hostels', 'Add Hostel Notice'],
     '/hostel-warden/reports': ['View Hostel Reports'],
     '/security/dashboard': ['View Security Dashboard'],
     '/security/movement': ['Log Student Entry/Exit'],
@@ -269,8 +296,8 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
     'Main': ['View Dashboard', 'View Analytics'],
     'Admissions': ['View Admissions', 'Add Admission', 'Edit Admission', 'Delete Admission', 'Approve Admission'],
     'Academic': ['View Students', 'Add Student', 'Edit Student', 'Delete Student', 'View Teachers', 'Add Teacher', 'Edit Teacher', 'View Courses', 'Manage Courses', 'View Departments', 'View Subjects', 'View Sections', 'Enter Marks', 'View Results'],
-    'HR & Admin': ['View Employees', 'Add Employee', 'Edit Employee', 'Delete Employee', 'Manage Roles', 'Manage Permissions', 'View Notices', 'Manage Notices'],
-    'Library': ['View Books', 'Add Book', 'Edit Book', 'Delete Book', 'Issue Book', 'Return Book'],
+    'HR & Admin': ['View Employees', 'Add Employee', 'Edit Employee', 'Delete Employee', 'Manage Roles', 'Manage Permissions', 'View Notices', 'Manage Notices', 'View Complaints', 'Manage Complaints'],
+    'Library': ['View Books', 'Add Book', 'Edit Book', 'Delete Book', 'Issue Book', 'Return Book', 'Collect Fine'],
     'Hostel': ['View Hostels', 'Manage Rooms', 'Manage Allocations', 'View Hostel Reports'],
     'Security': ['View Security Dashboard', 'Log Student Entry/Exit', 'Scan Gate Pass', 'Log Vehicle Registry', 'Log Security Incident'],
     'Student Portal': ['View Portal Dashboard', 'Submit Course Assignments', 'View Semester Results', 'Apply For Outings'],
@@ -278,17 +305,47 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
   };
 
   const filteredMenuGroups = menuGroups.map(group => {
-    if (userRole === 'college_admin' || userRole === 'Principal') {
-      // Admin sees everything EXCEPT portal specific views
+    const roleLower = (userRole || '').toLowerCase();
+
+    // 1. Student strictly sees only Student Portal
+    if (roleLower === 'student') {
+      return group.name === 'Student Portal' ? group : null;
+    }
+
+    // 2. Teacher strictly sees only Teacher Portal
+    if (roleLower === 'teacher' || roleLower === 'teacher role') {
+      return group.name === 'Teacher Portal' ? group : null;
+    }
+
+    // 3. Hostel Warden strictly sees only Hostel
+    if (roleLower === 'hostel' || roleLower.includes('warden')) {
+      return group.name === 'Hostel' ? group : null;
+    }
+
+    // 4. Librarian strictly sees only Library
+    if (roleLower === 'librarian') {
+      return group.name === 'Library' ? group : null;
+    }
+
+    // 5. HOD strictly sees Academic, Main Dashboard, Notices, and Reports
+    if (roleLower === 'hod' || adminInfo.designation === 'HOD') {
+      if (group.name === 'Main' || group.name === 'Academic' || group.name === 'Reports') {
+        return group;
+      }
+      if (group.name === 'HR & Admin') {
+        const hodHRItems = group.items.filter(item => item.path === '/notice');
+        return hodHRItems.length > 0 ? { ...group, items: hodHRItems } : null;
+      }
+      return null;
+    }
+
+    // 6. College Admin / Principal sees all admin groups
+    if (userRole === 'college_admin' || userRole === 'Principal' || userRole === 'Super Admin') {
       if (group.name === 'Student Portal' || group.name === 'Teacher Portal') return null;
       return group;
     }
-    if (userRole === 'Student') {
-      return group.name === 'Student Portal' ? group : null;
-    }
-    if (userRole === 'Teacher Role') {
-      return group.name === 'Teacher Portal' ? group : null;
-    }
+
+    // 7. Custom role filters based on permissions
     const categoryPermissions = groupPermissionCategories[group.name];
     if (categoryPermissions) {
       const hasPermission = categoryPermissions.some(p => userPermissions.includes(p));

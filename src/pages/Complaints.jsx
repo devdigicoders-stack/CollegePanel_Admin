@@ -7,7 +7,7 @@ import { checkPermission } from '../utils/checkPermission';
 import AccessDenied from '../components/AccessDenied';
 
 const Complaints = () => {
-  if (!checkPermission('View Students') && !checkPermission('View Employees')) {
+  if (!checkPermission('View Complaints') && !checkPermission('Manage Complaints') && !checkPermission('View Students') && !checkPermission('View Employees')) {
     return <AccessDenied />;
   }
   const [complaints, setComplaints] = useState([]);
@@ -23,8 +23,6 @@ const Complaints = () => {
     priority: 'All',
     search: ''
   });
-  const [filterDepartment, setFilterDepartment] = useState('All');
-  const [filterAudience, setFilterAudience] = useState('All Audiences');
   const [adminReplyText, setAdminReplyText] = useState('');
   const searchTimeout = useRef(null);
 
@@ -70,7 +68,7 @@ const Complaints = () => {
 
   const handleViewComplaint = (complaint) => {
     setSelectedComplaint(complaint);
-    setAdminReplyText('');
+    setAdminReplyText(complaint.adminReply || '');
     setShowViewModal(true);
   };
 
@@ -78,7 +76,9 @@ const Complaints = () => {
     try {
       await axiosInstance.put(`/complaints/${complaintId}`, { status: newStatus });
       toast.success('Complaint status updated');
-      setShowViewModal(false);
+      if (selectedComplaint && selectedComplaint._id === complaintId) {
+        setSelectedComplaint(prev => ({ ...prev, status: newStatus }));
+      }
       fetchComplaints();
     } catch (error) {
       toast.error('Failed to update status');
@@ -92,6 +92,9 @@ const Complaints = () => {
       toast.success('Complaint deleted successfully');
       setShowDeleteModal(false);
       setDeleteTarget(null);
+      if (selectedComplaint && selectedComplaint._id === deleteTarget._id) {
+        setSelectedComplaint(null);
+      }
       fetchComplaints();
     } catch (error) {
       toast.error('Failed to delete complaint');
@@ -101,12 +104,13 @@ const Complaints = () => {
   const handleAdminReply = async () => {
     if (!selectedComplaint) return;
     try {
+      const reply = adminReplyText || 'Your complaint has been reviewed and resolved.';
       await axiosInstance.put(`/complaints/${selectedComplaint._id}`, {
         status: 'Resolved',
-        adminReply: adminReplyText || 'Your complaint has been reviewed and resolved.'
+        adminReply: reply
       });
       toast.success('Complaint resolved successfully');
-      setShowViewModal(false);
+      setSelectedComplaint(prev => ({ ...prev, status: 'Resolved', adminReply: reply }));
       fetchComplaints();
     } catch (error) {
       toast.error('Failed to update complaint');

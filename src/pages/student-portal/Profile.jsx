@@ -31,7 +31,7 @@ const Profile = () => {
         name: data.studentName || '',
         enrollNo: data.studentId || '',
         branch: data.branch || '',
-        semester: data.course || '',
+        semester: data.semester || data.year || data.course || '',
         mobile: data.phone || '',
         email: data.email || '',
         bloodGroup: data.bloodGroup || '',

@@ -41,12 +41,22 @@
   --color-accent: #FB7185;
 }
 
-[data-theme="hostel_warden"] {
-  /* Premium Amber Theme */
+[data-theme="hostel_warden"],
+[data-theme="hostel"] {
+  /* Premium Warm Sunset & Obsidian Theme for Hostel */
   --color-primary: #EA580C;
   --color-primary-hover: #C2410C;
-  --color-sidebar: #431407;
-  --color-accent: #FBBF24;
+  --color-sidebar: #1C1917;
+  --color-accent: #FB923C;
+}
+
+[data-theme="library"],
+[data-theme="librarian"] {
+  /* Premium Academic Burgundy & Wine Theme for Library */
+  --color-primary: #9F1239;
+  --color-primary-hover: #881337;
+  --color-sidebar: #220611;
+  --color-accent: #FDA4AF;
 }
 
 @layer base {

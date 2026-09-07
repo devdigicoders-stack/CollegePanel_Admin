@@ -93,10 +93,14 @@ const LostDamaged = () => {
       setIsSubmitting(true);
       await axiosInstance.post('/library/lost-damaged', {
         bookId: selectedBook._id,
+        accessionNo: selectedBook.accessionNo,
+        bookTitle: selectedBook.title,
+        reportedBy: selectedMember.name || 'Student',
         memberId: selectedMember._id,
+        memberType: selectedMember.type || 'Student',
         type: formData.type,
-        cost: formData.cost,
-        penalty: formData.penalty,
+        cost: Number(formData.cost) || 0,
+        penalty: Number(formData.penalty) || 0,
         status: formData.status
       });
       toast.success('Case reported successfully');
@@ -107,7 +111,8 @@ const LostDamaged = () => {
       setMemberSearch('');
       fetchCases();
     } catch (error) {
-      toast.error('Failed to report case');
+      console.error('Report error:', error);
+      toast.error(error.response?.data?.error || error.response?.data?.message || 'Failed to report case');
     } finally {
       setIsSubmitting(false);
     }

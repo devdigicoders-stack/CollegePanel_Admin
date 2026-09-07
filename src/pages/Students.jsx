@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
   Search, ChevronDown, Eye, ChevronLeft, ChevronRight, Plus, X, 
-  Edit2, Trash2, AlertTriangle} from 'lucide-react';
+  Edit2, Trash2, AlertTriangle, Copy } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { checkPermission } from '../utils/checkPermission';
 import * as XLSX from 'xlsx';
@@ -142,15 +143,62 @@ const Students = () => {
     setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
   };
 
+  const copyToClipboard = (text) => {
+    if (!navigator.clipboard) {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      toast.success('Credentials copied to clipboard!');
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success('Credentials copied to clipboard!');
+    }).catch(() => {
+      toast.error('Failed to copy credentials');
+    });
+  };
+
   const handleSaveStudent = async (e) => {
     e.preventDefault();
     try {
       setSaving(true);
-      await axiosInstance.post('/students', formData);
+      const res = await axiosInstance.post('/students', formData);
       toast.success('Student added successfully!');
       setIsAddPanelOpen(false);
+      const studentNameSaved = formData.studentName;
       setFormData(initialFormState);
       fetchStudents();
+
+      if (res.data?.credentials) {
+        const creds = res.data.credentials;
+        const portalUrl = `${window.location.origin}/`;
+        Swal.fire({
+          title: 'Student Added Successfully!',
+          html: `
+            <div style="text-align: left; background: #f8fafc; padding: 16px; border-radius: 12px; font-family: monospace; font-size: 13px; border: 1px solid #e2e8f0;">
+              <p style="margin: 4px 0;"><strong>Student Name:</strong> ${studentNameSaved}</p>
+              <p style="margin: 4px 0;"><strong>Student ID:</strong> <span style="color: #0d9488;">${creds.studentId}</span></p>
+              <p style="margin: 4px 0;"><strong>Username:</strong> <span style="color: #2563eb;">${creds.username}</span></p>
+              <p style="margin: 4px 0;"><strong>Password:</strong> <span style="color: #ea580c;">${creds.password}</span></p>
+              <p style="margin: 4px 0;"><strong>Portal URL:</strong> <a href="${portalUrl}" target="_blank" style="color: #64748b; text-decoration: underline;">${portalUrl}</a></p>
+            </div>
+            <p style="font-size: 12px; color: #64748b; margin-top: 12px;">Please share these login credentials with the student.</p>
+          `,
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonText: 'Copy Credentials',
+          cancelButtonText: 'Close',
+          confirmButtonColor: 'var(--color-primary, #022a36)'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const textToCopy = `Login Details for ${studentNameSaved}\nStudent ID: ${creds.studentId}\nUsername: ${creds.username}\nPassword: ${creds.password}\nPortal URL: ${portalUrl}`;
+            copyToClipboard(textToCopy);
+          }
+        });
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to save student');
     } finally {
@@ -501,6 +549,17 @@ const Students = () => {
                           title="View"
                         >
                           <Eye size={18} strokeWidth={2} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            const portalUrl = `${window.location.origin}/`;
+                            const creds = `Login Details for ${row.studentName}\nStudent ID: ${row.studentId}\nUsername: ${row.username || row.email}\nPassword: ${row.password || 'Student@123'}\nPortal URL: ${portalUrl}`;
+                            copyToClipboard(creds);
+                          }}
+                          className="text-gray-400 hover:text-blue-500 transition-colors p-1"
+                          title="Copy Credentials"
+                        >
+                          <Copy size={18} strokeWidth={2} />
                         </button>
                         {checkPermission('Edit Student') && (
                           <button

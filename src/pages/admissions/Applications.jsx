@@ -75,6 +75,7 @@ const Applications = () => {
 
       toast.success('Application approved and student registered successfully!');
       setShowViewModal(false);
+      window.dispatchEvent(new Event('admissions_updated'));
       fetchApplications(); // Refresh list to remove approved one
     } catch (error) {
       console.error(error);
@@ -87,25 +88,39 @@ const Applications = () => {
   const handleReject = async (appId) => {
     const result = await Swal.fire({
       title: 'Reject Application?',
-      text: 'Are you sure you want to reject this application?',
+      text: 'Please enter the reason for rejecting this application:',
+      input: 'textarea',
+      inputPlaceholder: 'e.g. Ineligible criteria, Missing marksheet, Wrong document format...',
+      inputAttributes: {
+        'aria-label': 'Reason for rejection'
+      },
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#6B7280',
-      confirmButtonText: 'Yes, Reject'
+      confirmButtonText: 'Yes, Reject',
+      inputValidator: (value) => {
+        if (!value || !value.trim()) {
+          return 'Please provide a reason for rejecting!';
+        }
+      }
     });
     if (!result.isConfirmed) return;
+    const reason = result.value;
+
     try {
       setActionLoading(true);
       const token = localStorage.getItem('admin_token');
       
       await axios.put(`${import.meta.env.VITE_API_URL}/admissions/${appId}`, {
         stage: 'Cancelled',
-        status: 'Rejected'
+        status: 'Rejected',
+        remarks: reason
       }, { headers: { Authorization: `Bearer ${token}` } });
 
       toast.success('Application rejected');
       setShowViewModal(false);
+      window.dispatchEvent(new Event('admissions_updated'));
       fetchApplications(); // Refresh list to remove rejected one
     } catch (error) {
       console.error(error);

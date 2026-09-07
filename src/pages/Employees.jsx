@@ -4,9 +4,20 @@ import axiosInstance from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { checkPermission } from '../utils/checkPermission';
+import AccessDenied from '../components/AccessDenied';
 import Swal from 'sweetalert2';
 
+const resolveImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const baseUrl = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 const Employees = () => {
+  if (!checkPermission('View Employees') && !checkPermission('Manage Employees')) {
+    return <AccessDenied />;
+  }
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -313,7 +324,22 @@ const Employees = () => {
                 <tr key={employee._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-semibold">{(pagination.page - 1) * pagination.limit + index + 1}</td>
                   <td className="py-4 px-6 text-[13px] font-semibold text-primary">{employee.empId}</td>
-                  <td className="py-4 px-6 text-[13px] text-gray-800 font-medium whitespace-nowrap">{employee.name}</td>
+                  <td className="py-4 px-6 text-[13px] text-gray-800 font-medium whitespace-nowrap">
+                    <div className="flex items-center gap-3">
+                      {employee.profilePhoto ? (
+                        <img 
+                          src={resolveImageUrl(employee.profilePhoto)} 
+                          alt={employee.name} 
+                          className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                          {employee.name ? employee.name.charAt(0).toUpperCase() : 'E'}
+                        </div>
+                      )}
+                      <span>{employee.name}</span>
+                    </div>
+                  </td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 font-medium whitespace-nowrap">{employee.role}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{employee.department}</td>
                   <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{employee.mobile}</td>
@@ -324,6 +350,17 @@ const Employees = () => {
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+                      <button 
+                        onClick={() => {
+                          const text = `Login Credentials for ${employee.name}:\nRole: ${employee.role}\nUsername: ${employee.username || employee.email}\nPassword: ${employee.password || 'N/A'}\nPortal: ${window.location.origin}`;
+                          navigator.clipboard.writeText(text);
+                          toast.success('Credentials copied to clipboard!');
+                        }}
+                        className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors shadow-sm flex-shrink-0"
+                        title="Copy Credentials"
+                      >
+                        <Copy size={14} strokeWidth={2} />
+                      </button>
                       <button 
                         onClick={() => handleViewClick(employee)}
                         className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm flex-shrink-0"
@@ -738,8 +775,16 @@ const ViewEmployeeModal = ({ employee, onClose }) => {
         {/* Profile Section */}
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-[#0d8566] flex items-center justify-center flex-shrink-0">
-              <User size={40} className="text-white" />
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-[#0d8566] flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white shadow-md">
+              {employee.profilePhoto ? (
+                <img 
+                  src={resolveImageUrl(employee.profilePhoto)} 
+                  alt={employee.name} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User size={40} className="text-white" />
+              )}
             </div>
             <div className="flex-1">
               <h4 className="text-lg font-bold text-gray-800">{employee.name}</h4>

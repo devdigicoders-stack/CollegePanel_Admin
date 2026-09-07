@@ -282,13 +282,21 @@ function App() {
                 {/* Student Portal Specific Routes */}
                 <Route path="/student-portal/attendance/scan" element={<ScanAttendance />} />
                 <Route path="/student/dashboard" element={<StudentDashboard />} />
+                <Route path="/student-portal/dashboard" element={<StudentDashboard />} />
                 <Route path="/student/profile" element={<StudentProfile />} />
+                <Route path="/student-portal/profile" element={<StudentProfile />} />
                 <Route path="/student/assignments" element={<StudentAssignments />} />
+                <Route path="/student-portal/assignments" element={<StudentAssignments />} />
                 <Route path="/student/materials" element={<StudentStudyMaterials />} />
+                <Route path="/student-portal/materials" element={<StudentStudyMaterials />} />
                 <Route path="/student/hostel" element={<StudentHostel />} />
+                <Route path="/student-portal/hostel" element={<StudentHostel />} />
                 <Route path="/student/placement" element={<StudentPlacement />} />
+                <Route path="/student-portal/placement" element={<StudentPlacement />} />
                 <Route path="/student/complaints" element={<StudentComplaints />} />
+                <Route path="/student-portal/complaints" element={<StudentComplaints />} />
                 <Route path="/student/notices" element={<StudentNotices />} />
+                <Route path="/student-portal/notices" element={<StudentNotices />} />
 
                 {/* Teacher Portal Specific Routes */}
                 <Route path="/teacher-portal/dashboard" element={<TeacherDashboard />} />

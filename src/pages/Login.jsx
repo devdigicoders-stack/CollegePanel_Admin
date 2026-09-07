@@ -34,10 +34,15 @@ const Login = () => {
       // Redirect to the page they tried to access, or dashboard
       let from = location.state?.from || '/dashboard';
       if (from === '/dashboard') {
-        if (res.data.role === 'student' || res.data.role === 'Student') {
+        const roleLower = (res.data.role || '').toLowerCase();
+        if (roleLower === 'student') {
           from = '/student/dashboard';
-        } else if (res.data.role === 'teacher' || res.data.role === 'Teacher') {
+        } else if (roleLower === 'teacher' || roleLower === 'teacher role') {
           from = '/teacher-portal/dashboard';
+        } else if (roleLower === 'hostel' || roleLower.includes('warden')) {
+          from = '/hostel-warden/dashboard';
+        } else if (roleLower === 'librarian') {
+          from = '/library/dashboard';
         }
       }
       navigate(from, { replace: true });

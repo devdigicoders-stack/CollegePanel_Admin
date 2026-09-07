@@ -27,48 +27,21 @@ const Hods = () => {
 
   const searchTimeout = useRef(null);
 
-  useEffect(() => {
-    fetchDepartments();
-    fetchHods();
-  }, []);
-
-  useEffect(() => {
-    if (searchTimeout.current) clearTimeout(searchTimeout.current);
-    searchTimeout.current = setTimeout(() => {
-      setPagination(prev => ({ ...prev, page: 1 }));
-      fetchHods();
-    }, 400);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    setPagination(prev => ({ ...prev, page: 1 }));
-    fetchHods();
-  }, [filterDepartment]);
-
-  const fetchDepartments = async () => {
-    try {
-      const res = await axiosInstance.get('/academics/departments');
-      const depts = Array.isArray(res.data) ? res.data : (res.data?.data || []);
-      setDepartments(depts);
-    } catch (error) {
-      console.error('Failed to fetch departments', error);
-    }
-  };
-
-  const fetchHods = async () => {
+  const fetchHods = async (page = pagination.page, dept = filterDepartment, search = searchQuery) => {
     setLoading(true);
     try {
       const params = {
-        page: pagination.page,
+        page,
         limit: pagination.limit,
-        department: filterDepartment === 'All Departments' ? '' : filterDepartment,
-        search: searchQuery
+        department: dept === 'All Departments' ? '' : dept,
+        search
       };
       const res = await axiosInstance.get('/teachers/hods', { params });
       const hodsData = res.data.data || [];
       setHods(hodsData);
       setPagination(prev => ({
         ...prev,
+        page,
         total: res.data.total || hodsData.length,
         pages: res.data.pages || 1
       }));
@@ -78,6 +51,35 @@ const Hods = () => {
       setHods([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  useEffect(() => {
+    fetchHods(pagination.page, filterDepartment, searchQuery);
+  }, [pagination.page, filterDepartment]);
+
+  useEffect(() => {
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => {
+      if (pagination.page !== 1) {
+        setPagination(prev => ({ ...prev, page: 1 }));
+      } else {
+        fetchHods(1, filterDepartment, searchQuery);
+      }
+    }, 400);
+  }, [searchQuery]);
+
+  const fetchDepartments = async () => {
+    try {
+      const res = await axiosInstance.get('/academics/departments');
+      const depts = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      setDepartments(depts);
+    } catch (error) {
+      console.error('Failed to fetch departments', error);
     }
   };
 
@@ -170,6 +172,13 @@ const Hods = () => {
       return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
     }
     return [1, '...', pagination.page - 1, pagination.page, pagination.page + 1, '...', totalPages];
+  };
+
+  const resolveImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const baseUrl = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   return (
@@ -399,7 +408,7 @@ const Hods = () => {
                 <div className="flex items-center gap-4 mb-4">
                   {selectedHod.profileImage ? (
                     <img 
-                      src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${selectedHod.profileImage}`} 
+                      src={resolveImageUrl(selectedHod.profileImage)} 
                       alt={selectedHod.name} 
                       className="w-16 h-16 rounded-full object-cover border-2 border-primary bg-white shadow-sm"
                     />

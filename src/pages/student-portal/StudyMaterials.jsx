@@ -21,7 +21,19 @@ const StudyMaterials = () => {
     } finally { setLoading(false); }
   };
 
-  
+  const resolveFileUrl = (url) => {
+    if (!url) return '';
+    const baseUrl = (axiosInstance?.defaults?.baseURL || import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      if (url.includes('localhost:') && url.includes('/uploads/')) {
+        const uploadPath = url.substring(url.indexOf('/uploads/'));
+        return `${baseUrl}${uploadPath}`;
+      }
+      return url;
+    }
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -70,7 +82,7 @@ const StudyMaterials = () => {
                 <button 
                   onClick={() => {
                     if(item.fileUrl) {
-                      window.open(item.fileUrl, '_blank');
+                      window.open(resolveFileUrl(item.fileUrl), '_blank');
                     } else {
                       toast.error('File link not available');
                     }

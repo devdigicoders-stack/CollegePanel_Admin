@@ -108,9 +108,42 @@ export const Header = ({ onMenuClick }) => {
       case '/fees':
         return { title: 'Fees & Accounts', subtitle: 'Home > Fees & Accounts', isBreadcrumb: true };
       case '/library':
-        return { title: '', subtitle: '', isBreadcrumb: false };
+      case '/library/dashboard':
+        return { title: 'Library Dashboard', subtitle: 'Library > Dashboard', isBreadcrumb: true };
+      case '/library/books':
+        return { title: 'Books Catalog', subtitle: 'Library > Books Catalog', isBreadcrumb: true };
+      case '/library/issue-return':
+        return { title: 'Issue & Return', subtitle: 'Library > Circulation', isBreadcrumb: true };
+      case '/library/fines':
+        return { title: 'Penalties & Fines', subtitle: 'Library > Fines Management', isBreadcrumb: true };
+      case '/library/lost-damaged':
+        return { title: 'Lost & Damaged Books', subtitle: 'Library > Lost / Damaged Registry', isBreadcrumb: true };
+      case '/library/reports':
+        return { title: 'Library Reports', subtitle: 'Library > Reports & Analytics', isBreadcrumb: true };
       case '/hostel':
-        return { title: '', subtitle: '', isBreadcrumb: false };
+      case '/hostel-warden':
+      case '/hostel-warden/dashboard':
+        return { title: 'Hostel Dashboard', subtitle: 'Hostel > Dashboard', isBreadcrumb: true };
+      case '/hostel-warden/rooms':
+        return { title: 'Rooms & Beds', subtitle: 'Hostel > Rooms & Beds', isBreadcrumb: true };
+      case '/hostel-warden/inventory':
+        return { title: 'Assets & Inventory', subtitle: 'Hostel > Inventory', isBreadcrumb: true };
+      case '/hostel-warden/allotment':
+        return { title: 'Student Allotment', subtitle: 'Hostel > Allotment', isBreadcrumb: true };
+      case '/hostel-warden/check-in-out':
+        return { title: 'Check-In / Check-Out', subtitle: 'Hostel > Check-In/Out', isBreadcrumb: true };
+      case '/hostel-warden/leave-outing':
+        return { title: 'Leave & Outing Requests', subtitle: 'Hostel > Leave & Outings', isBreadcrumb: true };
+      case '/hostel-warden/visitors':
+        return { title: 'Visitors Gate', subtitle: 'Hostel > Visitors', isBreadcrumb: true };
+      case '/hostel-warden/complaints':
+        return { title: 'Room Complaints', subtitle: 'Hostel > Complaints', isBreadcrumb: true };
+      case '/hostel-warden/incidents':
+        return { title: 'Discipline Incidents', subtitle: 'Hostel > Incidents', isBreadcrumb: true };
+      case '/hostel-warden/notices':
+        return { title: 'Hostel Notices', subtitle: 'Hostel > Notice Board', isBreadcrumb: true };
+      case '/hostel-warden/reports':
+        return { title: 'Hostel Reports', subtitle: 'Hostel > Reports Center', isBreadcrumb: true };
       case '/reports':
         return { title: '', subtitle: '', isBreadcrumb: false };
       case '/notice':

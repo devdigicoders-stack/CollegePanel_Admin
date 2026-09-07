@@ -95,7 +95,7 @@ const Books = () => {
     try {
       setIssuedLoading(true);
       const params = new URLSearchParams();
-      params.append('status', 'Issued');
+      params.append('status', 'active');
       if (issuedSearch) params.append('search', issuedSearch);
       const response = await axiosInstance.get(`/library/transactions?${params.toString()}`);
       const txns = response.data || [];
@@ -321,7 +321,7 @@ const Books = () => {
           <Bookmark size={16} />
           <span>Issued Circulation</span>
           <span className="bg-orange-100 text-orange-700 text-[11px] px-2 py-0.5 rounded-full font-bold">
-            {counts.issued}
+            {counts.activeCirculation !== undefined ? counts.activeCirculation : (issuedTransactions.length || counts.issued)}
           </span>
           {activeSubTab === 'issued' && <div className="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-md"></div>}
         </button>
@@ -669,7 +669,7 @@ const Books = () => {
                           </td>
                           <td className="py-3.5 px-5 whitespace-nowrap">
                             <div className="font-bold text-gray-800">
-                              {txn.memberName || (txn.studentId ? `${txn.studentId.firstName} ${txn.studentId.lastName || ''}`.trim() : 'Student')}
+                              {(txn.memberName && txn.memberName !== 'undefined') ? txn.memberName : (txn.studentId?.studentName || (txn.studentId?.firstName ? `${txn.studentId.firstName} ${txn.studentId.lastName || ''}`.trim() : 'Student'))}
                             </div>
                             <span className="text-[11px] text-gray-500">Roll: {txn.studentId?.enrollmentNo || txn.studentId?.studentId || 'N/A'}</span>
                           </td>
@@ -848,7 +848,7 @@ const Books = () => {
                         return (
                           <tr key={issue._id || i} className="border-b border-gray-50 text-[13px]">
                             <td className="py-3 px-4 font-semibold text-gray-800">
-                              {issue.memberName}
+                              {issue.memberName && issue.memberName !== 'undefined' ? issue.memberName : 'Student'}
                               <span className="block text-[11px] text-gray-400 font-normal">{issue.memberType || 'Student'}</span>
                             </td>
                             <td className="py-3 px-4 text-gray-600">{issue.enrollmentNo || '—'}</td>

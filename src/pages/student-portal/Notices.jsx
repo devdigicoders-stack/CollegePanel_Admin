@@ -4,6 +4,13 @@ import axiosInstance from '../../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import SkeletonLoader from '../../components/SkeletonLoader';
 
+const resolveFileUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const baseUrl = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 const StudentNotices = () => {
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -100,7 +107,7 @@ const StudentNotices = () => {
                   {notice.pdfs && notice.pdfs.length > 0 && notice.pdfs.map((pdf, idx) => (
                     <a
                       key={idx}
-                      href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${pdf}`}
+                      href={resolveFileUrl(pdf)}
                       target="_blank"
                       rel="noreferrer"
                       className="flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors border border-red-100 text-[13px] font-semibold"
@@ -134,13 +141,13 @@ const StudentNotices = () => {
                       {notice.images.map((img, i) => (
                         <a 
                           key={i} 
-                          href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${img}`} 
+                          href={resolveFileUrl(img)} 
                           target="_blank" 
                           rel="noreferrer"
                           className="block rounded-xl overflow-hidden border border-gray-200 hover:border-primary hover:shadow-lg transition-all group/img relative aspect-video sm:aspect-square"
                         >
                           <img 
-                            src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${img}`} 
+                            src={resolveFileUrl(img)} 
                             alt={`Notice attachment ${i+1}`}
                             className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-300"
                           />

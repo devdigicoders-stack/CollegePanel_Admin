@@ -34,6 +34,19 @@ const StudyMaterials = () => {
     }
   };
 
+  const resolveFileUrl = (url) => {
+    if (!url) return '#';
+    const baseUrl = (axiosInstance?.defaults?.baseURL || import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      if (url.includes('localhost:') && url.includes('/uploads/')) {
+        const uploadPath = url.substring(url.indexOf('/uploads/'));
+        return `${baseUrl}${uploadPath}`;
+      }
+      return url;
+    }
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -127,7 +140,7 @@ const StudyMaterials = () => {
                   <p className="text-xs font-medium text-gray-500 mb-5">Uploaded on: {new Date(m.createdAt).toLocaleDateString()}</p>
                 </div>
                 <a 
-                  href={m.fileUrl} 
+                  href={resolveFileUrl(m.fileUrl)} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-bold transition-colors"

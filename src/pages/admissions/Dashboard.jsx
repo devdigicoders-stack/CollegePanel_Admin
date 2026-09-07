@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, AlertCircle, XCircle, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CheckCircle, AlertCircle, XCircle, FileText, ArrowRight } from 'lucide-react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import axios from 'axios';
@@ -111,6 +112,12 @@ const AdmissionOfficerDashboard = () => {
           <h3 className="text-[14px] font-bold text-gray-800 flex items-center gap-2">
             <AlertCircle size={16} className="text-yellow-500" /> Latest Pending Applications
           </h3>
+          <Link 
+            to="/admissions/applications" 
+            className="text-[12px] font-bold text-primary hover:underline flex items-center gap-1 transition-colors"
+          >
+            View All Pending <ArrowRight size={14} />
+          </Link>
         </div>
         
         {latestPendingApps.length > 0 ? (

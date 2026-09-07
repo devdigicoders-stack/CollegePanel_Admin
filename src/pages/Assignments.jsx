@@ -381,6 +381,19 @@ const Assignments = () => {
     return new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
+  const resolveFileUrl = (url) => {
+    if (!url) return '#';
+    const baseUrl = (axiosInstance?.defaults?.baseURL || import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      if (url.includes('localhost:') && url.includes('/uploads/')) {
+        const uploadPath = url.substring(url.indexOf('/uploads/'));
+        return `${baseUrl}${uploadPath}`;
+      }
+      return url;
+    }
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
   const getSubmissionProgress = (submitted, total) => {
     if (!total || total === 0) return 0;
     return Math.round((submitted / total) * 100);
@@ -389,8 +402,8 @@ const Assignments = () => {
   const filteredSubjects = subjects.filter(subj => {
     if (formData.branch && subj.courseName && subj.courseName.toLowerCase() !== formData.branch.toLowerCase()) return false;
     if (formData.semester && subj.semester) {
-      const fSem = formData.semester.replace(/[^0-9]/g, '');
-      const sSem = subj.semester.replace(/[^0-9]/g, '');
+      const fSem = String(formData.semester).replace(/[^0-9]/g, '');
+      const sSem = String(subj.semester).replace(/[^0-9]/g, '');
       if (fSem && sSem && fSem !== sSem) return false;
     }
     return true;
@@ -1102,7 +1115,7 @@ const Assignments = () => {
                 <div className="border-t border-gray-100 pt-4">
                   <h4 className="text-sm font-bold text-gray-700 mb-2">Attached PDF Document</h4>
                   <a
-                    href={selectedAssignment.fileUrl}
+                    href={resolveFileUrl(selectedAssignment.fileUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2.5 px-4 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-[13px] font-bold transition-all border border-primary/20"
@@ -1199,7 +1212,7 @@ const Assignments = () => {
                           <button
                             onClick={() => {
                               if(sub.fileUrl) {
-                                window.open(sub.fileUrl, '_blank');
+                                window.open(resolveFileUrl(sub.fileUrl), '_blank');
                               } else {
                                 toast.error('No file uploaded by student');
                               }

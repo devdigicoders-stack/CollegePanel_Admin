@@ -13,18 +13,25 @@ const PrivateRoute = ({ children }) => {
   const userRole = adminInfo.role || 'college_admin';
   const path = location.pathname;
 
+  const roleLower = userRole.toLowerCase();
+
   // Protect student portal routes
-  if (userRole === 'Student' && !path.startsWith('/student') && path !== '/dashboard' && path !== '/' && path !== '/profile') {
+  if (roleLower === 'student' && !path.startsWith('/student') && path !== '/profile') {
     return <Navigate to="/student/dashboard" replace />;
   }
 
-  // Protect academic routes for librarians, etc.
-  if (userRole === 'Librarian' && !path.startsWith('/library') && path !== '/dashboard' && path !== '/' && path !== '/profile') {
-     return <Navigate to="/dashboard" replace />;
+  // Protect library routes for librarian
+  if (roleLower === 'librarian' && !path.startsWith('/library') && path !== '/profile') {
+    return <Navigate to="/library/dashboard" replace />;
+  }
+
+  // Protect hostel warden routes
+  if ((roleLower === 'hostel' || roleLower.includes('warden')) && !path.startsWith('/hostel-warden') && path !== '/profile') {
+    return <Navigate to="/hostel-warden/dashboard" replace />;
   }
 
   // Protect teacher portal routes
-  if ((userRole === 'teacher' || userRole === 'Teacher') && !path.startsWith('/teacher') && path !== '/dashboard' && path !== '/' && path !== '/profile') {
+  if ((roleLower === 'teacher' || roleLower === 'teacher role') && !path.startsWith('/teacher') && path !== '/profile') {
     return <Navigate to="/teacher-portal/dashboard" replace />;
   }
 

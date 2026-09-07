@@ -315,7 +315,7 @@ const Teachers = () => {
           confirmButtonColor: 'var(--color-primary)'
         }).then((result) => {
           if (result.isConfirmed) {
-            const portalUrl = 'https://college-panel-admin.vercel.app/';
+            const portalUrl = `${window.location.origin}/`;
             const creds = `Login Details for ${newTeacher.name}\nUsername: ${newTeacher.username}\nPassword: ${newTeacher.password}\nPortal URL: ${portalUrl}`;
             copyToClipboard(creds);
           }
@@ -806,7 +806,7 @@ const Teachers = () => {
                         </button>
                         <button
                           onClick={() => {
-                            const portalUrl = 'https://college-panel-admin.vercel.app/';
+                            const portalUrl = `${window.location.origin}/`;
                             const creds = `Login Details for ${row.name}\nUsername: ${row.username}\nPassword: ${row.password || 'Teacher@123'}\nPortal URL: ${portalUrl}`;
                             copyToClipboard(creds);
                           }}

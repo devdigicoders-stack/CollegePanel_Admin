@@ -23,13 +23,24 @@ const Layout = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Apply dynamic theme based on role
-    const role = adminInfo.role || 'college_admin';
+    // Apply dynamic theme based on role & current route
+    const role = (adminInfo.role || 'college_admin').toLowerCase();
+    const pathname = location.pathname;
+
     let theme = 'admin';
-    if (role === 'Student') theme = 'student';
-    else if (role === 'Teacher Role' || role === 'Teacher') theme = 'teacher';
-    else if (role === 'Security') theme = 'security';
-    else if (role === 'Hostel Warden') theme = 'hostel_warden';
+    if (pathname.startsWith('/student') || role === 'student') {
+      theme = 'student';
+    } else if (pathname.startsWith('/teacher-portal') || role.includes('teacher')) {
+      theme = 'teacher';
+    } else if (pathname.startsWith('/hostel-warden') || pathname.startsWith('/hostel') || role.includes('hostel') || role.includes('warden')) {
+      theme = 'hostel_warden';
+    } else if (pathname.startsWith('/library') || role.includes('librarian') || role.includes('library')) {
+      theme = 'library';
+    } else if (pathname.startsWith('/security') || role === 'security') {
+      theme = 'security';
+    } else {
+      theme = 'admin';
+    }
     
     document.documentElement.setAttribute('data-theme', theme);
 

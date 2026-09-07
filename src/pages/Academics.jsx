@@ -29,6 +29,7 @@ const Academics = () => {
     'Courses': ['View Departments', 'Add Department', 'Edit Department', 'Delete Department'],
     'Branches': ['View Courses', 'Add Course', 'Edit Course', 'Delete Course'],
     'Semesters': ['View Courses', 'Add Course'], // semesters tied to courses
+    'Sections': ['View Courses', 'Add Course', 'Edit Course', 'Delete Course'],
     'Subjects': ['View Courses', 'Add Course', 'Edit Course', 'Delete Course'],
     'Designations': ['View Employees', 'Add Employee'],
     'Subject Allocations': ['View Courses', 'Add Course', 'Edit Course', 'Delete Course']
@@ -42,6 +43,7 @@ const Academics = () => {
     { name: 'Courses' },
     { name: 'Branches' },
     { name: 'Semesters' },
+    { name: 'Sections' },
     { name: 'Subjects' },
     { name: 'Designations' },
     { name: 'Subject Allocations' }
@@ -58,19 +60,19 @@ const Academics = () => {
   // Granular per-action permission check per tab
   const canAdd = (menuName) => {
     if (isFullAdmin) return true;
-    const addPerms = { 'Courses': 'Add Department', 'Branches': 'Add Course', 'Semesters': 'Add Course', 'Subjects': 'Add Course', 'Designations': 'Add Employee', 'Subject Allocations': 'Add Course' };
+    const addPerms = { 'Courses': 'Add Department', 'Branches': 'Add Course', 'Semesters': 'Add Course', 'Sections': 'Add Course', 'Subjects': 'Add Course', 'Designations': 'Add Employee', 'Subject Allocations': 'Add Course' };
     return checkPermission(addPerms[menuName] || '');
   };
 
   const canEdit = (menuName) => {
     if (isFullAdmin) return true;
-    const editPerms = { 'Courses': 'Edit Department', 'Branches': 'Edit Course', 'Semesters': 'Edit Course', 'Subjects': 'Edit Course', 'Designations': 'Edit Employee', 'Subject Allocations': 'Edit Course' };
+    const editPerms = { 'Courses': 'Edit Department', 'Branches': 'Edit Course', 'Semesters': 'Edit Course', 'Sections': 'Edit Course', 'Subjects': 'Edit Course', 'Designations': 'Edit Employee', 'Subject Allocations': 'Edit Course' };
     return checkPermission(editPerms[menuName] || '');
   };
 
   const canDelete = (menuName) => {
     if (isFullAdmin) return true;
-    const deletePerms = { 'Courses': 'Delete Department', 'Branches': 'Delete Course', 'Semesters': 'Delete Course', 'Subjects': 'Delete Course', 'Designations': 'Delete Employee', 'Subject Allocations': 'Delete Course' };
+    const deletePerms = { 'Courses': 'Delete Department', 'Branches': 'Delete Course', 'Semesters': 'Delete Course', 'Sections': 'Delete Course', 'Subjects': 'Delete Course', 'Designations': 'Delete Employee', 'Subject Allocations': 'Delete Course' };
     return checkPermission(deletePerms[menuName] || '');
   };
 
@@ -81,6 +83,7 @@ const Academics = () => {
     Courses: '/academics/departments',
     Branches: '/academics/courses',
     Semesters: '/academics/semesters',
+    Sections: '/academics/sections',
     Subjects: '/academics/subjects',
     Designations: '/designations',
     'Subject Allocations': '/academics/allocations'
@@ -102,6 +105,14 @@ const Academics = () => {
     Semesters: [
       { key: 'semesterNumber', label: 'Semester No.' },
       { key: 'startDate', label: 'Start Date' },
+      { key: 'status', label: 'Status' }
+    ],
+    Sections: [
+      { key: 'name', label: 'Section Name' },
+      { key: 'courseName', label: 'Branch' },
+      { key: 'semester', label: 'Semester' },
+      { key: 'classTeacherName', label: 'Class Teacher' },
+      { key: 'room', label: 'Room' },
       { key: 'status', label: 'Status' }
     ],
     Subjects: [
@@ -167,6 +178,41 @@ const Academics = () => {
         { key: 'semesterNumber', label: 'Semester Number', type: 'number', required: true },
         { key: 'startDate', label: 'Start Date', type: 'date', required: true },
         { key: 'status', label: 'Status', type: 'select', options: ['Active', 'Upcoming', 'Completed'], required: false }
+      ],
+      Sections: [
+        { key: 'name', label: 'Section Name', type: 'text', required: true },
+        { 
+          key: 'courseName', 
+          label: 'Branch', 
+          type: 'select', 
+          required: true,
+          options: courses.map(c => ({ value: c.name, label: c.name }))
+        },
+        { 
+          key: 'semester', 
+          label: 'Semester', 
+          type: 'select', 
+          required: true,
+          options: Array.from(new Set(semesters.map(s => s.semesterNumber))).sort((a,b)=>a-b).map(num => ({ value: num, label: `Semester ${num}` }))
+        },
+        { 
+          key: 'classTeacher', 
+          label: 'Class Teacher', 
+          type: 'select', 
+          required: false,
+          options: teachers.map(t => ({ value: t._id, label: t.name }))
+        },
+        { key: 'room', label: 'Room / Hall', type: 'text', required: false },
+        { 
+          key: 'status', 
+          label: 'Status', 
+          type: 'select', 
+          options: [
+            { value: 'Active', label: 'Active' },
+            { value: 'Inactive', label: 'Inactive' }
+          ], 
+          required: false 
+        }
       ],
       Subjects: [
         { key: 'code', label: 'Subject Code', type: 'text', required: true, disabled: isEditing },

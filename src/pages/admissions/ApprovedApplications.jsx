@@ -127,7 +127,12 @@ const ApprovedApplications = () => {
                   <tr key={app._id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="p-4">
                       <p className="text-[13px] font-black text-primary">{app.appNo}</p>
-                      <p className="text-[11px] text-gray-400 font-medium">{new Date(app.createdAt).toLocaleDateString('en-IN')}</p>
+                      {app.studentId && (
+                        <p className="text-[11px] font-bold text-emerald-700 font-mono bg-emerald-50 px-1.5 py-0.5 rounded w-max mt-0.5">
+                          {app.studentId}
+                        </p>
+                      )}
+                      <p className="text-[11px] text-gray-400 font-medium mt-0.5">{new Date(app.createdAt).toLocaleDateString('en-IN')}</p>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
@@ -142,7 +147,9 @@ const ApprovedApplications = () => {
                     </td>
                     <td className="p-4">
                       <p className="text-[13px] font-bold text-gray-800">{app.course}</p>
-                      <p className="text-[11px] text-gray-500 font-medium">{app.admissionType || 'Regular'}</p>
+                      <p className="text-[11px] text-gray-500 font-medium">
+                        {app.enrollNo ? `Enroll: ${app.enrollNo}` : (app.admissionType || 'Regular')}
+                      </p>
                     </td>
                     <td className="p-4">
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-100 text-emerald-700">

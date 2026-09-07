@@ -7,6 +7,16 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
   const StatusIcon = type === 'approved' ? CheckCircle : type === 'rejected' ? XCircle : Clock;
   const statusColors = type === 'approved' ? 'text-emerald-500 bg-emerald-50' : type === 'rejected' ? 'text-red-500 bg-red-50' : 'text-amber-500 bg-amber-50';
 
+  const resolveUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const baseUrl = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  const photoDoc = student.documents?.find(d => (d.name === 'Student Photo' || d.name === 'Photograph') && d.url);
+  const otherDocs = (student.documents || []).filter(d => d.name !== 'Student Photo' && d.name !== 'Photograph' && d.url);
+
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200 font-['Inter']">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
@@ -14,11 +24,11 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
         {/* Header */}
         <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
           <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 ${statusColors}`}>
-              {student.documents?.find(d => d.name === 'Student Photo') ? (
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 border border-gray-100 ${statusColors}`}>
+              {photoDoc ? (
                 <img 
-                  src={`${import.meta.env.VITE_API_URL.replace('/api', '')}${student.documents.find(d => d.name === 'Student Photo').url}`} 
-                  alt="Student" 
+                  src={resolveUrl(photoDoc.url)} 
+                  alt={student.name || 'Student'} 
                   className="w-full h-full object-cover" 
                 />
               ) : (
@@ -26,7 +36,7 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
               )}
             </div>
             <div>
-              <h3 className="text-xl font-black text-gray-800 tracking-tight">Student Details</h3>
+              <h3 className="text-xl font-black text-gray-800 tracking-tight">{student.name}</h3>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-[13px] text-gray-500 font-medium font-mono bg-gray-100 px-2 py-0.5 rounded-md">
                   {student.appNo}
@@ -189,6 +199,45 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
             {/* Right Column */}
             <div className="space-y-8">
               
+              {/* Rejection Notice if rejected */}
+              {(type === 'rejected' || student.status === 'Rejected' || student.remarks) && (
+                <div className="bg-red-50/80 border border-red-200 rounded-2xl p-5 text-red-800 shadow-sm">
+                  <div className="flex items-center gap-2 mb-2 text-red-600 font-black text-[12px] uppercase tracking-wider">
+                    <XCircle size={16} /> Rejection Information
+                  </div>
+                  <p className="text-[13px] text-red-700 font-medium">
+                    {student.remarks || 'Application was rejected by the admissions department during document/eligibility review.'}
+                  </p>
+                </div>
+              )}
+
+              {/* Assigned Academic Credentials (if Registered/Admitted) */}
+              {(student.studentId || student.enrollNo || student.registrationStatus === 'Registered') && (
+                <div className="bg-white p-6 rounded-2xl border border-emerald-100 bg-emerald-50/20 shadow-sm">
+                  <h4 className="text-[11px] font-black text-emerald-700 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Award size={14} className="text-emerald-600" /> Assigned Academic Credentials
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-2xs">
+                      <p className="text-[11px] text-gray-500 font-medium">Student ID</p>
+                      <p className="text-[14px] font-black text-primary font-mono">{student.studentId || 'N/A'}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-2xs">
+                      <p className="text-[11px] text-gray-500 font-medium">Enrollment No</p>
+                      <p className="text-[14px] font-bold text-gray-800 font-mono">{student.enrollNo || 'N/A'}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-2xs">
+                      <p className="text-[11px] text-gray-500 font-medium">Roll No</p>
+                      <p className="text-[14px] font-bold text-gray-800 font-mono">{student.rollNo || 'N/A'}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-2xs">
+                      <p className="text-[11px] text-gray-500 font-medium">Semester / Section</p>
+                      <p className="text-[14px] font-bold text-gray-800">{student.semester || 'Sem 1'} - Sec {student.section || 'A'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Course & Academics */}
               <div className="bg-gradient-to-br from-primary to-[#064e3b] p-6 rounded-2xl shadow-lg relative overflow-hidden">
                 {/* Decorative circle */}
@@ -200,6 +249,11 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
                 
                 <div className="mb-2">
                   <p className="text-3xl font-black text-white tracking-tight leading-none">{student.course}</p>
+                  {(student.branch || student.year) && (
+                    <p className="text-emerald-200 text-[13px] font-medium mt-2">
+                      {student.branch ? `${student.branch} • ` : ''}{student.year || ''}
+                    </p>
+                  )}
                 </div>
                 <p className="text-emerald-100 text-[13px] font-medium flex items-center gap-1.5 mt-4">
                   <StatusIcon size={14} /> 
@@ -238,13 +292,13 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
               </div>
 
               {/* Uploaded Documents */}
-              {student.documents && student.documents.filter(d => d.name !== 'Student Photo' && d.url).length > 0 && (
+              {otherDocs.length > 0 && (
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                   <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center gap-2">
                     <FileText size={14} /> Uploaded Documents
                   </h4>
                   <div className="space-y-3">
-                    {student.documents.filter(d => d.name !== 'Student Photo' && d.url).map((doc, idx) => (
+                    {otherDocs.map((doc, idx) => (
                       <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -256,7 +310,7 @@ const StudentDetailsModal = ({ isOpen, onClose, student, actions, type = 'pendin
                           </div>
                         </div>
                         <a 
-                          href={`${import.meta.env.VITE_API_URL.replace('/api', '')}${doc.url}`} 
+                          href={resolveUrl(doc.url)} 
                           target="_blank" 
                           rel="noreferrer"
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg text-[11px] font-bold hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors"

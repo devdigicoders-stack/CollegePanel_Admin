@@ -10,6 +10,13 @@ import SkeletonLoader from '../components/SkeletonLoader';
 import { checkPermission } from '../utils/checkPermission';
 import AccessDenied from '../components/AccessDenied';
 
+const resolveFileUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const baseUrl = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 const Notice = () => {
   if (!checkPermission('View Notices') && !checkPermission('Manage Notices')) {
     return <AccessDenied />;
@@ -871,7 +878,7 @@ const Notice = () => {
                     {selectedNotice.pdfs.map((pdf, i) => (
                       <a 
                         key={i}
-                        href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${pdf}`} 
+                        href={resolveFileUrl(pdf)} 
                         target="_blank" 
                         rel="noreferrer"
                         className="text-[13px] text-red-600 hover:bg-red-50 flex items-center gap-2 bg-red-50/50 p-2.5 rounded-lg border border-red-100 w-fit transition-colors font-medium"
@@ -890,13 +897,13 @@ const Notice = () => {
                     {selectedNotice.images.map((img, i) => (
                       <a 
                         key={i} 
-                        href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${img}`} 
+                        href={resolveFileUrl(img)} 
                         target="_blank" 
                         rel="noreferrer"
                         className="block rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition-shadow"
                       >
                         <img 
-                          src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || ''}${img}`} 
+                          src={resolveFileUrl(img)} 
                           alt={`Notice Attachment ${i+1}`}
                           className="w-full h-24 object-cover"
                         />

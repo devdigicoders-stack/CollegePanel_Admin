@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
 import { 
-  Plus, Search, Edit, Trash2, X, Shield, Check, ChevronLeft, ArrowLeft,
+  Plus, Search, Edit, Trash2, X, Shield, Check, ChevronLeft, ChevronRight, ArrowLeft,
   LayoutDashboard, GraduationCap, Users, UserCheck, ClipboardList,
   BookOpen, FileText, BookMarked, Home,
   BarChart3, Settings, ShieldAlert} from 'lucide-react';
@@ -156,7 +156,7 @@ const Roles = () => {
 
   useEffect(() => {
     fetchRoles();
-  }, []);
+  }, [pagination.page]);
 
   useEffect(() => {
     if (activeTab === 'users') {
@@ -681,7 +681,7 @@ const handleSavePermissions = async () => {
               disabled={pagination.page === totalPages}
               className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronLeft size={16} />
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>

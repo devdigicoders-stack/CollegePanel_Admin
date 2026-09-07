@@ -13,8 +13,8 @@ const NewAdmission = () => {
   const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
   const collegeId = adminInfo?.collegeId || adminInfo?._id;
   
-  // Construct the public URL using the live frontend link
-  const baseUrl = 'https://college-panel-admin.vercel.app';
+  // Construct the public URL using current origin
+  const baseUrl = window.location.origin;
   const publicUrl = `${baseUrl}/public/admission/${collegeId}`;
 
   const copyToClipboard = () => {
