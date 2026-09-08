@@ -54,14 +54,15 @@ const InternalMarks = () => {
         const secs = Array.isArray(secRes.data) ? secRes.data : (secRes.data?.data || []);
         const subs = Array.isArray(subRes.data) ? subRes.data : (subRes.data?.data || []);
 
-        setDepartments(depts);
+        const uniqueDepts = Array.from(new Map(depts.map(d => [d.name?.trim(), d])).values()).filter(d => d.name);
+        setDepartments(uniqueDepts);
         setSemesters(sems);
         setSections(secs);
         setSubjects(subs);
 
         // Set default filter values if we have data
         setFilters({
-          department: depts[0]?.name || '',
+          department: uniqueDepts[0]?.name || '',
           semester: sems[0]?.semesterNumber?.toString() || '1',
           section: secs[0]?.name || 'A',
           subject: subs[0]?.name || '',

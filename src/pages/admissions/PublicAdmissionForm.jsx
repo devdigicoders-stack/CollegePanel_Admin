@@ -21,7 +21,14 @@ const PublicAdmissionForm = () => {
   useEffect(() => {
     if (collegeId) {
       axios.get(`${import.meta.env.VITE_API_URL}/admissions/public/${collegeId}/form-options`)
-        .then(res => setFormOptions(res.data))
+        .then(res => {
+          const data = res.data || {};
+          setFormOptions({
+            ...data,
+            branches: Array.from(new Set((data.branches || []).map(b => b?.trim()).filter(Boolean))),
+            courses: Array.from(new Set((data.courses || []).map(c => c?.trim()).filter(Boolean)))
+          });
+        })
         .catch(err => console.error('Error fetching options', err));
     }
   }, [collegeId]);

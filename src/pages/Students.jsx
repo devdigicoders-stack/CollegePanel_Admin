@@ -70,10 +70,10 @@ const Students = () => {
     try {
       const res = await axiosInstance.get('/students/filters');
       setFilterOptions({
-        branches: res.data.branches || [],
-        years: res.data.years || [],
-        sessions: res.data.sessions || [],
-        courses: res.data.courses || []
+        branches: Array.from(new Set((res.data.branches || []).map(b => b?.trim()).filter(Boolean))),
+        years: Array.from(new Set((res.data.years || []).map(y => y?.trim()).filter(Boolean))),
+        sessions: Array.from(new Set((res.data.sessions || []).map(s => s?.trim()).filter(Boolean))),
+        courses: Array.from(new Set((res.data.courses || []).map(c => c?.trim()).filter(Boolean)))
       });
     } catch {
       toast.error('Failed to load filter options');

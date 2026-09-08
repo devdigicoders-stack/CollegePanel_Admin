@@ -18,6 +18,13 @@ const StudentNotices = () => {
 
   useEffect(() => {
     fetchNotices();
+    const handleUpdate = () => fetchNotices();
+    window.addEventListener('notices_updated', handleUpdate);
+    window.addEventListener('live-notification', handleUpdate);
+    return () => {
+      window.removeEventListener('notices_updated', handleUpdate);
+      window.removeEventListener('live-notification', handleUpdate);
+    };
   }, []);
 
   const fetchNotices = async () => {

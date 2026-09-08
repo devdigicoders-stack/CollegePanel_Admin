@@ -17,6 +17,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
   const [pendingHostelLeavesCount, setPendingHostelLeavesCount] = useState(0);
   const [unreadNotices, setUnreadNotices] = useState(0);
   const [unreadAssignments, setUnreadAssignments] = useState(0);
+  const [unreadMaterials, setUnreadMaterials] = useState(0);
 
   useEffect(() => {
     const fetchPendingAdmissions = async () => {
@@ -76,19 +77,43 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
         
         const token = localStorage.getItem('admin_token');
         if (!token) return;
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/student-portal/dashboard/stats`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const totalAssignments = res.data.totalAssignments || 0;
-        const lastSeen = parseInt(localStorage.getItem('last_seen_assignments_count') || '0', 10);
-        
-        if (location.pathname === '/student/assignments') {
-          localStorage.setItem('last_seen_assignments_count', totalAssignments.toString());
-          setUnreadAssignments(0);
-        } else if (totalAssignments > lastSeen) {
-          setUnreadAssignments(totalAssignments - lastSeen);
-        } else {
-          setUnreadAssignments(0);
+
+        const [statsRes, matRes] = await Promise.allSettled([
+          axios.get(`${import.meta.env.VITE_API_URL}/student-portal/dashboard/stats`, {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get(`${import.meta.env.VITE_API_URL}/student-portal/study-materials`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+
+        if (statsRes.status === 'fulfilled') {
+          const totalAssignments = statsRes.value.data?.totalAssignments || 0;
+          const lastSeen = parseInt(localStorage.getItem('last_seen_assignments_count') || '0', 10);
+          
+          if (location.pathname === '/student/assignments') {
+            localStorage.setItem('last_seen_assignments_count', totalAssignments.toString());
+            setUnreadAssignments(0);
+          } else if (totalAssignments > lastSeen) {
+            setUnreadAssignments(totalAssignments - lastSeen);
+          } else {
+            setUnreadAssignments(0);
+          }
+        }
+
+        if (matRes.status === 'fulfilled') {
+          const materialsList = Array.isArray(matRes.value.data) ? matRes.value.data : [];
+          const totalMaterials = materialsList.length;
+          const lastSeenMat = parseInt(localStorage.getItem('last_seen_materials_count') || '0', 10);
+
+          if (location.pathname === '/student/materials' || location.pathname === '/student-portal/materials') {
+            localStorage.setItem('last_seen_materials_count', totalMaterials.toString());
+            setUnreadMaterials(0);
+          } else if (totalMaterials > lastSeenMat) {
+            setUnreadMaterials(totalMaterials - lastSeenMat);
+          } else {
+            setUnreadMaterials(0);
+          }
         }
       } catch (error) {
         console.error('Error fetching student stats:', error);
@@ -104,8 +129,16 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
     // Listen for custom update events
     const handleLeaveUpdate = () => fetchPendingHostelLeaves();
     const handleAdmissionUpdate = () => fetchPendingAdmissions();
+    const handleStudentUpdate = () => fetchStudentStats();
+    const handleNoticeUpdate = () => fetchNoticesCount();
+
     window.addEventListener('hostel_leave_updated', handleLeaveUpdate);
     window.addEventListener('admissions_updated', handleAdmissionUpdate);
+    window.addEventListener('assignments_updated', handleStudentUpdate);
+    window.addEventListener('materials_updated', handleStudentUpdate);
+    window.addEventListener('notices_updated', handleNoticeUpdate);
+    window.addEventListener('student_content_updated', handleStudentUpdate);
+    window.addEventListener('live-notification', handleStudentUpdate);
     
     // Set up an interval to check periodically
     const intervalId = setInterval(() => {
@@ -119,6 +152,11 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
       clearInterval(intervalId);
       window.removeEventListener('hostel_leave_updated', handleLeaveUpdate);
       window.removeEventListener('admissions_updated', handleAdmissionUpdate);
+      window.removeEventListener('assignments_updated', handleStudentUpdate);
+      window.removeEventListener('materials_updated', handleStudentUpdate);
+      window.removeEventListener('notices_updated', handleNoticeUpdate);
+      window.removeEventListener('student_content_updated', handleStudentUpdate);
+      window.removeEventListener('live-notification', handleStudentUpdate);
     };
   }, [location.pathname]);
 
@@ -207,7 +245,7 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
       items: [
         { name: 'Dashboard', icon: LayoutDashboard, path: '/student/dashboard' },
         { name: 'My Profile', icon: Users, path: '/student/profile' },
-        { name: 'Study Materials', icon: BookOpen, path: '/student/materials' },
+        { name: 'Study Materials', icon: BookOpen, path: '/student/materials', badge: unreadMaterials },
         { name: 'Assignments', icon: FileText, path: '/student/assignments', badge: unreadAssignments },
         { name: 'Hostel Room', icon: Bed, path: '/student/hostel' },
         { name: 'Notices', icon: ClipboardList, path: '/student/notices', badge: unreadNotices },

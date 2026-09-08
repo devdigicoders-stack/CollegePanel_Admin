@@ -11,12 +11,28 @@ const Assignments = () => {
 
   useEffect(() => {
     fetchAssignments();
+
+    const handleUpdate = () => {
+      fetchAssignments();
+    };
+
+    window.addEventListener('assignments_updated', handleUpdate);
+    window.addEventListener('student_content_updated', handleUpdate);
+    window.addEventListener('live-notification', handleUpdate);
+
+    return () => {
+      window.removeEventListener('assignments_updated', handleUpdate);
+      window.removeEventListener('student_content_updated', handleUpdate);
+      window.removeEventListener('live-notification', handleUpdate);
+    };
   }, []);
 
   const fetchAssignments = async () => {
     try {
       const res = await axiosInstance.get('/student-portal/assignments');
-      setAssigns(res.data);
+      const data = Array.isArray(res.data) ? res.data : [];
+      setAssigns(data);
+      localStorage.setItem('last_seen_assignments_count', data.length.toString());
     } catch (error) {
       toast.error('Failed to fetch assignments');
     } finally { setLoading(false); }

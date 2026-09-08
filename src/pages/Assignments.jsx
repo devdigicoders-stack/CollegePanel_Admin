@@ -399,6 +399,8 @@ const Assignments = () => {
     return Math.round((submitted / total) * 100);
   };
 
+  const uniqueBranches = Array.from(new Set((branches || []).map(b => b.name?.trim()).filter(Boolean)));
+
   const filteredSubjects = subjects.filter(subj => {
     if (formData.branch && subj.courseName && subj.courseName.toLowerCase() !== formData.branch.toLowerCase()) return false;
     if (formData.semester && subj.semester) {
@@ -408,7 +410,8 @@ const Assignments = () => {
     }
     return true;
   });
-  const displaySubjects = filteredSubjects.length > 0 ? filteredSubjects : subjects;
+  const uniqueSubjectsList = Array.from(new Map((filteredSubjects.length > 0 ? filteredSubjects : subjects).map(s => [s.name?.trim(), s])).values());
+  const displaySubjects = uniqueSubjectsList;
   const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
   const userRole = adminInfo.role || 'college_admin';
   const canEdit = userRole === 'college_admin' || userRole === 'Teacher' || userRole === 'Principal' || userRole === 'HOD';
@@ -463,8 +466,8 @@ const Assignments = () => {
             className="appearance-none bg-[#F9FAFB] border border-gray-200 text-gray-700 py-2.5 pl-4 pr-10 rounded-lg text-[13px] font-medium focus:outline-none cursor-pointer"
           >
             <option>All Branches</option>
-            {branches.map((b) => (
-              <option key={b._id} value={b.name}>{b.name}</option>
+            {uniqueBranches.map((branchName) => (
+              <option key={branchName} value={branchName}>{branchName}</option>
             ))}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
@@ -687,8 +690,8 @@ const Assignments = () => {
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
                     <option value="">Select Branch</option>
-                    {branches.map((b) => (
-                      <option key={b._id} value={b.name}>{b.name}</option>
+                    {uniqueBranches.map((branchName) => (
+                      <option key={branchName} value={branchName}>{branchName}</option>
                     ))}
                   </select>
                 </div>
@@ -908,8 +911,8 @@ const Assignments = () => {
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary bg-white"
                   >
                     <option value="">Select Branch</option>
-                    {branches.map((b) => (
-                      <option key={b._id} value={b.name}>{b.name}</option>
+                    {uniqueBranches.map((branchName) => (
+                      <option key={branchName} value={branchName}>{branchName}</option>
                     ))}
                   </select>
                 </div>

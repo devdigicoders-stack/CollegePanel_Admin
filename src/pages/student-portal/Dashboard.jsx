@@ -39,6 +39,24 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     fetchAll();
+
+    const handleUpdate = () => {
+      fetchAll();
+    };
+
+    window.addEventListener('materials_updated', handleUpdate);
+    window.addEventListener('assignments_updated', handleUpdate);
+    window.addEventListener('notices_updated', handleUpdate);
+    window.addEventListener('student_content_updated', handleUpdate);
+    window.addEventListener('live-notification', handleUpdate);
+
+    return () => {
+      window.removeEventListener('materials_updated', handleUpdate);
+      window.removeEventListener('assignments_updated', handleUpdate);
+      window.removeEventListener('notices_updated', handleUpdate);
+      window.removeEventListener('student_content_updated', handleUpdate);
+      window.removeEventListener('live-notification', handleUpdate);
+    };
   }, []);
 
   const fetchAll = async () => {
@@ -143,7 +161,7 @@ const StudentDashboard = () => {
                 </span>
               </div>
               <p className="text-[11px] text-gray-500 mt-0.5">
-                Dynamic attendance verification for <strong className="text-gray-700">{profile?.branch || 'Your Branch'}</strong> • Sem <strong className="text-gray-700">{currentClass?.semester || profile?.semester || '1'}</strong> • Section <strong className="text-gray-700">{currentClass?.section || profile?.section || 'A'}</strong>
+                Dynamic attendance verification for <strong className="text-gray-700">{profile?.branch || 'Your Branch'}</strong> • Sem <strong className="text-gray-700">{String(currentClass?.semester || profile?.semester || '1').replace(/^Sem\s*/i, '')}</strong> • Section <strong className="text-gray-700">{currentClass?.section || profile?.section || 'A'}</strong>
               </p>
             </div>
           </div>
@@ -336,7 +354,7 @@ const StudentDashboard = () => {
             </div>
             <p className="text-[13px] font-bold text-gray-700">No Scheduled Class QR Available Right Now</p>
             <p className="text-[11px] text-gray-400 mt-1 max-w-md">
-              Active classes for {profile?.branch || 'your branch'} in Semester {profile?.semester || '1'} will appear here once faculty activates the session.
+              Active classes for {profile?.branch || 'your branch'} in Semester {String(profile?.semester || '1').replace(/^Sem\s*/i, '')} will appear here once faculty activates the session.
             </p>
           </div>
         )}

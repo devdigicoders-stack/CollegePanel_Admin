@@ -91,10 +91,8 @@ const Teachers = () => {
       // Designations /list/all returns {data: ["string1", "string2"]} - array of strings
       const desigs = desigRes.data?.data || [];
       
-      console.log('Fetched departments:', depts); // Debug log
-      console.log('Fetched designations:', desigs); // Debug log
-      
-      setDepartments(depts);
+      const uniqueDepts = Array.from(new Map(depts.map(d => [d.name?.trim(), d])).values()).filter(d => d.name);
+      setDepartments(uniqueDepts);
       setDesignations(desigs);
     } catch (error) {
       console.error('Failed to fetch filter options', error);
@@ -208,7 +206,8 @@ const Teachers = () => {
       const sems = Array.isArray(sRes.data) ? sRes.data : (sRes.data?.data || []);
       const subs = Array.isArray(subRes.data) ? subRes.data : (subRes.data?.data || []);
 
-      setDepartments(depts);
+      const uniqueDepts = Array.from(new Map(depts.map(d => [d.name?.trim(), d])).values()).filter(d => d.name);
+      setDepartments(uniqueDepts);
       setCourses(crs);
       setSemesters(sems);
       setSubjects(subs);

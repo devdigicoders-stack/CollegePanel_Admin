@@ -138,8 +138,18 @@ const StudyMaterials = () => {
     }
   };
 
-  // Filter subjects based on selected course
-  const filteredSubjects = subjects.filter(sub => formData.course ? sub.courseName === formData.course : true);
+  // Unique branch names without duplicates
+  const uniqueBranches = Array.from(new Set((courses || []).map(c => c.name?.trim()).filter(Boolean)));
+
+  // Filter subjects based on selected branch and deduplicate by subject name
+  const filteredSubjects = subjects.filter(sub => {
+    if (!formData.course) return true;
+    return (
+      (sub.courseName && sub.courseName.trim().toLowerCase() === formData.course.trim().toLowerCase()) ||
+      (sub.branch && sub.branch.trim().toLowerCase() === formData.course.trim().toLowerCase())
+    );
+  });
+  const uniqueFilteredSubjects = Array.from(new Map(filteredSubjects.map(s => [s.name?.trim(), s])).values());
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full font-['Inter']">
@@ -169,7 +179,7 @@ const StudyMaterials = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-800 text-[14px]">{mat.title}</h4>
-                  <p className="text-[12px] text-gray-500">{mat.type} • {mat.size}</p>
+                  <p className="text-[12px] text-gray-500">{mat.type}{mat.size && mat.size !== 'Unknown' ? ` • ${mat.size}` : ''}</p>
                 </div>
               </div>
               <div className="space-y-2 text-[12px] text-gray-600">
@@ -209,10 +219,10 @@ const StudyMaterials = () => {
                 <div>
                   <label className="block text-[12px] font-semibold text-gray-700 mb-1">Branch *</label>
                   <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                    value={formData.course} onChange={e => setFormData({...formData, course: e.target.value})}>
+                    value={formData.course} onChange={e => setFormData({...formData, course: e.target.value, subject: ''})}>
                     <option value="">Select Branch</option>
-                    {courses.map(c => (
-                      <option key={c._id} value={c.name}>{c.name}</option>
+                    {uniqueBranches.map(branchName => (
+                      <option key={branchName} value={branchName}>{branchName}</option>
                     ))}
                   </select>
                 </div>
@@ -221,27 +231,20 @@ const StudyMaterials = () => {
                   <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                     value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})}>
                     <option value="">Select Subject</option>
-                    {filteredSubjects.map(s => (
-                      <option key={s._id} value={s.name}>{s.name}</option>
+                    {uniqueFilteredSubjects.map(s => (
+                      <option key={s._id || s.name} value={s.name}>{s.name}</option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1">Type</label>
-                  <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                    value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
-                    <option value="Document">Document (PDF/Doc)</option>
-                    <option value="Video">Video Link</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[12px] font-semibold text-gray-700 mb-1">Size (Optional)</label>
-                  <input type="text" className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                    value={formData.size} onChange={e => setFormData({...formData, size: e.target.value})} placeholder="e.g. 2.5 MB" />
-                </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1">Type</label>
+                <select required className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" 
+                  value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                  <option value="Document">Document (PDF/Doc)</option>
+                  <option value="Video">Video Link</option>
+                </select>
               </div>
 
               <div>

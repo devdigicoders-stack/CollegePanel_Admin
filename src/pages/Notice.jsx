@@ -60,6 +60,8 @@ const Notice = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const searchTimeout = useRef(null);
 
+  const uniqueCourses = Array.from(new Set((courses || []).map(c => c.name?.trim()).filter(Boolean)));
+
   useEffect(() => {
     fetchNotices();
   }, [pagination.page, filterAudience, filterStatus]);
@@ -507,7 +509,7 @@ const Notice = () => {
                       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                       <option value="">-- Select Course --</option>
-                      {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
+                      {uniqueCourses.map(courseName => <option key={courseName} value={courseName}>{courseName}</option>)}
                     </select>
                   </div>
                 </div>
@@ -700,7 +702,7 @@ const Notice = () => {
                       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                       <option value="">-- Select Course --</option>
-                      {courses.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
+                      {uniqueCourses.map(courseName => <option key={courseName} value={courseName}>{courseName}</option>)}
                     </select>
                   </div>
                 </div>

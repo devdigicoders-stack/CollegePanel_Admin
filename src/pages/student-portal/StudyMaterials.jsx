@@ -10,12 +10,28 @@ const StudyMaterials = () => {
 
   useEffect(() => {
     fetchMaterials();
+
+    const handleUpdate = () => {
+      fetchMaterials();
+    };
+
+    window.addEventListener('materials_updated', handleUpdate);
+    window.addEventListener('student_content_updated', handleUpdate);
+    window.addEventListener('live-notification', handleUpdate);
+
+    return () => {
+      window.removeEventListener('materials_updated', handleUpdate);
+      window.removeEventListener('student_content_updated', handleUpdate);
+      window.removeEventListener('live-notification', handleUpdate);
+    };
   }, []);
 
   const fetchMaterials = async () => {
     try {
       const res = await axiosInstance.get('/student-portal/study-materials');
-      setMaterials(res.data);
+      const data = Array.isArray(res.data) ? res.data : [];
+      setMaterials(data);
+      localStorage.setItem('last_seen_materials_count', data.length.toString());
     } catch (error) {
       toast.error('Failed to fetch study materials');
     } finally { setLoading(false); }
