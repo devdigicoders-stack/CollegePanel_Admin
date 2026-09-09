@@ -210,8 +210,8 @@ const Layout = ({ children }) => {
             </button>
           </div>
         </div>
-      </div>
-    );
+      </div> 
+    ); 
   }
 
   return (
@@ -222,7 +222,7 @@ const Layout = ({ children }) => {
           className="md:hidden fixed inset-0 bg-black/50 z-40 print:hidden" 
           onClick={() => setIsSidebarOpen(false)}
         />
-      )}
+      )} 
       
       <div className={`
         fixed md:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out h-full print:hidden
