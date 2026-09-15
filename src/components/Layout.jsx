@@ -93,15 +93,29 @@ const Layout = ({ children }) => {
         
         const latestPerms = latestData.permissions || [];
         const currentPerms = currentInfo.permissions || [];
+        const latestModules = latestData.unlockedModules || [];
+        const currentModules = currentInfo.unlockedModules || [];
+        const latestPremium = !!latestData.isPremiumUnlocked;
+        const currentPremium = !!currentInfo.isPremiumUnlocked;
         
-        // Check if permissions have changed
-        const isIdentical = latestPerms.length === currentPerms.length &&
+        // Check if permissions or modules have changed
+        const isPermsIdentical = latestPerms.length === currentPerms.length &&
           latestPerms.every((val, index) => val === currentPerms[index]);
+
+        const isModulesIdentical = latestPremium === currentPremium &&
+          latestModules.length === currentModules.length &&
+          latestModules.every((val, index) => val === currentModules[index]);
           
-        if (!isIdentical) {
-          const updatedInfo = { ...currentInfo, permissions: latestPerms };
+        if (!isPermsIdentical || !isModulesIdentical) {
+          const updatedInfo = { 
+            ...currentInfo, 
+            permissions: latestPerms,
+            unlockedModules: latestModules,
+            isPremiumUnlocked: latestPremium
+          };
           localStorage.setItem('admin_info', JSON.stringify(updatedInfo));
-          setPermissionsKey(JSON.stringify(latestPerms));
+          setPermissionsKey(JSON.stringify(latestPerms) + JSON.stringify(latestModules) + latestPremium);
+          window.dispatchEvent(new Event('college_modules_updated'));
         }
       } catch (error) {
         console.error('Failed to sync permissions:', error);

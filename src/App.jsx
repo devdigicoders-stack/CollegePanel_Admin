@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/Layout';
@@ -142,6 +143,24 @@ import TeacherNotices from './pages/teacher-portal/Notices';
 import TeacherStudyMaterials from './pages/teacher-portal/StudyMaterials';
 import TeacherAssignments from './pages/teacher-portal/Assignments';
 import TeacherComplaints from './pages/teacher-portal/Complaints';
+import PremiumLockScreen from './components/PremiumLockScreen';
+import { isModuleUnlocked } from './utils/moduleAccess';
+
+// Dynamic Premium Route Guard based on College License
+const PremiumGuard = ({ moduleKey, moduleName, children }) => {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const handleUpdate = () => setTick(t => t + 1);
+    window.addEventListener('college_modules_updated', handleUpdate);
+    return () => window.removeEventListener('college_modules_updated', handleUpdate);
+  }, []);
+
+  if (isModuleUnlocked(moduleKey)) {
+    return children;
+  }
+  return <PremiumLockScreen moduleName={moduleName} moduleKey={moduleKey} />;
+};
 
 function App() {
   return (
@@ -161,6 +180,8 @@ function App() {
               <Layout>
                 <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                
+                {/* ── CORE ERP FEATURES (100% UNLOCKED & ACTIVE) ──────── */}
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/admissions" element={<Admissions />} />
                 <Route path="/students" element={<Students />} />
@@ -169,20 +190,15 @@ function App() {
                 <Route path="/hod" element={<Hods />} />
                 <Route path="/roles" element={<Roles />} />
                 <Route path="/employees" element={<Employees />} />
-                
-
                 <Route path="/fees" element={<Fees />} />
-                <Route path="/library" element={<Library />} />
-                <Route path="/hostel" element={<Hostel />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/notice" element={<Notice />} />
-                <Route path="/complaints" element={<Complaints />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/assignments" element={<Assignments />} />
                 <Route path="/study-materials" element={<StudyMaterials />} />
 
-                {/* Admissions Specific Routes */}
+                {/* Admissions Specific Routes (Core) */}
                 <Route path="/admissions/dashboard" element={<AdmissionsDashboard />} />
                 <Route path="/admissions/applications" element={<Applications />} />
                 <Route path="/admissions/approved" element={<ApprovedApplications />} />
@@ -190,94 +206,50 @@ function App() {
                 <Route path="/admissions/new" element={<NewAdmission />} />
                 <Route path="/admissions/reports" element={<AdmissionReports />} />
 
+                {/* ── PREMIUM CAMPUS FEATURES (DYNAMICALLY LICENSED BY COLLEGE) ────── */}
+                
+                {/* Library Pages */}
+                <Route path="/library" element={<PremiumGuard moduleKey="library" moduleName="Library Management"><Library /></PremiumGuard>} />
+                <Route path="/library/dashboard" element={<PremiumGuard moduleKey="library" moduleName="Library Dashboard"><LibraryDashboard /></PremiumGuard>} />
+                <Route path="/library/books" element={<PremiumGuard moduleKey="library" moduleName="Library Books Catalog"><LibraryBooks /></PremiumGuard>} />
+                <Route path="/library/issue-return" element={<PremiumGuard moduleKey="library" moduleName="Issue & Return Desk"><LibraryIssueReturn /></PremiumGuard>} />
+                <Route path="/library/fines" element={<PremiumGuard moduleKey="library" moduleName="Library Penalties & Fines"><LibraryFines /></PremiumGuard>} />
+                <Route path="/library/lost-damaged" element={<PremiumGuard moduleKey="library" moduleName="Lost & Damaged Books"><LibraryLostDamaged /></PremiumGuard>} />
+                <Route path="/library/reports" element={<PremiumGuard moduleKey="library" moduleName="Library Analytics Reports"><LibraryReports /></PremiumGuard>} />
 
-                {/* Library Specific Routes */}
-                <Route path="/library/dashboard" element={<LibraryDashboard />} />
-                <Route path="/library/books" element={<LibraryBooks />} />
-                <Route path="/library/issue-return" element={<LibraryIssueReturn />} />
-                <Route path="/library/fines" element={<LibraryFines />} />
-                <Route path="/library/lost-damaged" element={<LibraryLostDamaged />} />
-                <Route path="/library/reports" element={<LibraryReports />} />
+                {/* Hostel Pages */}
+                <Route path="/hostel" element={<PremiumGuard moduleKey="hostel" moduleName="Hostel Management"><Hostel /></PremiumGuard>} />
+                <Route path="/hostel-warden/dashboard" element={<PremiumGuard moduleKey="hostel" moduleName="Hostel Dashboard"><HostelWardenDashboard /></PremiumGuard>} />
+                <Route path="/hostel-warden/rooms" element={<PremiumGuard moduleKey="hostel" moduleName="Rooms & Beds Management"><HostelWardenRooms /></PremiumGuard>} />
+                <Route path="/hostel-warden/allotment" element={<PremiumGuard moduleKey="hostel" moduleName="Student Allotment"><HostelWardenAllotment /></PremiumGuard>} />
+                <Route path="/hostel-warden/check-in-out" element={<PremiumGuard moduleKey="hostel" moduleName="Student In / Out Management"><HostelWardenCheckInOut /></PremiumGuard>} />
+                <Route path="/hostel-warden/leave-outing" element={<PremiumGuard moduleKey="hostel" moduleName="Leave & Outing Management"><HostelWardenLeaveOuting /></PremiumGuard>} />
+                <Route path="/hostel-warden/visitors" element={<PremiumGuard moduleKey="security" moduleName="Visitor Management"><HostelWardenVisitors /></PremiumGuard>} />
+                <Route path="/hostel-warden/complaints" element={<PremiumGuard moduleKey="complaints" moduleName="Hostel Complaints"><HostelWardenComplaints /></PremiumGuard>} />
+                <Route path="/hostel-warden/incidents" element={<PremiumGuard moduleKey="hostel" moduleName="Discipline & Incident Tracking"><HostelWardenIncidents /></PremiumGuard>} />
+                <Route path="/hostel-warden/inventory" element={<PremiumGuard moduleKey="hostel" moduleName="Hostel Assets & Inventory"><HostelWardenInventory /></PremiumGuard>} />
+                <Route path="/hostel-warden/notices" element={<PremiumGuard moduleKey="hostel" moduleName="Hostel Notice Board"><HostelWardenNotices /></PremiumGuard>} />
+                <Route path="/hostel-warden/reports" element={<PremiumGuard moduleKey="hostel" moduleName="Hostel Analytics Reports"><HostelWardenReports /></PremiumGuard>} />
 
-                {/* Hostel Warden Specific Routes */}
-                <Route path="/hostel-warden/dashboard" element={<HostelWardenDashboard />} />
-                <Route path="/hostel-warden/rooms" element={<HostelWardenRooms />} />
-                <Route path="/hostel-warden/allotment" element={<HostelWardenAllotment />} />
-                <Route path="/hostel-warden/check-in-out" element={<HostelWardenCheckInOut />} />
-                <Route path="/hostel-warden/leave-outing" element={<HostelWardenLeaveOuting />} />
-                <Route path="/hostel-warden/visitors" element={<HostelWardenVisitors />} />
-                <Route path="/hostel-warden/complaints" element={<HostelWardenComplaints />} />
-                <Route path="/hostel-warden/incidents" element={<HostelWardenIncidents />} />
-                <Route path="/hostel-warden/inventory" element={<HostelWardenInventory />} />
-                <Route path="/hostel-warden/notices" element={<HostelWardenNotices />} />
-                <Route path="/hostel-warden/reports" element={<HostelWardenReports />} />
+                {/* Mess Pages */}
+                <Route path="/mess/dashboard" element={<PremiumGuard moduleKey="mess" moduleName="Mess Dashboard"><MessDashboard /></PremiumGuard>} />
+                <Route path="/mess/menu" element={<PremiumGuard moduleKey="mess" moduleName="Mess Meal Menu"><MessMealMenu /></PremiumGuard>} />
+                <Route path="/mess/students" element={<PremiumGuard moduleKey="mess" moduleName="Mess Enrolled Students"><MessStudents /></PremiumGuard>} />
+                <Route path="/mess/stock" element={<PremiumGuard moduleKey="mess" moduleName="Mess Stock & Inventory"><MessStockInventory /></PremiumGuard>} />
+                <Route path="/mess/consumption" element={<PremiumGuard moduleKey="mess" moduleName="Daily Food Consumption"><MessDailyConsumption /></PremiumGuard>} />
+                <Route path="/mess/purchases" element={<PremiumGuard moduleKey="mess" moduleName="Mess Purchase Requests"><MessPurchaseRequests /></PremiumGuard>} />
+                <Route path="/mess/complaints" element={<PremiumGuard moduleKey="mess" moduleName="Mess Food Complaints"><MessComplaints /></PremiumGuard>} />
+                <Route path="/mess/reports" element={<PremiumGuard moduleKey="mess" moduleName="Mess Analytics Reports"><MessReports /></PremiumGuard>} />
 
-                {/* Mess Manager Specific Routes */}
-                <Route path="/mess/dashboard" element={<MessDashboard />} />
-                <Route path="/mess/menu" element={<MessMealMenu />} />
-                <Route path="/mess/students" element={<MessStudents />} />
-                <Route path="/mess/stock" element={<MessStockInventory />} />
-                <Route path="/mess/consumption" element={<MessDailyConsumption />} />
-                <Route path="/mess/purchases" element={<MessPurchaseRequests />} />
-                <Route path="/mess/complaints" element={<MessComplaints />} />
-                <Route path="/mess/reports" element={<MessReports />} />
+                {/* Complaint & Discipline */}
+                <Route path="/complaints" element={<PremiumGuard moduleKey="complaints" moduleName="Complaint & Discipline Management"><Complaints /></PremiumGuard>} />
 
-                {/* Lab Assistant Specific Routes */}
-                <Route path="/lab/dashboard" element={<LabDashboard />} />
-                <Route path="/lab/units" element={<LabUnits />} />
-                <Route path="/lab/equipment" element={<LabEquipment />} />
-                <Route path="/lab/schedule" element={<LabPracticalSchedule />} />
-                <Route path="/lab/issue-return" element={<LabIssueReturn />} />
-                <Route path="/lab/consumables" element={<LabConsumableStock />} />
-                <Route path="/lab/maintenance" element={<LabMaintenance />} />
-                <Route path="/lab/damage-lost" element={<LabDamageLost />} />
-                <Route path="/lab/safety" element={<LabSafetyChecklist />} />
-                <Route path="/lab/reports" element={<LabReports />} />
-
-                {/* Workshop Instructor Specific Routes */}
-                <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
-                <Route path="/workshop/schedule" element={<WorkshopSchedule />} />
-                <Route path="/workshop/batches" element={<WorkshopBatches />} />
-                <Route path="/workshop/jobs" element={<WorkshopJobs />} />
-                <Route path="/workshop/machines" element={<WorkshopMachines />} />
-                <Route path="/workshop/tool-issue-return" element={<WorkshopToolIssueReturn />} />
-                <Route path="/workshop/stock" element={<WorkshopConsumableStock />} />
-                <Route path="/workshop/maintenance" element={<WorkshopMaintenance />} />
-                <Route path="/workshop/safety" element={<WorkshopSafetyChecklist />} />
-                <Route path="/workshop/reports" element={<WorkshopReports />} />
-
-                {/* Placement Officer Specific Routes */}
-                <Route path="/placement/dashboard" element={<PlacementDashboard />} />
-                <Route path="/placement/profiles" element={<PlacementStudentProfiles />} />
-                <Route path="/placement/companies" element={<PlacementCompanies />} />
-                <Route path="/placement/jobs" element={<PlacementJobOpportunities />} />
-                <Route path="/placement/drives" element={<PlacementDrives />} />
-                <Route path="/placement/shortlist" element={<PlacementEligibilityShortlisting />} />
-                <Route path="/placement/applications" element={<PlacementApplications />} />
-                <Route path="/placement/interviews" element={<PlacementInterviews />} />
-                <Route path="/placement/offers" element={<PlacementSelectionsOffers />} />
-                <Route path="/placement/internships" element={<PlacementInternships />} />
-                <Route path="/placement/reports" element={<PlacementReports />} />
-
-                {/* Receptionist Specific Routes */}
-                <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
-                <Route path="/receptionist/visitors" element={<ReceptionistVisitors />} />
-                <Route path="/receptionist/calls" element={<ReceptionistCalls />} />
-                <Route path="/receptionist/appointments" element={<ReceptionistAppointments />} />
-                <Route path="/receptionist/helpdesk" element={<ReceptionistHelpDesk />} />
-                <Route path="/receptionist/gatepass" element={<ReceptionistGatePass />} />
-                <Route path="/receptionist/courier" element={<ReceptionistCourier />} />
-                <Route path="/receptionist/reports" element={<ReceptionistReports />} />
-
-                {/* Security / Gate Operator Specific Routes */}
-                <Route path="/security/dashboard" element={<SecurityDashboard />} />
-                <Route path="/security/movement" element={<SecurityStudentMovement />} />
-                <Route path="/security/visitors" element={<SecurityVisitors />} />
-                <Route path="/security/gatepass" element={<SecurityGatePass />} />
-                <Route path="/security/vehicles" element={<SecurityVehicles />} />
-                <Route path="/security/hostel-movement" element={<SecurityHostelMovement />} />
-                <Route path="/security/incidents" element={<SecurityIncidents />} />
-                <Route path="/security/reports" element={<SecurityReports />} />
+                {/* Additional Campus Management Modules */}
+                <Route path="/lab/*" element={<PremiumGuard moduleKey="all" moduleName="Lab Management"><LabDashboard /></PremiumGuard>} />
+                <Route path="/workshop/*" element={<PremiumGuard moduleKey="all" moduleName="Workshop Management"><WorkshopDashboard /></PremiumGuard>} />
+                <Route path="/placement/*" element={<PremiumGuard moduleKey="all" moduleName="Placement Officer Portal"><PlacementDashboard /></PremiumGuard>} />
+                <Route path="/receptionist/*" element={<PremiumGuard moduleKey="all" moduleName="Receptionist & Front Desk"><ReceptionistDashboard /></PremiumGuard>} />
+                <Route path="/security/*" element={<PremiumGuard moduleKey="security" moduleName="Campus Security & Gatepass"><SecurityDashboard /></PremiumGuard>} />
 
                 {/* Student Portal Specific Routes */}
                 <Route path="/student-portal/attendance/scan" element={<ScanAttendance />} />
