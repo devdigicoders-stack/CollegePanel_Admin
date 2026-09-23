@@ -9,12 +9,18 @@
   --color-accent: var(--color-accent);
 }
 
-:root {
-  /* Default Admin (Teal) */
-  --color-primary: #0A6C54;
-  --color-primary-hover: #085a46;
-  --color-sidebar: #022a36;
-  --color-accent: #2DD4BF;
+::selection {
+  background-color: #FF7A00;
+  color: #ffffff;
+}
+
+:root,
+[data-theme="admin"] {
+  /* DigiCampus Official Admin Theme (Emerald Green, Deep Forest Sidebar & Vibrant Orange Accent) */
+  --color-primary: #008744;
+  --color-primary-hover: #007338;
+  --color-sidebar: #05140D;
+  --color-accent: #FF7A00;
 }
 
 [data-theme="student"] {

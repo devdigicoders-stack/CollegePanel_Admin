@@ -297,7 +297,7 @@ const Attendance = () => {
         // Footer Note
         ctx.fillStyle = '#94a3b8';
         ctx.font = '500 16px "Inter", Arial, sans-serif';
-        ctx.fillText('Powered by College ERP', canvas.width / 2, 980);
+        ctx.fillText('Powered by DigiCampusPro', canvas.width / 2, 980);
         
         // Download logic
         const finalUrl = canvas.toDataURL('image/png', 1.0);

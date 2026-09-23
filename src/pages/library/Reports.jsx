@@ -20,7 +20,7 @@ const LibraryReports = () => {
   }
 
   const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
-  const collegeName = adminInfo.collegeName || adminInfo.name || 'Polytechnic College Central Library';
+  const collegeName = adminInfo.collegeName || adminInfo.name || 'DigiCampusPro Central Library';
 
   const [reportType, setReportType] = useState('Lost Books Report');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
@@ -337,7 +337,7 @@ const LibraryReports = () => {
   <div class="footer">
     <div>
       <strong>Certified Official Library Log</strong><br>
-      System-generated record from Polytechnic College Library CRM
+      System-generated record from DigiCampusPro Library ERP
     </div>
     <div style="text-align: right;">
       <div style="border-top: 1.5px solid #334155; width: 180px; margin-bottom: 5px; display: inline-block;"></div>
@@ -704,7 +704,7 @@ const LibraryReports = () => {
                 <div className="hidden print:flex justify-between items-end pt-6 mt-6 border-t border-gray-300 text-[10px] text-gray-600">
                   <div>
                     Certified Official Library Log<br />
-                    System-generated record from Polytechnic College Library CRM
+                    System-generated record from DigiCampusPro Library ERP
                   </div>
                   <div className="text-right">
                     <div className="border-t border-gray-800 w-44 mb-1 inline-block"></div>

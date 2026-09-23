@@ -128,8 +128,11 @@ Password: ${formData.dob}
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-['Inter']">
         <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-gray-100">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="text-emerald-500" size={40} />
+          <div className="mb-4 inline-flex items-center justify-center p-2 rounded-xl bg-gray-50 border border-gray-100">
+            <img src="/DigiCampus Logo.png" alt="DigiCampusPro Logo" className="h-9 w-auto object-contain" />
+          </div>
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="text-emerald-500" size={36} />
           </div>
           <h2 className="text-2xl font-black text-gray-800 mb-2">Registration Details Submitted!</h2>
           <p className="text-gray-500 text-sm mb-6">Your registration details have been successfully received by the college for verification.</p>
@@ -201,17 +204,23 @@ Password: ${formData.dob}
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4 font-['Inter']">
       
-      <div className="text-center mb-10">
-        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/20">
-          <GraduationCap className="text-white" size={32} />
+      <div className="text-center mb-8 flex flex-col items-center">
+        {/* DigiCampusPro Logo Badge */}
+        <div className="bg-white rounded-2xl py-3 px-6 shadow-md border border-gray-100 inline-flex items-center justify-center mb-4 transition-transform hover:scale-105">
+          <img 
+            src="/DigiCampus Logo.png" 
+            alt="DigiCampusPro Logo" 
+            className="h-11 md:h-12 w-auto object-contain" 
+          />
         </div>
-        <h1 className="text-2xl md:text-3xl font-black text-primary mb-2 tracking-wide">
-          {formOptions.collegeName ? formOptions.collegeName.toUpperCase() : 'LOADING...'}
+
+        <h1 className="text-2xl md:text-3xl font-black text-primary mb-1 tracking-wide font-['Outfit']">
+          {formOptions.collegeName ? formOptions.collegeName.toUpperCase() : 'DIGICAMPUSPRO'}
         </h1>
-        <h2 className="text-xl md:text-2xl font-bold text-gray-800">
-          Student Registration Form
+        <h2 className="text-lg md:text-xl font-bold text-gray-800">
+          Student Registration & Admission Portal
         </h2>
-        <p className="text-gray-500 font-medium mt-2">Fill out the form below to complete your registration</p>
+        <p className="text-gray-500 font-medium text-sm mt-1">Fill out the form below to complete your admission registration</p>
       </div>
 
       <div className="max-w-3xl w-full">
@@ -532,9 +541,14 @@ Password: ${formData.dob}
         </form>
       </div>
       
-      {/* Footer link for DigiCoders requirement mentioned earlier */}
+      {/* Footer */}
       <div className="mt-auto pt-10 pb-4 text-center">
-         <p className="text-[12px] text-gray-400 font-medium">Crafted with ♥ by <a href="https://DigiCoders.in/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-bold">Team DigiCoders</a></p>
+         <p className="text-[12px] text-gray-500 font-medium flex items-center justify-center gap-1.5">
+           <span>Powered by</span>
+           <span className="font-bold text-primary">DigiCampusPro</span>
+           <span>•</span>
+           <span>Crafted with ♥ by <a href="https://DigiCoders.in/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-bold">Team DigiCoders</a></span>
+         </p>
       </div>
     </div>
   );

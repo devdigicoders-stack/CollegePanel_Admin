@@ -21,11 +21,11 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message: ', payload);
 
-  const notificationTitle = payload.notification?.title || payload.data?.title || 'College ERP Notification';
+  const notificationTitle = payload.notification?.title || payload.data?.title || 'DigiCampusPro Notification';
   const notificationOptions = {
     body: payload.notification?.body || payload.data?.body || payload.data?.message || '',
-    icon: payload.notification?.icon || '/favicon.svg',
-    badge: '/favicon.svg',
+    icon: payload.notification?.icon || '/DigiCampus Logo.png',
+    badge: '/DigiCampus Logo.png',
     data: payload.data || {},
     vibrate: [200, 100, 200]
   };

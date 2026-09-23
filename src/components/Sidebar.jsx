@@ -526,18 +526,22 @@ export const Sidebar = ({ isOpen = true, setIsSidebarOpen, onLogoutClick }) => {
     <div className={`${isOpen ? 'w-[252px]' : 'w-[68px]'} bg-sidebar text-white flex flex-col h-full overflow-hidden flex-shrink-0 transition-all duration-300 select-none`}>
       
       {/* Brand Header */}
-      <div className={`flex items-center ${isOpen ? 'justify-start px-4' : 'justify-center'} pt-5 pb-4 gap-3 flex-shrink-0 border-b border-white/5`}>
-        <div className="flex items-center justify-center w-10 h-10 bg-white/10 rounded-xl flex-shrink-0 shadow-inner">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 12l10-6 10 6-10 6-10-6z" />
-            <path d="M22 12v6" />
-            <path d="M6 14.5V20c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-5.5" />
-          </svg>
-        </div>
-        {isOpen && (
-          <div className="flex flex-col overflow-hidden">
-            <span className="text-[14px] font-bold tracking-wider font-['Inter'] text-white leading-tight whitespace-nowrap">POLYTECHNIC</span>
-            <span className="text-[11px] text-accent font-semibold tracking-wide">College ERP</span>
+      <div className={`flex items-center ${isOpen ? 'px-3' : 'justify-center px-2'} py-3 flex-shrink-0 border-b border-white/10`}>
+        {isOpen ? (
+          <div className="w-full bg-white rounded-xl py-2 px-3 shadow-md border border-white/20 flex items-center justify-center transition-all hover:shadow-lg">
+            <img 
+              src="/DigiCampus Logo.png" 
+              alt="DigiCampusPro Logo" 
+              className="h-9 w-auto max-w-full object-contain" 
+            />
+          </div>
+        ) : (
+          <div className="w-11 h-11 bg-white rounded-xl shadow-md border border-white/20 flex items-center justify-center overflow-hidden p-1 transition-all hover:scale-105" title="DigiCampusPro">
+            <img 
+              src="/DigiCampus Logo.png" 
+              alt="DigiCampusPro" 
+              className="w-full h-full object-contain"
+            />
           </div>
         )}
       </div>

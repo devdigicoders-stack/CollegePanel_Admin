@@ -341,7 +341,7 @@ export const PremiumLockScreen = ({ moduleName = 'This Premium Feature', moduleK
                   <label className="block text-xs font-semibold text-slate-700 mb-1">College / Organization Name</label>
                   <input
                     type="text"
-                    defaultValue={adminInfo.collegeName || 'Polytechnic College'}
+                    defaultValue={adminInfo.collegeName || 'DigiCampusPro'}
                     readOnly
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 font-medium"
                   />

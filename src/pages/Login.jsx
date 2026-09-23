@@ -58,16 +58,17 @@ const Login = () => {
       
       {/* Left Sidebar Panel */}
       <div className="md:w-[40%] lg:w-[35%] h-full bg-sidebar text-white flex flex-col justify-between relative overflow-hidden hidden md:flex">
-        <div className="z-10 flex flex-col items-center text-center mt-16 lg:mt-20">
-          <div className="mb-6">
+        <div className="z-10 flex flex-col items-center text-center mt-10 lg:mt-14 px-6">
+          <div className="mb-4 bg-white rounded-2xl py-3 px-6 shadow-2xl border border-white/30 inline-flex items-center justify-center">
             <img 
-              src="/DigiCoders%20Transparent%20Logo.png" 
-              alt="DigiCoders Logo" 
-              className="h-25 w-auto object-contain drop-shadow-md bg-white/10 rounded-2xl p-2 backdrop-blur-sm"
+              src="/DigiCampus Logo.png" 
+              alt="DigiCampusPro Logo" 
+              className="h-12 lg:h-14 w-auto max-w-[260px] object-contain"
             />
           </div>
-          <h1 className="text-[22px] lg:text-[24px] font-bold tracking-wide mb-3 font-['Inter']">POLYTECHNIC COLLEGE ERP</h1>
-          <p className="text-accent text-base font-medium">College / Admin Login</p>
+          <h1 className="text-[22px] lg:text-[26px] font-black tracking-wide mb-1 font-['Outfit'] text-white">DigiCampusPro</h1>
+          <p className="text-accent text-xs font-bold tracking-widest uppercase">Smart Campus • Bright Future</p>
+          <p className="text-white/70 text-xs mt-1 font-medium">Enterprise College & Campus ERP</p>
         </div>
 
         {/* Building Image */}
@@ -80,22 +81,28 @@ const Login = () => {
         </div>
       </div>
 
-      <div className="md:hidden bg-sidebar text-white py-12 px-6 flex flex-col items-center justify-center relative overflow-hidden">
-        <img 
-          src="/DigiCoders%20Transparent%20Logo.png" 
-          alt="DigiCoders Logo" 
-          className="h-16 w-auto object-contain mb-4 drop-shadow-md bg-white/10 rounded-xl p-2 backdrop-blur-sm" 
-        />
-        <h1 className="text-[20px] font-bold tracking-wider mb-2 font-['Inter'] text-center">POLYTECHNIC COLLEGE ERP</h1>
-        <p className="text-accent text-[13px] font-medium">College / Admin Login</p>
+      <div className="md:hidden bg-sidebar text-white py-10 px-6 flex flex-col items-center justify-center relative overflow-hidden">
+        <div className="mb-3 bg-white rounded-xl py-2 px-4 shadow-xl border border-white/30 inline-flex items-center justify-center">
+          <img 
+            src="/DigiCampus Logo.png" 
+            alt="DigiCampusPro Logo" 
+            className="h-9 w-auto max-w-[200px] object-contain" 
+          />
+        </div>
+        <h1 className="text-[20px] font-black tracking-wider mb-1 font-['Outfit'] text-center text-white">DigiCampusPro</h1>
+        <p className="text-accent text-[11px] font-bold tracking-wider uppercase">Smart Campus • Bright Future</p>
       </div>
 
       {/* Right Login Panel */}
       <div className="flex-1 h-full flex flex-col justify-center items-center p-6 relative bg-[#F9FAFB]">
         <div className="w-full max-w-[480px] bg-white rounded-2xl p-8 lg:p-12 shadow-[0_4px_24px_rgb(0,0,0,0.03)] border border-gray-100 relative z-10">
           
+          <div className="flex items-center gap-2.5 mb-6">
+            <img src="/DigiCampus Logo.png" alt="DigiCampusPro" className="h-10 w-auto object-contain" />
+          </div>
+
           <h2 className="text-[28px] font-bold text-primary mb-2 font-['Outfit']">Welcome Back!</h2>
-          <p className="text-[#6B7280] mb-6 lg:mb-8 font-['Inter'] text-[15px]">Sign in to your college admin account</p>
+          <p className="text-[#6B7280] mb-6 lg:mb-8 font-['Inter'] text-[15px]">Sign in to your DigiCampusPro portal account</p>
 
           <form onSubmit={handleLogin} className="space-y-4 lg:space-y-5">
             <div>

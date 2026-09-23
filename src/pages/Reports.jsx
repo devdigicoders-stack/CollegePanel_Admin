@@ -227,7 +227,7 @@ const downloadHTML = (columns, data, title, collegeName, filtersApplied = '', ai
 <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
 <div class="header">
   <div>
-    <h1 class="clg-title">${collegeName || 'COLLEGE ERP REPORT'}</h1>
+    <h1 class="clg-title">${collegeName || 'DIGICAMPUSPRO REPORT'}</h1>
     <h2 class="rep-title">${title}</h2>
   </div>
   <div class="meta">
@@ -267,7 +267,7 @@ const Reports = () => {
   }
 
   const adminInfo = JSON.parse(localStorage.getItem('admin_info') || '{}');
-  const collegeName = adminInfo.collegeName || 'Polytechnic College';
+  const collegeName = adminInfo.collegeName || 'DigiCampusPro';
 
   const [moduleTick, setModuleTick] = useState(0);
 

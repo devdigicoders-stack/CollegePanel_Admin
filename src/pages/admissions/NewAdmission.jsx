@@ -134,7 +134,7 @@ const NewAdmission = () => {
       // Footer Note
       ctx.fillStyle = '#94a3b8';
       ctx.font = '500 16px "Inter", Arial, sans-serif';
-      ctx.fillText('Powered by College ERP', width / 2, 980);
+      ctx.fillText('Powered by DigiCampusPro', width / 2, 980);
 
       resolve(canvas);
     });
@@ -194,11 +194,11 @@ const NewAdmission = () => {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-3xl mx-auto text-center mt-10">
         
-        <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Share2 className="text-primary" size={36} strokeWidth={1.5} />
+        <div className="mb-6 inline-flex items-center justify-center p-3 rounded-2xl bg-white shadow-md border border-gray-100">
+          <img src="/DigiCampus Logo.png" alt="DigiCampusPro Logo" className="h-10 w-auto object-contain" />
         </div>
         
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Automated Student Registration</h2>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Automated Student Registration Link</h2>
         <p className="text-[13px] text-gray-500 mb-8 max-w-lg mx-auto leading-relaxed">
           Manual data entry is no longer required. Generate your unique student registration link and share it directly with admitted students via WhatsApp or Email. Students will fill the form themselves, and it will appear in your <b>Pending Applications</b> for verification.
         </p>
