@@ -320,7 +320,7 @@ const StudentDashboard = () => {
                   value={
                     currentClass.scanUrl && !currentClass.scanUrl.includes('localhost')
                       ? currentClass.scanUrl
-                      : `https://college-panel-admin.vercel.app/student-portal/attendance/scan?classId=${currentClass._id}`
+                      : `https://admin.digicampuspro.com/student-portal/attendance/scan?classId=${currentClass._id}`
                   }
                   size={160}
                   bgColor="#ffffff"

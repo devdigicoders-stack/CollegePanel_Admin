@@ -883,7 +883,7 @@ const Attendance = () => {
                   id="teacher-qr-canvas"
                   value={`${
                     window.location.origin.includes('localhost')
-                      ? 'https://college-panel-admin.vercel.app'
+                      ? 'https://admin.digicampuspro.com'
                       : window.location.origin
                   }/student-portal/attendance/scan?classId=${selectedClass}`}
                   size={200}
